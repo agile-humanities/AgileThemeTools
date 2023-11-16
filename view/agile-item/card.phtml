@@ -1,0 +1,41 @@
+<?php
+/**
+ * @file card.phtml
+ * @description Displays a card view for a particular item. Use $this->plugin('cardViewer')->getCard($item) to invoke.
+ * @var $this /Laminas/View/View
+ * @var $containerElement Wrapping element can be passed to card via the View Helper
+ * @var $item
+ */
+
+    $translate = $this->plugin('translate');
+    $escape = $this->plugin('escapeHtml');
+    $headingTerm = $this->siteSetting('browse_heading_property_term');
+    $contentType = [];
+    $contentType['value'] = !empty($item->value('dcterms:type')) ? $item->value('dcterms:type') : 'Item';
+    $viewItemPageTerm = $this->siteSetting('browse_heading_property_term', 'View Item');
+
+    $viewItemPage = $item->value($viewItemPageTerm, ['default' => $translate('View Item')]);
+    $bodyTerm = $this->siteSetting('browse_body_property_term');
+
+    $heading = $headingTerm ? $item->value($headingTerm, ['default' => $translate('[Untitled]')]) : $item->displayTitle();
+    $body = $bodyTerm ? $item->value($bodyTerm) : $item->displayDescription();
+
+    $thumbnail = $this->thumbnail($item, 'large');
+
+?>
+<<?php print $containerElement; ?> class="card">
+    <p class="item-label"><?php echo($contentType['value']); ?></p>
+    <figure class="item-thumbnail">
+        <?php echo $item->linkRaw($thumbnail); ?>
+    </figure>
+    <div class="item-info">
+        <p class="item-label"><?php echo($contentType['value']); ?></p>
+        <h3 class="item-title"><?php echo $item->link($heading); ?></h3>
+        <?php if ($body): ?>
+            <div class="item-description"><?php echo $escape($body); ?></div>
+        <?php endif; ?>
+        <div class="item-link">
+            <?php echo $item->link($viewItemPage); ?> <span>></span>
+        </div>
+    </div>
+</<?php print $containerElement; ?> >

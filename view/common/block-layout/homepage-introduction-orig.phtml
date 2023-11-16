@@ -1,0 +1,77 @@
+<?php
+// Variables also available:
+// $labelText
+// $subtitle
+// $buttonText
+?>
+<div id="block-<?php echo $this->blockId; ?>" class="homepage-introduction main-slide-viewer region <?php echo $this->regionClass; ?>" data-target-region-id="<?php echo $this->targetID; ?>">
+
+  <div class="title-area">
+    <?php if (!empty($labelText)): ?>
+        <div class='label'><?php echo $labelText; ?></div>
+    <?php endif; ?>
+    <?php if (!empty($titleSlideTitle)): ?>
+        <h1><?php echo $titleSlideTitle; ?></h1>
+    <?php endif; ?>
+    <?php if (!empty($subtitle)): ?>
+        <div class='subtitle'><?php echo $subtitle; ?></div>
+    <?php endif; ?>
+    <?php if (!empty($titleSlideIntro)): ?>
+        <?php echo $titleSlideIntro; ?>
+    <?php endif; ?>
+    <?php if (!empty($buttonText)): ?>
+        <a class='slickNext next-slide btn'><?php echo $buttonText; ?></a>
+    <?php endif; ?>
+  </div>
+  <?php if($hasAttachments): ?>
+    <div class='slide-container'>
+      <slide-viewer class="<?php echo $hasAudioAttachment ? 'slideshow-with-audio' : ''; ?>" option-slidesToShow='<?php echo $optionSlidesPerRow; ?>' option-autoplay='<?php echo $optionAutoPlay; ?>' option-fade='<?php echo $optionFade; ?>'>
+        <div slot='slides'>
+              <?php foreach ($attachments as $attachment): ?>
+                  <?php
+                      $item = $attachment->item();
+                  ?>
+                  <slide-item>
+                      <?php if ($item):
+                          $media = $attachment->media() ?: $item->primaryMedia();
+                          if ($media):
+                      ?>
+                              <div slot='slide-content'>
+                                  <?php echo $this->thumbnail($media,$thumbnailType); ?>
+                              </div>
+                          <?php endif; ?>
+                      <?php endif; ?>
+                      <div slot='slide-caption'>
+                          <?php if ($showTitleOption == 'item_title'): ?>
+                              <h3><?php echo $item->link($item->displayTitle()); ?></h3>
+                          <?php elseif ($showTitleOption == 'file_name'): ?>
+                              <h3><?php echo $media->displayTitle(); ?></h3>
+                          <?php endif; ?>
+                          <?php if ($attachment->caption()): ?>
+                              <?php echo $attachment->caption(); ?>
+                          <?php endif; ?>
+                      </div>
+                  </slide-item>
+              <?php endforeach; ?>
+          </div>
+          <?php if($hasAudioAttachment): ?>
+              <div class="audio-controls">
+                  <div class="audio-player">
+                      <?php echo $audioAttachment->media()->render(); ?>
+                      <div class="audio-message">
+                          <a href=='#' class='audio-text-play-control' title='Play audio' data-playbtnmsg='Play audio slideshow' data-stopbtnmsg='Pause audio slideshow'>Play audio slideshow.</a>
+                      </div>
+                  </div>
+                  <?php if ($audioAttachment->caption()): ?>
+                      <div class="audio-caption">
+                          <?php echo $audioAttachment->caption(); ?>
+                      </div>
+                  <?php endif; ?>
+              </div>
+          <?php endif; ?>
+      </slide-viewer>
+    </div>
+  <?php endif;?>
+</div>
+
+

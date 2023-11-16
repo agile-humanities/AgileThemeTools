@@ -1,0 +1,26 @@
+{
+  "name": "agile-theme-tools",
+  "version": "1.0.0",
+  "description": "Extends Omeka S’s standard theming options.",
+  "main": "./assets/js/slideshow.js",
+  "author": {
+    "name": "Agile Humanities Agency",
+    "url": "https://agilehumanities.ca"
+  },
+  "license": "VNU3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agile-humanities/agile-theme-tools-omeka"
+  },
+  "keywords": [
+    "omeka-s"
+  ],
+  "dependencies": {
+    "jquery": "^3.5.1",
+    "slick-carousel": "^1.8.1"
+  },
+  "browserslist": [
+    "> 5%",
+    "> 2% in US"
+  ]
+}

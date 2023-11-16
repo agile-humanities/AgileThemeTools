@@ -1,0 +1,35 @@
+<div id="block-<?php echo $this->blockId; ?>" class="section-intro-splash region <?php echo $this->regionClass; ?>  <?php echo $titleSlideTextAlignment ?>" data-target-region-id="<?php echo $this->targetID; ?> ">
+    <div class="items">
+        <?php foreach ($attachments as $attachment): ?>
+            <?php
+                $item = $attachment->item();
+            ?>
+            <div class="item resource">
+                <?php if ($item):
+                    $media = $attachment->media() ?: $item->primaryMedia();
+                    if ($media):
+                ?>
+                      <figure>
+                          <?php echo $item->linkRaw($this->thumbnail($media,$thumbnailType)); ?>
+                          <?php if ($attachment->caption()): ?>
+                            <figcaption><?php echo $attachment->caption(); ?></figcaption>
+                          <?php endif; ?>
+                      </figure>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <div class="item resource introduction">
+        <div class='introductory-text'>
+            <?php if (!empty($titleSlideTitle)): ?>
+                <h1><?php echo $titleSlideTitle; ?></h1>
+            <?php endif; ?>
+            <?php if (!empty($titleSlideIntro)): ?>
+                <?php echo $titleSlideIntro; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+
