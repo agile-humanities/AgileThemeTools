@@ -14,6 +14,14 @@ use Zend\ModuleManager\ModuleEvent;
 class Module extends AbstractModule {
   const NAMESPACE = __NAMESPACE__;
 
+  protected $dependencies = [
+    'AdvancedSearch',
+    'BlocksDisposition',
+    'IiifServer',
+    'ImageServer',
+    'UniversalViewer'
+  ];
+
   public function init(ModuleManager $moduleManager) {
     $events = $moduleManager->getEventManager();
 
