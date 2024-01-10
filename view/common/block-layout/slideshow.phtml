@@ -3,19 +3,24 @@
 // $labelText
 // $subtitle
 // $buttonText
+
+$plugins = $this->getHelperPluginManager();
+$partial = $this->plugin('partial');
+$thumbnailer = $plugins->get('thumbnail');
+
+
 ?>
 <div id="block-<?php echo $this->blockId; ?>" class="slideshow-block region <?php echo $this->regionClass; ?>" data-target-region-id="<?php echo $this->targetID; ?>">
   <slide-viewer class="<?php echo $hasAudioAttachment ? 'slideshow-with-audio' : ''; ?>" option-slidesPerRow='<?php echo $optionSlidesPerRow; ?>' option-autoplay='<?php echo $optionAutoPlay; ?>' option-fade='<?php echo $optionFade; ?>'>
     <div slot='slides'>
           <?php if ($useTitleSlide): ?>
               <slide-item class="title-slide">
-                  <div slot='slide-content'>
-                      <?php
-                          if ($titleSlideMedia):
-                              echo $this->thumbnail($titleSlideMedia, $thumbnailType);
-                          endif;
-                      ?>
-                  </div>
+                          <div slot='slide-content'>
+                              <?php
+                                  if ($titleSlideMedia):
+                                      echo $thumbnailer($titleSlideMedia, $thumbnailType);
+                                  endif;?>
+                          </div>
                   <div slot='slide-caption'>
                       <?php if (!empty($labelText)): ?>
                           <div class='label'><?php echo $labelText; ?></div>

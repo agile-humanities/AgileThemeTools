@@ -6,6 +6,7 @@ use Omeka\Site\BlockLayout\AbstractBlockLayout;
 use Omeka\Api\Representation\SiteRepresentation;
 use Omeka\Api\Representation\SitePageRepresentation;
 use Omeka\Api\Representation\SitePageBlockRepresentation;
+use Omeka\Api\Representation\ItemRepresentation;
 use Laminas\Form\FormElementManager as FormElementManager;
 use Omeka\Entity\SitePageBlock;
 use Omeka\Stdlib\HtmlPurifier;
@@ -78,24 +79,24 @@ class Slideshow extends AbstractBlockLayout
         $labelText = new Text("o:block[__blockIndex__][o:data][labelText]");
         $labelText->setAttribute('class', 'block-label-text');
         $labelText->setLabel('Label Text (optional surtitle)');
-        
+
         // Slide Viewer Configuration Options
-                
+
         $slidesperRow = new Text("o:block[__blockIndex__][o:data][slidesperrow]");
         $slidesperRow->setAttribute('class', 'block-slider-config-slidesperrow');
         $slidesperRow->setLabel('Number of slides per page');
         $slidesperRow->setAttribute('value',1);
-        
+
         $autoPlay = new Checkbox("o:block[__blockIndex__][o:data][autoplay]");
         $autoPlay->setAttribute('class', 'block-slider-config-autoplay');
         $autoPlay->setLabel('Play slideshow automatically');
         $autoPlay->setAttribute('value',false);
-        
+
         $fade = new Checkbox("o:block[__blockIndex__][o:data][fade]");
         $fade->setAttribute('class', 'block-slider-config-fade');
         $fade->setLabel('Use cross-fade effect');
         $fade->setAttribute('value',false);
-            
+
         $region = new RegionMenuSelect();
 
         if ($block) {
@@ -157,23 +158,23 @@ class Slideshow extends AbstractBlockLayout
         if (!$attachments) {
             return '';
         }
-      
+
 
         $data = $block->data();
         $showTitleOption = $block->dataValue('show_title_option', 'item_title');
         list($scope,$region) = explode(':',$data['region']);
-        $thumbnailType = 'large'; 
+        $thumbnailType = 'large';
 
         $image_attachments = [];
         $audio_attachment = null;
-        
+
         foreach($attachments as $attachment) {
             $item = $attachment->item();
             if ($item) {
                 $media = $attachment->media() ?: $item->primaryMedia();
-                
+
                 // Filter for media type. $media->mediaType() returns a MIME type.
-    
+
                 if ($media) {
                     if (strpos($media->mediaType(),'audio') !== false && $audio_attachment == null) {
                       $audio_attachment = $attachment;
@@ -183,7 +184,7 @@ class Slideshow extends AbstractBlockLayout
                 }
             }
         }
-        
+
         $values = [
             'block' => $block,
             'useTitleSlide' => $data['hastitle'],
@@ -208,11 +209,15 @@ class Slideshow extends AbstractBlockLayout
             'optionAutoPlay' => $data['autoplay'] ? "true" : "false",
             'optionFade' => $data['fade'] ? "true" : "false"
         ];
-        
-        if (count($image_attachments) > 0) {
-            $values['titleSlideAttachment'] = $image_attachments[0];
-            $values['titleSlideItem'] = $image_attachments[0]->item();
-            $values['titleSlideMedia'] = $image_attachments[0]->media() ?: $image_attachments[0]->primaryMedia();
+
+
+      if (count($image_attachments) > 0) {
+            //** @var Omeka\Api\Representation\SiteBlockAttachmentRepresentation $titleAttachment **/
+            $titleAttachment = $image_attachments[0];
+            $titleItem = $titleAttachment->item();
+            $values['titleSlideAttachment'] = $titleAttachment;
+            $values['titleSlideItem'] = $titleItem;
+            $values['titleSlideMedia'] = $titleItem->media() ? $titleItem->media()[0] : $titleItem->primaryMedia();
         }
 
         return $view->partial('common/block-layout/slideshow', $values);
