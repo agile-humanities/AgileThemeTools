@@ -2,13 +2,13 @@
 
 namespace AgileThemeTools\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
+use Laminas\Mvc\Controller\AbstractActionController;
 use Omeka\Api\Manager;
 use Omeka\Stdlib\HtmlPurifier;
 use Omeka\Api\Representation\SiteRepresentation;
 use Omeka\Api\Representation\SitePageRepresentation;
 use Laminas\Form\FormElementManager as FormElementManager;
-use Zend\Filter\RealPath;
+use Laminas\Filter\RealPath;
 
 class SectionManager extends AbstractActionController {
 

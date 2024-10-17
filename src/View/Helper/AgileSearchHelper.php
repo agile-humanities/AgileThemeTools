@@ -1,7 +1,7 @@
 <?php
-namespace AgileThemeTools\Mvc\Controller\Plugin;
+namespace AgileThemeTools\View\Helper;
 
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 use AgileThemeTools\Controller\AgileSearchHandler;
 
 /**

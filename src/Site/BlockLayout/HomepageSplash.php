@@ -224,12 +224,12 @@ class HomepageSplash extends AbstractBlockLayout
             'targetID' => '#' . $region,
             'hasAudioAttachment' => $audio_attachment != null,
             'audioAttachment' => $audio_attachment,
-            'optionSlidesPerRow' => (int)$data['slidesperrow'],
-            'optionSlidesToShow' => key_exists('slidestoshow',$data) ? (int)$data['slidestoshow'] : 1,
-            'optionAutoPlay' => $data['autoplay'] ? "true" : "false",
-            'optionFade' => $data['fade'] ? "true" : "false",
+            'optionSlidesPerRow' => array_key_exists('slidesperrow',$data) ? (int)$data['slidesperrow'] : 1,
+            'optionSlidesToShow' => array_key_exists('slidestoshow',$data) ? (int)$data['slidestoshow'] : 1,
+            'optionAutoPlay' => array_key_exists('autoplay',$data) ? "true" : "false",
+            'optionFade' => array_key_exists('fade',$data) ? "true" : "false",
             'hasAttachments' => $hasAttachments,
-            'compositionClass' => $data['composition']
+            'compositionClass' => array_key_exists('composition',$data) ? $data['composition'] : ''
         ]);
     }
 }

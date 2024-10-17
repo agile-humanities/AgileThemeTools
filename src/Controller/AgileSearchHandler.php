@@ -2,7 +2,7 @@
 
 namespace AgileThemeTools\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
+use Laminas\Mvc\Controller\AbstractActionController;
 use Omeka\Api\Manager;
 use Omeka\Stdlib\HtmlPurifier;
 use Omeka\Api\Representation\SiteRepresentation;

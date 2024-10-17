@@ -2,8 +2,8 @@
 namespace AgileThemeTools\Service\ViewHelper;
 
 use Interop\Container\ContainerInterface;
-use AgileThemeTools\Mvc\Controller\Plugin\AgileSearchHelper;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use AgileThemeTools\View\Helper\AgileSearchHelper;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class AgileSearchHelperFactory implements FactoryInterface
 {

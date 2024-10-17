@@ -33,8 +33,8 @@ namespace AgileThemeTools\Controller;
 use Search\Controller\IndexController;
 use Search\Query;
 use Search\Response;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class AgileSearchIndexController extends IndexController {
 

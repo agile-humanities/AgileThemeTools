@@ -2,6 +2,8 @@
   namespace AgileThemeTools;
 
   use AgileThemeTools\Service\Controller\AgileSearchHandlerFactory;
+  use AgileThemeTools\Service\ViewHelper\AgileSearchHelperFactory;
+  use AgileThemeTools\View\Helper\AgileSearchHelper;
 
   return array(
       'view_manager' => [
@@ -24,7 +26,7 @@
               'slideshow' => Service\BlockLayout\SlideshowFactory::class,
               'poster' => Service\BlockLayout\PosterFactory::class,
               'itemListing' => Service\BlockLayout\ItemListingFactory::class,
-              // 'linkCards' => Service\BlockLayout\LinkCardsFactory::class,
+              'linkCards' => Service\BlockLayout\LinkCardsFactory::class,
               'callout' => Service\BlockLayout\CalloutFactory::class,
               'quotation' => Service\BlockLayout\QuotationFactory::class,
               'deck' => Service\BlockLayout\DeckFactory::class,
@@ -52,8 +54,11 @@
               ],
           ],
      'view_helpers' => [
+         'aliases' => [
+           'agile_search_helper' => AgileSearchHelper::class
+         ],
          'factories' => [
-             'agile_search_helper' => Service\ViewHelper\AgileSearchHelperFactory::class,
+           AgileSearchHelper::class => AgileSearchHelperFactory::class,
          ],
         'invokables' => [
             'ckEditor' => View\Helper\CustomCKEditorConfig::class,

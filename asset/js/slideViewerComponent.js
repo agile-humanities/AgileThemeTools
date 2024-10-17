@@ -388,8 +388,8 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
 
     if (this.hasAttribute('integratedcontrols')) {
       controls = `<div id='sequential-nav' class='integrated'>
-        <a class="sequential-control previous" aria-label="Previous"></a>
         <div id='slide-nav'></div>
+        <a class="sequential-control previous" aria-label="Previous"></a>
         <a class="sequential-control next" aria-label="Next"></a>
       </div>`;
 
@@ -471,13 +471,13 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
           background: var(--sequential-nav-background,none);
 
         }
-        
+
         /* Integrated Navigation (Sequential and page navigation in same container) */
-        
+
          #sequential-nav.integrated {
             pointer-events: initial;
          }
-        
+
         .integrated #slide-nav {
             position: relative;
             bottom: initial;
@@ -496,9 +496,10 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
           border-color: var(--page-marker-border-color, white);
           background: var(--page-marker-background,#DDDDDD);
           margin: var(--page-marker-margin,0 var(--slide-marker-spacing,0.5rem) 0 0);
-          transition: background 0.2s
+          transition: background 0.2s;
+          transform: var(--page-marker-transform,none);
         }
-        
+
         .page-marker:focus {
           background: var(--page-marker-background-hover,#BBBBBB);
           transform: var(--page-marker-transform-hover,none);
@@ -552,9 +553,9 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
           background-size: var(--sequential-control-background-size,100%);
           background-position: center
         }
-        
+
         /* Screen Reader */
-        
+
         .screen-reader-text {
           clip: rect(1px, 1px, 1px, 1px);
           clip-path: inset(50%);
@@ -582,7 +583,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
       // Define global styles
 
       styleElement.appendChild(document.createTextNode(`
-        
+
         .slide-container {
           height: 100%;
         }
@@ -594,36 +595,36 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
         .slick-list, .slick-slide, .slick-slide > div {
           width: 100%;
         }
-        
-        
+
+
         /* FROM slick.css */
-        
+
         .slick-slider
         {
             position: relative;
-        
+
             display: block;
             box-sizing: border-box;
-        
+
             -webkit-user-select: none;
                -moz-user-select: none;
                 -ms-user-select: none;
                     user-select: none;
-        
+
             -webkit-touch-callout: none;
             -khtml-user-select: none;
             -ms-touch-action: pan-y;
                 touch-action: pan-y;
             -webkit-tap-highlight-color: transparent;
         }
-        
+
         .slick-list
         {
             position: relative;
-        
+
             display: block;
             overflow: hidden;
-        
+
             margin: 0;
             padding: 0;
         }
@@ -636,7 +637,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
             cursor: pointer;
             cursor: hand;
         }
-        
+
         .slick-slider .slick-track,
         .slick-slider .slick-list
         {
@@ -646,13 +647,13 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
                  -o-transform: translate3d(0, 0, 0);
                     transform: translate3d(0, 0, 0);
         }
-        
+
         .slick-track
         {
             position: relative;
             top: 0;
             left: 0;
-        
+
             display: block;
             margin-left: auto;
             margin-right: auto;
@@ -661,7 +662,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
         .slick-track:after
         {
             display: table;
-        
+
             content: '';
         }
         .slick-track:after
@@ -672,12 +673,12 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
         {
             visibility: hidden;
         }
-        
+
         .slick-slide
         {
             display: none;
             float: left;
-        
+
             height: 100%;
             min-height: 1px;
         }
@@ -708,9 +709,9 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
         .slick-vertical .slick-slide
         {
             display: block;
-        
+
             height: auto;
-        
+
             border: 1px solid transparent;
         }
         .slick-arrow.slick-hidden {

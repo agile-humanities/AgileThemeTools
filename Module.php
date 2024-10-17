@@ -60,7 +60,7 @@ class Module extends AbstractModule {
              // Code borrowed from the AltText module (with thanks!). Substitutes dc:description if no Alt tag provided.
              // Defaults to the title of the file, which is often just the filename.
 
-             public function attachListeners(SharedEventManagerInterface $sharedEventManager) {
+             /*public function attachListeners(SharedEventManagerInterface $sharedEventManager) {
                $sharedEventManager->attach(
                  '*',
                  'view_helper.thumbnail.attribs',
@@ -81,5 +81,5 @@ class Module extends AbstractModule {
                    $event->setParam('attribs', $attribs);
                  }
                );
-             }
+             } */
 }

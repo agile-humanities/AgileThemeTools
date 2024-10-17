@@ -10,7 +10,7 @@ use Omeka\Api\Representation\SitePageRepresentation;
 use Omeka\Api\Representation\SitePageBlockRepresentation;
 use Omeka\Stdlib\ErrorStore;
 use Omeka\Stdlib\HtmlPurifier;
-use Zend\Form\Element\Text;
+use Laminas\Form\Element\Text;
 use Laminas\Form\Element\Textarea;
 use Laminas\Form\FormElementManager as FormElementManager;
 use Laminas\View\Renderer\PhpRenderer;
@@ -53,7 +53,7 @@ class LinkCards extends AbstractBlockLayout
         $data['buttonPath'] = isset($data['buttonPath']) ? $this->htmlPurifier->purify($data['buttonPath']) : '';
         $data['classes'] = isset($data['classes']) ? $this->htmlPurifier->purify($data['classes']) : '';
         $data['itemFields'] = [];
-        
+
         for ($i=0;$i<3;$i++) {
           if (!empty($data["itemLabel_{$i}"]) || !empty($data["itemTitle_{$i}"]) || !empty($data["itemUrl_{$i}"])) {
             $data['itemFields'][$i]['label'] =  isset($data["itemLabel_{$i}"]) ? $this->htmlPurifier->purify($data["itemLabel_{$i}"]) : '';
@@ -64,7 +64,7 @@ class LinkCards extends AbstractBlockLayout
             $data['itemFields'][$i]['url'] = isset($data["itemTitle_{$i}"]) ? $this->htmlPurifier->purify($data["itemUrl_{$i}"]) : '';
           }
         }
-        
+
         $block->setData($data);
     }
 
@@ -94,14 +94,14 @@ class LinkCards extends AbstractBlockLayout
         $classes = new Text("o:block[__blockIndex__][o:data][classes]");
         $classes->setAttribute('class', 'block-button-classes');
         $classes->setLabel('Block Class (optional, separate with spaces)');
-        
+
         for ($i=0;$i<3;$i++) {
           $iLabel = $i+1;
 
           ${'itemLabel' . $i} = new Text("o:block[__blockIndex__][o:data][itemLabel_{$i}]");
           ${'itemLabel' . $i}->setAttribute('class', 'block-item-label');
           ${'itemLabel' . $i}->setLabel("A label for this item {$iLabel} (e.g. “Exhibit”)");
-          
+
           ${'itemTitle' . $i} = new Text("o:block[__blockIndex__][o:data][itemTitle_{$i}]") ;
           ${'itemTitle' . $i}->setAttribute('class', 'block-item-title');
           ${'itemTitle' . $i}->setLabel("A title for item {$iLabel}");
@@ -123,7 +123,7 @@ class LinkCards extends AbstractBlockLayout
           ${'itemUrl' . $i}->setAttribute('class', 'block-item-url');
           ${'itemUrl' . $i}->setLabel("The URL link for item {$iLabel}");
         }
-        
+
         $buttonPath = new Text("o:block[__blockIndex__][o:data][buttonPath]");
         $buttonPath->setAttribute('class', 'block-button-path');
         $buttonPath->setLabel('Button Path (optional)');
@@ -135,7 +135,7 @@ class LinkCards extends AbstractBlockLayout
             $buttonText->setAttribute('value',$block->dataValue('buttonText'));
             $region->setAttribute('value', $block->dataValue('region'));
             $classes->setAttribute('value',$block->dataValue('classes'));
-            
+
             for ($i=0;$i<3;$i++) {
                 ${'itemLabel' . $i}->setAttribute('value',$block->dataValue("itemLabel_{$i}"));
                 ${'itemTitle' . $i}->setAttribute('value',$block->dataValue("itemTitle_{$i}"));
@@ -144,7 +144,7 @@ class LinkCards extends AbstractBlockLayout
                 ${'itemDescription' . $i}->setAttribute('value',$block->dataValue("itemDescription_{$i}"));
                 ${'itemUrl' . $i}->setAttribute('value',$block->dataValue("itemUrl_{$i}"));
             }
-            
+
         } else {
             $region->setAttribute('value','region:default');
         }
@@ -156,10 +156,10 @@ class LinkCards extends AbstractBlockLayout
         $html .= $view->blockAttachmentsForm($block);
         $html .= "<p>Provide titles and links for each image above:</p>";
         $html .= "<hr/>";
-        
+
         for ($i=0;$i<3;$i++) {
           $iLabel = $i+1;
-          
+
           $html .= '<a href="#" class="collapse collapsed" aria-label="collapse"><h4>' . $view->translate("Fields for Item {$iLabel}"). '</h4></a>';
           $html .= '<div class="collapsible collapsed">';
           $html .= $view->formRow(${'itemLabel' . $i});
@@ -171,7 +171,7 @@ class LinkCards extends AbstractBlockLayout
           $html .= '</div>';
         }
         $html .= "<hr/>";
-        
+
         $html .= '<a href="#" class="collapse" aria-label="collapse"><h4>' . $view->translate('Additional Options'). '</h4></a>';
         $html .= '<div class="collapsible collapsed">';
         $html .= $view->formRow($buttonText);
