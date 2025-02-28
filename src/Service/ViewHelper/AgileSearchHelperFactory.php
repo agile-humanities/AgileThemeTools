@@ -9,6 +9,8 @@ class AgileSearchHelperFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
-        return new AgileSearchHelper($services->get('AgileSearchHandler'));
+    $settings = $services->get('Omeka\Settings');
+    $siteSettings = $services->get('Omeka\Settings\Site');
+    return new AgileSearchHelper($services->get('AgileSearchHandler'),$settings,$siteSettings);
     }
 }

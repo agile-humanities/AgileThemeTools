@@ -55,7 +55,8 @@
           ],
      'view_helpers' => [
          'aliases' => [
-           'agile_search_helper' => AgileSearchHelper::class
+           'agile_search_helper' => AgileSearchHelper::class,
+           'agileSearchHelper' => AgileSearchHelper::class
          ],
          'factories' => [
            AgileSearchHelper::class => AgileSearchHelperFactory::class,

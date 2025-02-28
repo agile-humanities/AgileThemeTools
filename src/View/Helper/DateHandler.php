@@ -8,28 +8,49 @@ use Omeka\Api\Representation\ValueRepresentation;
 class DateHandler extends AbstractHelper
 {
   /**
-   * A stub function to process numeric dates.
+   * A stub function to process numeric dates. There must be a more elegant way to handle unknown date formats
    */
   public function __invoke() {
 
   }
 
-  public function render($date=null,$output_format='F j, Y',$input_format='MMDDYYYY') {
+  public function render($date=null,$output_format='F j, Y', $input_format='') {
 
     if (!$date) {
       return $date; // Return the original value or null if none specified
     }
 
-    if ($input_format === 'DDMMYYYY') {
-      $day = substr($date,0,2);
-      $month = substr($date,2,2);
-      $year = substr($date,4,4);
-      $date = implode('-',[$year,$month,$day]);
-    } else if ($input_format === 'MMDDYYYY') {
-      $month = substr($date,0,2);
-      $day = substr($date,2,2);
-      $year = substr($date,4,4);
-      $date = implode('-',[$year,$month,$day]);
+    if ($input_format != '') {
+
+      $date = str_replace('-', '', $date);
+      $input_format = str_replace('-', '', $date);
+
+      switch ($input_format) {
+        case 'DDMMYYYY':
+          $day = substr($date, 0, 2);
+          $month = substr($date, 2, 2);
+          $year = substr($date, 4, 4);
+          break;
+        case 'MMDDYYYY':
+          $month = substr($date, 0, 2);
+          $day = substr($date, 2, 2);
+          $year = substr($date, 4, 4);
+          break;
+        case 'YYYYMM':
+          $day = '01';
+          $month = substr($date, 4, 2);
+          $year = substr($date, 0, 4);
+          break;
+        case 'YYYYMMDD':
+        default:
+          $day = substr($date, 6, 2);
+          $month = substr($date, 4, 2);
+          $year = substr($date, 0, 4);
+          break;
+
+      }
+
+      $date = implode('-', [$year, $month, $day]);
     }
 
     return date($output_format,strtotime($date));

@@ -53,7 +53,7 @@ class SectionManager extends AbstractActionController {
         // Also, Omeka keeps its site and page slugs as $page['params']['site-slug'] and $page['params']['page-slug']
         // Items without a page-slug are likely direct routes and ignored as sections.
 
-        $this->pages = $this->site->publicNav()->toArray();
+        $this->pages = $this->site ? $this->site->publicNav()->toArray() : [];
         $this->getSections(); // Populates the page index. Requires pages be built.
     }
 
@@ -69,6 +69,7 @@ class SectionManager extends AbstractActionController {
     public function getSections() {
 
         $sections = [];
+
         foreach ($this->pages as $page) {
             // Top-level user-added pages are considered a “section”.
             if (array_key_exists('params',$page) && array_key_exists('page-slug',$page['params'])) {

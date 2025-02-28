@@ -21,8 +21,15 @@ class SectionManagerFactory implements FactoryInterface
         $htmlPurifier = $serviceLocator->get('Omeka\HtmlPurifier');
         $formElementManager = $serviceLocator->get('FormElementManager');
         $api = $serviceLocator->get('Omeka\ApiManager');
-        $siteSlug = $serviceLocator->get('Application')->getMvcEvent()->getRouteMatch()->getParam('site-slug');
-        $site = $api->read('sites', ['slug' => $siteSlug])->getContent();
+        $route = $serviceLocator->get('Application')->getMvcEvent()->getRouteMatch();
+        $siteSlug = null;
+        $site=null;
+
+        if ($route) {
+          $siteSlug = $route->getParam('site-slug');
+          $site = $api->read('sites', ['slug' => $siteSlug])->getContent();
+        }
         return new SectionManager($api, $htmlPurifier, $formElementManager,$siteSlug,$site);
+
     }
 }

@@ -1,6 +1,6 @@
 (function($) {
     $(document).ready(function() {
-        $('main > div > .region').each(function() {
+        $('main > div .region').each(function() {
             var block = $(this);
             // Check to see if target id attribute and matching DOM object exists.
             if (typeof block.attr('data-target-region-id') !== "undefined" && $(block.attr('data-target-region-id')).length > 0) {

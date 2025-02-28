@@ -30,15 +30,17 @@ CKEDITOR.editorConfig = function (config) {
   ];
 
   // Filter content
-  config.allowedContent = false;
+  config.allowedContent = true; // normally set to false to defer to extraAllowedContent below
+  config.removeFormatAttributes = '';
   config.extraPlugins = "sourcedialog";
   config.pasteFromWordRemoveStyles = true;
   config.pasteFromWordRemoveFontStyles = true;
 
   // Set  block elements.
   config.format_tags = "p;h1;h2;h3;h4;h5;h6;pre;div";
-  config.extraAllowedContent =
-    "dl;dt;dd;parallax-layers(*);parallax-layers[id];p(*);div(*);div[slot];div[id]";
+  config.extraAllowedContent = '*[*]{*}(*)'
+  // config.extraAllowedContent =
+  //  "dl;dt;dd;parallax-layers(*);parallax-layers[id];p(*);div(*);div[slot];div[id];iframe;";
 };
 
 // Ensure that custom elements aren’t wrapped in a paragraph tag
@@ -51,5 +53,4 @@ CKEDITOR.on("instanceReady", function (ev) {
     p: 1,
     section: 1,
   };
-  console.log(this);
 });
