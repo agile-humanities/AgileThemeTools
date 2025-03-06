@@ -52,7 +52,7 @@ class AgileSearchHelper extends AbstractHelper
 
     $solrMappings = $this->getSolrMappings($value->resource()->resourceName());
     $term = $value->property()->term();
-    if (array_key_exists($term,$solrMappings)) {
+    if (array_key_exists($term,$solrMappings) && $value->value()) {
       return $this->getAdvancedSearchUrl() . "?" . urlencode("facet[{$solrMappings[$term]}][0]") . "=" . urlencode($value->value());
     } else {
       return $this->getAdvancedSearchUrl();
