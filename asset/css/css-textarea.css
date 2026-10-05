@@ -1,0 +1,83 @@
+/* CssTextarea form element. See view/common/css-textarea-form.phtml. */
+
+.agile-css-textarea {
+    width: 100%;
+    font-family: Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.85em;
+    line-height: 1.5;
+    tab-size: 4;
+    white-space: pre;
+}
+
+.agile-css-variables {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1px solid #dfdfdf;
+    border-radius: 3px;
+    background-color: #f7f7f7;
+}
+
+.agile-css-variables summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.agile-css-variables h4 {
+    margin: 12px 0 4px;
+}
+
+.agile-css-variables-help,
+.agile-css-variables-empty {
+    margin: 6px 0;
+    color: #676767;
+    font-size: 0.9em;
+}
+
+.agile-css-variable-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.agile-css-variable-list li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 0.85em;
+}
+
+.agile-css-swatch {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 2px;
+}
+
+.agile-css-variables .agile-css-variable-name {
+    margin: 0;
+    padding: 1px 4px;
+    border: 0;
+    border-radius: 2px;
+    background: #fff;
+    box-shadow: none;
+    color: #1a1a1a;
+    font-family: Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 1em;
+    cursor: copy;
+}
+
+.agile-css-variables .agile-css-variable-name.is-copied {
+    background: #d9f2dc;
+}
+
+.agile-css-variable-value {
+    overflow: hidden;
+    color: #676767;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

@@ -17,6 +17,7 @@ class RegionMenuSelect extends Select {
         return([
             'region:default' => 'Primary Content Tier',
             'region:splash' => 'Splash Area',
+            'region:main-title' => 'Main Title Area (full width)',
             'region:secondary-content' => 'Secondary Content Tier',
         ]);
     }

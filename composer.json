@@ -1,0 +1,17 @@
+{
+    "name": "agile-humanities/agile-theme-tools",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bill Kennedy",
+            "email": "bill@agilehumanities.ca"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "webrium/vtt-parser": "dev-main",
+        "symfony/yaml": "^7.3"
+    }
+}

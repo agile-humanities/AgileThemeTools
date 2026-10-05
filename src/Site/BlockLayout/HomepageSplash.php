@@ -197,7 +197,7 @@ class HomepageSplash extends AbstractBlockLayout
 
               // Filter for media type. $media->mediaType() returns a MIME type.
 
-              if ($media) {
+              if ($media && $media->mediaType()) {
                 if (strpos($media->mediaType(), 'audio') !== false && $audio_attachment == null) {
                   $audio_attachment = $attachment;
                 } else {

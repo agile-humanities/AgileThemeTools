@@ -1,0 +1,83 @@
+<?php
+/**
+ * FontStack form element, collapsed by default: the summary line shows the role's font (set in that font), its
+ * source and whether it loaded; the controls and the full preview are inside. Behaviour: asset/js/font-stack.js.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \AgileThemeTools\Form\Element\FontStack $element
+ * @var string $role
+ * @var array $roles ThemeFonts::ROLES
+ * @var array $parsed ['family', 'generic', 'alias', 'declaration']
+ * @var string $inferredSource
+ * @var array $suggestions [google => [family => category], bundled => [family => ['weights' => …]], system => [label => stack]]
+ * @var string[] $generics
+ * @var string $googleAxes
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/font-stack.css', 'AgileThemeTools'));
+$this->headScript()->appendFile($this->assetUrl('js/font-stack.js', 'AgileThemeTools'));
+
+$name = $element->getName();
+$id = $element->getAttribute('id') ?: $name;
+$sources = [
+    'google' => $translate('Google Fonts'),
+    'bundled' => $translate('Bundled with the theme'),
+    'system' => $translate('System font or already loaded'),
+    'alias' => $translate('Same as another font'),
+];
+$otherRoles = array_diff_key($roles, [$role => true]);
+$listId = $id . '-suggestions';
+?>
+<div class="agile-font-stack"
+    data-role="<?= $escape($role) ?>"
+    data-source-input="<?= $escape($name . '_source') ?>"
+    data-inferred-source="<?= $escape($inferredSource) ?>"
+    data-google-axes="<?= $escape($googleAxes) ?>"
+    data-bundled="<?= $escape(json_encode(array_keys($suggestions['bundled']))) ?>"
+    data-google-categories="<?= $escape(json_encode($suggestions['google'])) ?>"
+    data-system-stacks="<?= $escape(json_encode($suggestions['system'])) ?>">
+    <?= $this->formHidden($element) ?>
+    <details class="agile-font-stack-details">
+    <summary class="agile-font-stack-summary">
+        <span class="agile-font-stack-summary-sample"><?= $escape($parsed['declaration']) ?></span>
+        <span class="agile-font-stack-summary-source"></span>
+        <span class="agile-font-stack-status"></span>
+    </summary>
+    <div class="agile-font-stack-row">
+        <label class="agile-font-stack-field">
+            <span><?= $escape($translate('Source')) ?></span>
+            <select class="agile-font-stack-source" aria-label="<?= $escape($translate('Font source')) ?>">
+                <?php foreach ($sources as $key => $label): ?>
+                <option value="<?= $key ?>"><?= $escape($label) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label class="agile-font-stack-field agile-font-stack-family-field">
+            <span><?= $escape($translate('Family')) ?></span>
+            <input type="text" class="agile-font-stack-family" list="<?= $escape($listId) ?>" value="<?= $escape($parsed['family']) ?>" placeholder="<?= $escape($translate('e.g. Open Sans')) ?>" autocomplete="off" spellcheck="false" aria-label="<?= $escape($translate('Font family')) ?>">
+            <datalist id="<?= $escape($listId) ?>"></datalist>
+        </label>
+        <label class="agile-font-stack-field agile-font-stack-alias-field">
+            <span><?= $escape($translate('Use the')) ?></span>
+            <select class="agile-font-stack-alias" aria-label="<?= $escape($translate('Font to reuse')) ?>">
+                <?php foreach ($otherRoles as $otherRole => $info): ?>
+                <option value="<?= $escape($otherRole) ?>"<?= $parsed['alias'] === $otherRole ? ' selected' : '' ?>><?= $escape($translate($info['label'])) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label class="agile-font-stack-field agile-font-stack-generic-field">
+            <span><?= $escape($translate('Fallback')) ?></span>
+            <select class="agile-font-stack-generic" aria-label="<?= $escape($translate('Generic fallback')) ?>">
+                <?php foreach ($generics as $generic): ?>
+                <option value="<?= $generic ?>"<?= $parsed['generic'] === $generic ? ' selected' : '' ?>><?= $generic ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+    </div>
+    <div class="agile-font-stack-preview">
+        <span class="agile-font-stack-sample" aria-hidden="true">The quick brown fox jumps over the lazy dog — 0123456789 <em>italic</em> <strong>bold</strong></span>
+    </div>
+    <div class="agile-font-stack-declaration"><?= $escape($translate('Saved as')) ?> <code class="agile-font-stack-code"><?= $escape($parsed['declaration']) ?></code></div>
+    </details>
+</div>

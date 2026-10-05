@@ -1,0 +1,92 @@
+/* Logo audit findings (view/common/theme-logo-audit.phtml). */
+
+.theme-logo-audit {
+    margin: 0 0 24px;
+    padding: 12px 16px;
+    border: 1px solid #e6d9a8;
+    border-radius: 3px;
+    background: #fdf8e4;
+}
+
+.theme-logo-audit h4 {
+    margin: 0 0 8px;
+}
+
+.theme-logo-audit-logo {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.theme-logo-audit-logo + .theme-logo-audit-logo {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e6d9a8;
+}
+
+/* The checkerboard shows at a glance whether the image has a transparent background. */
+.theme-logo-audit-thumb {
+    flex: 0 0 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 72px;
+    padding: 6px;
+    border: 1px solid #dfdfdf;
+    background: #8a8a8a conic-gradient(#9d9d9d 25%, #777 0 50%, #9d9d9d 0 75%, #777 0) 0 0 / 16px 16px;
+}
+
+.theme-logo-audit-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.theme-logo-audit-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.theme-logo-audit-title {
+    margin: 0 0 4px;
+}
+
+.theme-logo-audit-title span {
+    margin-left: 8px;
+    color: #676767;
+    font-size: 0.85em;
+    overflow-wrap: anywhere;
+}
+
+.theme-logo-audit ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.theme-logo-audit li {
+    margin: 4px 0;
+}
+
+.theme-logo-audit li strong {
+    margin-right: 4px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+}
+
+.theme-logo-audit-warning strong {
+    background: #f9dede;
+    color: #8a1f1f;
+}
+
+.theme-logo-audit-note strong {
+    background: #e4e4e4;
+    color: #404040;
+}
+
+.theme-logo-audit li em {
+    display: block;
+    color: #505050;
+    font-style: normal;
+    font-size: 0.9em;
+}

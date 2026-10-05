@@ -1,0 +1,111 @@
+/* FontStack form elements (theme styling). See asset/js/font-stack.js. */
+
+.agile-font-stack-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: flex-end;
+}
+
+.agile-font-stack-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 140px;
+}
+
+.agile-font-stack-field > span {
+    color: #676767;
+    font-size: 0.8em;
+}
+
+.agile-font-stack-family-field {
+    flex: 1 1 260px;
+}
+
+.agile-font-stack .agile-font-stack-family,
+.agile-font-stack select {
+    margin: 0;
+}
+
+.agile-font-stack-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+    margin: 8px 0 4px;
+    padding: 8px 12px;
+    border: 1px solid #dfdfdf;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.agile-font-stack-sample {
+    font-size: 1.25em;
+    line-height: 1.4;
+}
+
+.agile-font-stack-status {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+}
+
+.agile-font-stack-status.is-ok {
+    background: #d9f2dc;
+    color: #1d5a26;
+}
+
+.agile-font-stack-status.is-bad {
+    background: #f9dede;
+    color: #8a1f1f;
+}
+
+.agile-font-stack-declaration {
+    color: #676767;
+    font-size: 0.85em;
+}
+
+.agile-font-stack-code {
+    font-family: Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Collapsed row: the role's font (set in that font), its source and the load status. */
+
+.agile-font-stack-details {
+    border: 1px solid #dfdfdf;
+    border-radius: 3px;
+    background: #f7f7f7;
+}
+
+.agile-font-stack-details[open] {
+    padding-bottom: 8px;
+}
+
+.agile-font-stack-details > *:not(summary) {
+    margin-left: 12px;
+    margin-right: 12px;
+}
+
+.agile-font-stack-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    padding: 8px 12px;
+    cursor: pointer;
+    list-style-position: inside;
+}
+
+.agile-font-stack-summary-sample {
+    font-size: 1.15em;
+}
+
+.agile-font-stack-summary-source {
+    color: #676767;
+    font-size: 0.85em;
+}
+
+.agile-font-stack-summary-source::before {
+    content: "· ";
+}

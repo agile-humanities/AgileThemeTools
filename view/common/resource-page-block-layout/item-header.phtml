@@ -1,0 +1,121 @@
+<?php
+  // Fallback for themes that do not provide their own item header (pitts3 overrides it).
+
+  $translate = $this->plugin('translate');
+  $escape = $this->plugin('escapeHtml');
+  $partial = $this->plugin('partial');
+  $valueDisplay = $this->plugin('valueDisplay');
+  $propertyTerms = $this->plugin('propertyTerms');
+  $item = $resource;
+  $itemMedia = $item->media();
+  /** @var \AgileThemeTools\View\Helper\AgileSearchHelper $searchHelper */
+  $searchHelper = $this->plugin('agileSearchHelper');
+  $creator = $item->value('dcterms:creator');
+  $label = $item->resourceClass() ? $item->resourceClass()->label() : $translate('Item');
+  $hasTranscription = !empty($item->value("vra:text")); // @todo: improve this
+  $keyTerms = $propertyTerms->fromThemeSetting('key_terms') ?: ['dcterms:created','dcterms:date','dcterms:temporal','dcterms:subject','dcterms:spatial'];
+?>
+<div class='item-info item-text'>
+  <div class='wayfinding'>
+    <a class="wayfinding--breadcrumb icon-home" href="<?= $siteUrl; ?>"><span class="screen-reader-text">Home</span></a>
+    <span>></span>
+    <a class="wayfinding--breadcrumb" href="<?= $searchHelper->getAdvancedSearchUrl(); ?>">Browse</a>
+    <?php
+    /** @var Omeka\Api\Representation\ItemSetRepresentation $itemSet */
+    $itemSets = $item->itemSets();
+    ?>
+    <span>></span>
+    <?php
+    if (count ($itemSets) > 0):
+      $firstItemSet = array_shift($itemSets);
+      ?>
+      <?= sprintf("<a class='wayfinding--breadcrumb key-item-set' href='%s'>%s</a>",$searchHelper->getFacetedItemSetUrl($firstItemSet),$firstItemSet->title()) ?>
+    <?php endif; ?>
+  </div>
+  <header>
+    <div class="item-label"><?= $escape($label) ?></div>
+    <?= $this->pageTitle($item->displayTitle(), 1); ?>
+  </header>
+  <?php if ($item->value('dcterms:alternative')): ?>
+    <div class='subtitle'>
+      <?= $valueDisplay($item->value('dcterms:alternative'), ['link' => false]); ?>
+    </div>
+  <?php endif; ?>
+  <?php if ($creator): ?>
+    <div class='deck'>
+      <?= $valueDisplay($creator); ?>
+    </div>
+  <?php endif; ?>
+
+
+  <div class="container-with-tabs-and-panels">
+
+    <?php if ($hasTranscription): ?>
+      <div class="tabs">
+        <a class="tab description-tab active-tab">Description</a> |
+        <a class="tab info-tab">Transcription</a>
+      </div>
+    <?php endif; ?>
+    <div class="panels">
+      <div class="description-panel">
+        <p class="description-text">
+          <?php $values = $item->value('dcterms:description', ['all' => true]); foreach ($values as $value) { echo $value->asHtml(); }?>
+        </p>
+        <div class='key-metadata'>
+          <div class='metadata-list metadata-list-top'>
+            <?php
+            // Display key terms
+            foreach($propertyTerms->select($item->values(), $keyTerms) as $term => $propertyData):
+              if (!empty($propertyData['values'][0])):
+                printf("<div class='property' data-term='%s'>\n",$escape($term));
+                printf("   <div class='metadata-label'>%s</div>",$escape($propertyData['alternate_label'] ?: $translate($propertyData['property']->label())));
+                print ("    <div class='values'>");
+                /** @var Omeka\Api\Representation\ValueRepresentation $value */
+                foreach($propertyData['values'] as $value)
+                  if($value->isPublic()):
+                    printf("       <div class='value'>%s</div>",$valueDisplay($value));
+                  endif;
+                print ("    </div>");
+                print ("</div>");
+              endif;
+            endforeach;
+            ?>
+            <div class="property">
+              <?php $itemSets = $item->itemSets(); ?>
+              <?php if (count($itemSets) > 0): ?>
+                <div class="label label-item-info metadata-label"><?php echo $translate(
+                    "Item sets"
+                  ); ?></div>
+                <?php foreach ($itemSets as $itemSet): ?>
+                  <div class="value"><a class="item-set-link-top" href="<?= $escape(
+                      $searchHelper->getFacetedItemSetUrl($itemSet)
+                    ); ?>"><?php echo $itemSet->displayTitle(); ?></a></div>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </div>
+          </div>
+        </div>
+        <div class='rights'>
+          <?php if ($item->primaryMedia()):  // Download item ?>
+            <div class="metadata-label">Original Download Block</div>
+            <?= $partial('agile-item/download-item-block', [
+              'item' => $item,
+            ]) ?>
+          <?php endif; ?>
+        </div>
+        <?php if (!empty($item->value("dcterms:rights"))): ?>
+          <div class='rights-statement'>
+            <p class="metadata-label">Rights Statement</p>
+            <p class="metadata-value"><?= $valueDisplay($item->value('dcterms:rights'), ['link' => false]); ?></p>
+          </div>
+        <?php endif; ?>
+      </div>
+      <?php if ($hasTranscription): ?>
+        <div class="transcription-panel">
+          <p class="metadata-label">Transcription of this Item</p>
+          <?= $valueDisplay($item->value("vra:text"), ['link' => false]); ?>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>

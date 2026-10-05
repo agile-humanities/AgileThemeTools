@@ -2,12 +2,15 @@
 namespace AgileThemeTools\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
+use Omeka\Api\Representation\ItemSetRepresentation;
 use Omeka\Api\Representation\ValueRepresentation;
 use AdvancedSearch\Api\Representation\SearchConfigRepresentation;
+use Omeka\Entity\Item;
 use Omeka\Settings\SiteSettings;
 use Omeka\View\Helper\Api;
 use Omeka\Api\Representation\SiteRepresentation;
 use AdvancedSearch\View\Helper\GetSearchConfig;
+use function PHPUnit\Framework\isInstanceOf;
 
 
 /**
@@ -15,17 +18,51 @@ use AdvancedSearch\View\Helper\GetSearchConfig;
  */
 class AgileSearchHelper extends AbstractHelper
 {
+  /** Global setting: properties whose values are never linked to search (see Module::addSettingFormElements()). */
+  const UNLINKED_TERMS_SETTING = 'agilethemetools_unlinked_terms';
+
+  /** Used until the setting is saved: properties whose values make poor search links. */
+  const UNLINKED_TERMS_DEFAULT = [
+    'dcterms:title',
+    'dcterms:alternative',
+    'dcterms:description',
+    'dcterms:abstract',
+    'dcterms:tableOfContents',
+    'dcterms:bibliographicCitation',
+    'dcterms:identifier',
+    'dcterms:extent',
+    'dcterms:rights',
+    'dcterms:rightsHolder',
+    'dcterms:license',
+    'dcterms:accessRights',
+    'bibo:identifier',
+    'bibo:number',
+    'bibo:locator',
+  ];
+
   protected $agileSearchHandler;
 
   /** @var SiteSettings $siteSettings */
   protected $siteSettings;
   protected $settings;
+  protected $api;
+  protected $search_inclusion_list = [];
+
+  /** @var string[]|null Facet fields on the site's main search config. */
+  protected $facetFields;
+
+  /** @var array Solr fields mapped to each property term, keyed by resource name. */
+  protected $solrFieldsByTerm = [];
+
+  /** @var string[]|null Terms whose values are never linked to search. */
+  protected $unlinkedTerms;
 
 
-  public function __construct($agileSearchHandler,$settings,$siteSettings,$mapController=null) {
+  public function __construct($agileSearchHandler,$settings,$siteSettings,$api,$mapController=null) {
     $this->agileSearchHandler = $agileSearchHandler;
     $this->settings = $settings;
     $this->siteSettings = $siteSettings;
+    $this->api = $api;
   }
 
   public function __invoke() {
@@ -46,18 +83,113 @@ class AgileSearchHelper extends AbstractHelper
    * as a string.
    */
 
-  public function getSolrSearchUrl($value) {
+  public function getSolrSearchUrl(ValueRepresentation $value) {
 
-    //$resourceName = $resourceArg instanceof ItemRepresentation || $resourceArg instanceof Resource ? $resourceArg->resourceName() : $resourceArg;
-
-    $solrMappings = $this->getSolrMappings($value->resource()->resourceName());
-    $term = $value->property()->term();
-    if (array_key_exists($term,$solrMappings) && $value->value()) {
-      return $this->getAdvancedSearchUrl() . "?" . urlencode("facet[{$solrMappings[$term]}][0]") . "=" . urlencode($value->value());
-    } else {
-      return $this->getAdvancedSearchUrl();
+    if (!$this->isLinkableProperty($value)) {
+      return '';
     }
 
+    return $this->getValueSearchUrl($value);
+  }
+
+  /**
+   * Returns a URL to the site's Advanced Search page for a value, or '' when the value should not link to search.
+   *
+   * - The property is a facet on the site's main search config: the link preselects that facet.
+   * - Otherwise, if a string Solr field (_ss, then _s) is mapped: the link filters on it. There is no facet to
+   *   preselect, but the results are the same.
+   * - Otherwise (full-text fields only, or no mapping): ''.
+   *
+   * Linked resources and URIs return '': they link to their own destination (see ValueDisplay). So do properties in
+   * the global "Properties not linked to search" setting (see getUnlinkedTerms()).
+   */
+  public function getValueSearchUrl(ValueRepresentation $value): string {
+    if ($value->valueResource() || $value->uri() || (string) $value->value() === '') {
+      return '';
+    }
+
+    if (in_array($value->property()->term(), $this->getUnlinkedTerms(), true)) {
+      return '';
+    }
+
+    try {
+      if (!$this->isSolrSearch()) {
+        return '';
+      }
+
+      $fields = $this->getSolrFieldsByTerm($value->resource()->resourceName())[$value->property()->term()] ?? [];
+      $field = array_values(array_intersect($fields, $this->getConfiguredFacetFields()))[0] ?? null;
+
+      if ($field === null) {
+        foreach (['_ss', '_s'] as $suffix) {
+          foreach ($fields as $candidate) {
+            if (substr($candidate, -strlen($suffix)) === $suffix) {
+              $field = $candidate;
+              break 2;
+            }
+          }
+        }
+      }
+
+      if ($field === null) {
+        return '';
+      }
+
+      return $this->getAdvancedSearchUrl() . '?' . http_build_query(['facet' => [$field => [$value->value()]]]);
+    } catch (\TypeError $e) {
+      // The site has no main search config (getAdvancedSearchConfig() cannot return one).
+      return '';
+    }
+  }
+
+  /**
+   * Returns the terms whose values are never linked to search: the global "Properties not linked to search" setting,
+   * or UNLINKED_TERMS_DEFAULT until it is saved. A list saved empty leaves every property linkable.
+   */
+  public function getUnlinkedTerms(): array {
+    if ($this->unlinkedTerms === null) {
+      $value = $this->settings->get(self::UNLINKED_TERMS_SETTING);
+      $this->unlinkedTerms = $value === null
+        ? self::UNLINKED_TERMS_DEFAULT
+        : $this->view->plugin('propertyTerms')->parse($value);
+    }
+    return $this->unlinkedTerms;
+  }
+
+  /**
+   * Returns the facet fields configured on the site's main search config.
+   */
+  public function getConfiguredFacetFields(): array {
+    if ($this->facetFields === null) {
+      $this->facetFields = [];
+      $facetSettings = $this->getAdvancedSearchConfig()->setting('facet');
+      foreach ($facetSettings['facets'] ?? [] as $key => $facet) {
+        $field = is_array($facet) ? ($facet['field'] ?? $key) : $facet;
+        if (is_string($field) && $field !== '') {
+          $this->facetFields[] = $field;
+        }
+      }
+    }
+    return $this->facetFields;
+  }
+
+  /**
+   * Returns every Solr field mapped to each property term, e.g. ['dcterms:creator' => ['dcterms_creator_s',
+   * 'dcterms_creator_ss', 'dcterms_creator_txt']]. Unlike getSolrMappings(), nothing is dropped.
+   */
+  public function getSolrFieldsByTerm($resourceName): array {
+    if (!isset($this->solrFieldsByTerm[$resourceName])) {
+      $fields = [];
+      if ($this->isSolrSearch()) {
+        $searchEngineSettings = $this->getAdvancedSearchConfig()->searchEngine()->settings();
+        $solrCore = $this->api->read('solr_cores', $searchEngineSettings['engine_adapter']['solr_core_id'])->getContent();
+        foreach ($solrCore->mapsByResourceName($resourceName) as $map) {
+          $fields[$map->source()][] = $map->fieldName();
+        }
+      }
+      $this->solrFieldsByTerm[$resourceName] = $fields;
+    }
+    return $this->solrFieldsByTerm[$resourceName];
   }
 
   /**
@@ -77,11 +209,53 @@ class AgileSearchHelper extends AbstractHelper
     $propId = $value->property()->term();
     $propValue= $value->value();
 
-    return $defaultSite->siteUrl() . '/item?'.
+    $searchUrl = $this->getAdvancedSearchUrl() ?? $defaultSite->siteUrl() . '/item';
+
+    return $searchUrl . '?'.
       urlencode("filter[0][join]")  .'=and&'.
       urlencode("filter[0][field]") ."={$propId}&".
       urlencode("filter[0][type]")  .'=eq&'.
       urlencode("filter[0][val]")   . "={$propValue}";
+  }
+
+  public function getFacetedItemSetUrl(ItemSetRepresentation $itemSet,$use_search_page=true) {
+    if ($use_search_page !== true) {
+      return $itemSet->url();
+    }
+    $searchUrl = $this->getAdvancedSearchUrl();
+    $propValue = $itemSet->id();
+
+    //facet%5Bitem_set_id%5D%5B0%5D=
+
+    return $searchUrl .'?facet%5Bitem_set_id%5D%5B0%5D='. $propValue;
+
+    /*
+    return $searchUrl . '?'.
+      urlencode("filter[0][join]")  .'=and&'.
+      urlencode("filter[0][field]") ."=item_set_id&".
+      urlencode("filter[0][type]")  .'=eq&'.
+      urlencode("filter[0][val]")   . "={$propValue}";
+    */
+
+
+  }
+
+  /**
+   * This is a stub function to return an Advanced Search + Solr url for an item set based on Item Set ID.
+   * It's not very foolproof, so use with caution.
+   *
+   * @param $id
+   * @return string
+   */
+
+  public function getSolrItemSetUrl($id) {
+    if (!$this->isSolrSearch()) {
+      return '';
+    }
+
+    /** @var ItemSetRepresentation $itemSet */
+    $itemSet = $this->api->read('item_sets', ['id' => $id])->getContent();
+    return $this->getAdvancedSearchUrl() . "?" . urlencode("facet[item_set_dcterms_title_ss][0]") . "=" . urlencode($itemSet->title());
   }
 
   /**
@@ -151,6 +325,40 @@ class AgileSearchHelper extends AbstractHelper
     asort($solrMappings);
 
     return array_flip($solrMappings);
+
+  }
+
+  /*
+   * Sets a search inclusion list. Allows you to set a list of properties that should be linked to the
+   * advanced search page. If no inclusion list is supplied then all propertyies are linked.
+   *
+   * @todo: The Advanced Resource Template modules allows you to set an inclusion list via a configurable settings.
+   *   This helper should support that setting if it exists.
+   * @todo: Allow for an exclusion list to also be set as per the Advanced Resource Template module.
+   */
+
+  public function setSearchInclusionList($fields): void {
+    $this->search_inclusion_list = $fields;
+  }
+
+  /*
+   * Checks to see if a property inclusion list has been set.
+   */
+
+  public function hasSearchInclusionList():bool {
+    return count($this->search_inclusion_list);
+  }
+
+  /*
+   * Checks to see if value is linkable.
+   */
+
+  public function isLinkableProperty(ValueRepresentation $value):bool {
+    if ($this->hasSearchInclusionList() && !in_array($value->property()->term(),$this->search_inclusion_list)) {
+      return false;
+    }
+
+    return true;
 
   }
 

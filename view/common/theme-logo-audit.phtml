@@ -1,0 +1,35 @@
+<?php
+/**
+ * Findings of the logo audit (Styling\LogoAudit). Only rendered when a logo has findings.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var array[] $logos
+ * @var \Omeka\Api\Representation\SiteRepresentation $site
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/theme-logo-audit.css', 'AgileThemeTools'));
+?>
+<div class="theme-logo-audit" role="status">
+    <h4><?= $escape($translate('Logo check')) ?></h4>
+    <?php foreach ($logos as $logo): ?>
+    <div class="theme-logo-audit-logo">
+        <span class="theme-logo-audit-thumb"><img src="<?= $escape($logo['url']) ?>" alt=""></span>
+        <div class="theme-logo-audit-body">
+            <p class="theme-logo-audit-title">
+                <strong><?= $escape($translate($logo['label'])) ?></strong>
+                <span><?= $escape($logo['name']) ?><?php if ($logo['width'] && $logo['height']): ?> · <?= $escape(round($logo['width']) . ' × ' . round($logo['height'])) ?><?php endif; ?></span>
+            </p>
+            <ul>
+                <?php foreach ($logo['findings'] as $finding): ?>
+                <li class="theme-logo-audit-<?= $escape($finding['level']) ?>">
+                    <strong><?= $escape($finding['level'] === 'warning' ? $translate('Warning') : $translate('Note')) ?></strong>
+                    <?= $escape($translate($finding['message'])) ?>
+                    <?php if ($finding['fix'] !== ''): ?><em><?= $escape($translate($finding['fix'])) ?></em><?php endif; ?>
+                </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+    <?php endforeach; ?>
+</div>

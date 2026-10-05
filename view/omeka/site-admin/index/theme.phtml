@@ -1,0 +1,112 @@
+<?php
+use Omeka\Site\Theme\Manager;
+
+/** @var \Omeka\Site\Theme\Theme $currentTheme */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->htmlElement('body')->appendAttribute('class', 'sites theme');
+$this->headScript()->prependFile($this->assetUrl('vendor/compare-versions/index.js', 'Omeka'));
+
+/** @var \Omeka\View\Helper\ThemeSetting $themeSettings */
+$themeSettings = $this->plugin('themeSetting');
+
+$fallbackThumbnailUrl = $this->assetUrl('img/theme.jpg', 'Omeka');
+?>
+<?php echo $this->pageTitle($translate('Theme'), 1, $translate('Sites')); ?>
+
+<?php if(isset($this->form) && $themeSettings('configurable_site_theme') && Manager::STATE_ACTIVE === $currentTheme->getState()): ?>
+    <?= $this->themeBuildPanel($this->currentSite(), $currentTheme, ['compact' => true]); ?>
+<?php endif; ?>
+
+<?php if (Manager::STATE_ACTIVE === $currentTheme->getState()): ?>
+    <?= $this->themeLogoAudit($this->currentSite(), $currentTheme); ?>
+<?php endif; ?>
+
+<?php if(isset($this->form)): ?>
+    <?php $form->prepare(); ?>
+    <?php echo $this->form()->openTag($form); ?>
+    <div id="page-actions">
+        <?php echo $this->cancelButton(); ?>
+        <button><?php echo $translate('Save'); ?></button>
+    </div>
+    <div class="current-theme<?php echo Manager::STATE_ACTIVE !== $currentTheme->getState() ? ' invalid' : ''; ?>">
+        <?php $localThumbnailUrl = OMEKA_PATH . $currentTheme->getThumbnail(); ?>
+        <?php $absoluteThumbnailUrl = $this->basePath() . $currentTheme->getThumbnail(); ?>
+        <div class="theme-thumbnail"><img src="<?php echo $escape((file_exists($localThumbnailUrl)) ? $absoluteThumbnailUrl : $fallbackThumbnailUrl); ?>"></div>
+
+        <div class="current-theme-info">
+            <h3>
+                <span class="current-theme-label"><?php echo $translate('Current theme'); ?></span>
+                <span class="current-theme-name"><?php echo $currentTheme->getName(); ?></span>
+            </h3>
+            <?php if (Manager::STATE_ACTIVE === $currentTheme->getState()): ?>
+            <p class="theme-meta">
+                <?php $currentVersion = $currentTheme->getIni('version'); ?>
+                <?php if (!empty($currentVersion)): ?>
+                <span class="theme-version">
+                    <?php echo sprintf($translate('version %s'), $currentVersion); ?>
+                </span>
+                <?php endif; ?>
+                <span class="theme-author"><a href="<?php echo $escape($currentTheme->getIni('author_link')); ?>" target="_blank"><?php echo $escape($currentTheme->getIni('author')); ?></a></span>
+                <?php if (($currentDescription = $currentTheme->getIni('description')) && ($currentDescription !== '')): ?>
+                <span class="theme-description"><?php echo $escape($currentDescription); ?></span>
+                <?php endif; ?>
+            </p>
+            <?php if ($currentTheme->isConfigurable()): ?>
+                <?php echo $this->hyperlink($translate('Edit theme settings'), $this->url(null, ['action' => 'theme-settings'], true), ['class' => 'theme-settings button']); ?>
+            <?php endif; ?>
+            <?php if ($currentTheme->isConfigurableResourcePageBlocks()): ?>
+            <?php echo $this->hyperlink($translate('Configure resource pages'), $this->url(null, ['action' => 'theme-resource-pages'], true), ['class' => 'theme-resource-pages button']); ?>
+            <?php endif; ?>
+            <?php if ($themeSettings('configurable_site_theme')): ?>
+                <?= $this->hyperlink($translate('Configure theme styles'), $this->url(null, ['action' => 'theme-styling'], true), ['class' => 'theme-styling-pages button']); ?>
+            <?php endif; ?>
+            <div class="version-notification" style="display: none;"
+                data-addon-id="<?php echo $this->escapeHtml($currentTheme->getId()); ?>"
+                data-current-version="<?php echo $this->escapeHtml($currentTheme->getIni('version')); ?>">
+                <?php echo sprintf(
+                    $translate('A new version of this theme is available. %s'),
+                    sprintf(
+                        '<a href="%s">%s</a>',
+                        'http://omeka.org/s/themes/' . $currentTheme->getId(),
+                        $translate('Get the new version.')
+                    )
+                ); ?>
+            </div>
+
+            <?php else: ?>
+            <p class="error"><?php echo $translate('Error: this theme is invalid.'); ?></p>
+            <ul>
+                <li><?php echo sprintf($translate('ID: %s'), $currentTheme->getId()); ?></li>
+                <li><?php echo sprintf($translate('Status: %s'), $currentTheme->getState()); ?></li>
+            </ul>
+            <p><?php echo $translate('Please contact the Omeka S administrator. This site will not be publicly available until the problem is resolved or you select another theme below.'); ?></p>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php echo $this->formCollection($form, false); ?>
+    <?php
+    echo $this->partial('omeka/site-admin/index/theme-selector.phtml', [
+        'currentTheme' => $currentTheme,
+        'themes' => $themes,
+        'fallbackThumbnailUrl' => $fallbackThumbnailUrl
+    ]);
+    ?>
+    <?php echo $this->form()->closeTag(); ?>
+<?php endif; ?>
+
+<?php if ($this->setting('version_notifications')): ?>
+<script>
+$.get('https://omeka.org/add-ons/json/s_theme.json')
+    .done(function(data) {
+        var addon = $('.version-notification');
+        var addonId = addon.data('addon-id');
+        if (addonId in data) {
+            if (compareVersions.compareVersions(addon.data('current-version'), data[addonId]['latest_version']) === -1) {
+                addon.show();
+            }
+        }
+    });
+</script>
+<?php endif; ?>

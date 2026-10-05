@@ -1,0 +1,75 @@
+/* PropertyList form element. See view/common/property-list-form.phtml. */
+
+.agile-property-list .chosen-container {
+    margin-bottom: 8px;
+}
+
+.agile-property-list-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.agile-property-list-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px 3px 8px;
+    border: 1px solid #dfdfdf;
+    border-radius: 3px;
+    background-color: #f7f7f7;
+    line-height: 1.5;
+}
+
+.agile-property-list-item.is-unknown {
+    border-color: #a91919;
+    background-color: #fbeaea;
+}
+
+.agile-property-list-items.is-sortable .agile-property-list-item {
+    padding-left: 4px;
+}
+
+.agile-property-list-item .sortable-handle {
+    cursor: move;
+}
+
+.agile-property-list-item.sortable-ghost {
+    opacity: 0.4;
+}
+
+.agile-property-list-term {
+    color: #676767;
+    font-size: 0.8em;
+}
+
+.agile-property-list .agile-property-list-remove {
+    margin: 0;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: #676767;
+    cursor: pointer;
+}
+
+.agile-property-list .agile-property-list-remove:hover,
+.agile-property-list .agile-property-list-remove:focus {
+    color: #a91919;
+}
+
+.agile-property-list-empty {
+    margin: 4px 0;
+    color: #676767;
+    font-style: italic;
+}
+
+.agile-property-list-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}

@@ -831,7 +831,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
           focusOnSelect: false,
           focusOnChange: false,
           infinite: true,
-          initialSlide: 0,
+          //initialSlide: 0, // Causes next/prev buttons not to work. See https://github.com/akiran/react-slick/issues/1946
           lazyLoad: 'ondemand',
           mobileFirst: false,
           pauseOnHover: true,
@@ -845,7 +845,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
           slidesPerRow: 1,
           slidesToShow: 1,
           slidesToScroll: 1,
-          speed: 500,
+          speed: 3000,
           swipe: true,
           swipeToSlide: false,
           touchMove: true,
@@ -1003,6 +1003,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
   nextSlideBehaviour(e,_this) {
     var element = document.getElementById(_this.getAttribute('id')).querySelector('.slick-slider');
     jQuery(element).slick('slickNext');
+    console.log(element);
   }
 
   previousSlideBehaviour(e,_this) {
@@ -1020,7 +1021,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
     var _this = this;
     var pagerElement = this.shadowRoot.getElementById('slide-nav');
     var slider = this.querySelector('[slot="slides"]');
-    this.currentSlide = this.libraryConfiguration.options.initialSlide; // init value
+    this.currentSlide = 0; // this.libraryConfiguration.options.initialSlide; // init value // // Causes next/prev buttons not to work. See https://github.com/akiran/react-slick/issues/1946
     this.slideCount = jQuery(slider).slick('getDotCount') + 1; // dot count is off by one after init (?).
     pagerElement.setAttribute('data-count',this.slideCount);
 

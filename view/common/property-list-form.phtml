@@ -1,0 +1,55 @@
+<?php
+/**
+ * PropertyList form element. Behaviour: asset/js/property-list-form.js.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \AgileThemeTools\Form\Element\PropertyList $element
+ * @var array $items Listed terms: [['term' => …, 'display' => …, 'text' => …, 'unknown' => bool], …]
+ * @var array $groups Picker options by vocabulary: [prefix => ['label' => …, 'options' => [term => ['display' => …, 'text' => …]]]]
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+
+$this->headLink()->appendStylesheet($this->assetUrl('css/property-list-form.css', 'AgileThemeTools'));
+$this->headScript()->appendFile($this->assetUrl('vendor/sortablejs/Sortable.min.js', 'Omeka'));
+$this->headScript()->appendFile($this->assetUrl('js/property-list-form.js', 'AgileThemeTools'));
+
+$sortable = $element->isSortable();
+$elementLabel = $translate((string) $element->getLabel());
+$removeLabel = $translate('Remove');
+?>
+<div class="agile-property-list"
+    data-sortable="<?= $sortable ? '1' : '0' ?>"
+    data-remove-label="<?= $escape($removeLabel) ?>"
+    data-unknown-label="<?= $escape($translate('Not a property in this installation')) ?>">
+    <?= $this->formHidden($element) ?>
+    <select class="chosen-select agile-property-list-picker"
+        aria-label="<?= $escape(sprintf($translate('Add a property to %s'), $elementLabel)) ?>"
+        data-placeholder="<?= $escape($translate('Add a property…')) ?>">
+        <option value=""></option>
+        <?php foreach ($groups as $group): ?>
+        <optgroup label="<?= $escape($group['label']) ?>">
+            <?php foreach ($group['options'] as $term => $option): ?>
+            <option value="<?= $escape($term) ?>" data-display="<?= $escape($option['display']) ?>"><?= $escape($option['text']) ?></option>
+            <?php endforeach; ?>
+        </optgroup>
+        <?php endforeach; ?>
+    </select>
+    <ul class="agile-property-list-items<?= $sortable ? ' is-sortable' : '' ?>">
+        <?php foreach ($items as $item): ?>
+        <li class="agile-property-list-item<?= $item['unknown'] ? ' is-unknown' : '' ?>" data-term="<?= $escape($item['term']) ?>"<?= $item['unknown'] ? ' title="' . $escape($translate('Not a property in this installation')) . '"' : '' ?>>
+            <?php if ($sortable): ?><span class="sortable-handle" aria-hidden="true"></span><?php endif; ?>
+            <span class="agile-property-list-label"><?= $escape($item['display']) ?></span>
+            <span class="agile-property-list-term"><?= $escape($item['term']) ?></span>
+            <button type="button" class="o-icon-delete agile-property-list-remove" title="<?= $escape($removeLabel) ?>" aria-label="<?= $escape($removeLabel . ' ' . $item['display']) ?>"></button>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+    <p class="agile-property-list-empty"<?= $items ? ' hidden' : '' ?>><?= $escape($element->getEmptyLabel() ?? $translate('No properties selected.')) ?></p>
+    <div class="agile-property-list-actions">
+        <?php if ($element->hasAddAll()): ?>
+        <button type="button" class="agile-property-list-add-all"><?= $escape($translate('Add all properties used on this site')) ?></button>
+        <?php endif; ?>
+        <button type="button" class="agile-property-list-clear"><?= $escape($translate('Remove all')) ?></button>
+    </div>
+</div>

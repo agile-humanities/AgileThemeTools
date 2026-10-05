@@ -1,0 +1,131 @@
+/* Site theme build panel. See view/common/theme-build-panel.phtml. */
+
+.theme-build-panel {
+    margin: 12px 0 24px;
+    padding: 12px 16px;
+    border: 1px solid #dfdfdf;
+    border-left-width: 6px;
+    border-radius: 3px;
+    background-color: #f7f7f7;
+}
+
+.theme-build-current { border-left-color: #2c8a3c; }
+.theme-build-stale,
+.theme-build-unbuilt { border-left-color: #e0a800; }
+.theme-build-failed { border-left-color: #a91919; }
+.theme-build-running { border-left-color: #3a6ea5; }
+
+.theme-build-title {
+    margin: 0 0 8px;
+    font-size: 1.1em;
+}
+
+.theme-build-state {
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background-color: #fff;
+    font-size: 0.8em;
+    font-weight: normal;
+}
+
+.theme-build-facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 16px;
+    margin: 0 0 12px;
+}
+
+.theme-build-facts dt {
+    color: #676767;
+}
+
+.theme-build-facts dd {
+    margin: 0;
+}
+
+.theme-build-versions {
+    display: block;
+    color: #676767;
+    font-size: 0.85em;
+}
+
+.theme-build-reasons {
+    margin: 0;
+    padding-left: 1.2em;
+}
+
+.theme-build-error {
+    color: #a91919;
+}
+
+.theme-build-preflight {
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    border: 1px solid #f0d0d0;
+    background-color: #fff;
+}
+
+.theme-build-preflight h4 {
+    margin: 0 0 6px;
+}
+
+.theme-build-preflight ul {
+    margin: 0;
+    padding-left: 1.2em;
+}
+
+.theme-build-preflight li.theme-build-warn strong::before {
+    content: "⚠ ";
+}
+
+.theme-build-preflight li.theme-build-fail strong::before {
+    content: "✕ ";
+    color: #a91919;
+}
+
+.theme-build-fix {
+    display: block;
+    color: #676767;
+    font-size: 0.9em;
+}
+
+.theme-build-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.theme-build-form {
+    display: inline;
+}
+
+.theme-build-progress {
+    margin: 0;
+    color: #3a6ea5;
+    font-style: italic;
+}
+
+.theme-build-log {
+    margin-top: 12px;
+}
+
+.theme-build-log pre {
+    max-height: 320px;
+    overflow: auto;
+    padding: 8px;
+    background-color: #1e1e1e;
+    color: #e6e6e6;
+    font-size: 0.8em;
+    line-height: 1.4;
+}
+
+.theme-build-just-finished .theme-build-title {
+    animation: theme-build-flash 1.2s ease-out 1;
+}
+
+@keyframes theme-build-flash {
+    from { background-color: #fff3bf; }
+    to { background-color: transparent; }
+}

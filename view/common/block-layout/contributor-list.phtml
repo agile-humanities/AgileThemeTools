@@ -1,3 +1,23 @@
 <div id="block-<?php echo $this->blockId; ?>" class="contributor-list region <?php echo $this->regionClass; ?>" data-target-region-id="<?php echo $this->targetID; ?>">
-    <?php echo $this->html; ?>
+  <?php
+  foreach($contributors as $key => $contributor):
+    $alpha_group = substr($key,0);
+    ?>
+
+    <div class='contributor-entry' data-alpha-group="<?= $alpha_group ?>" data-sortkey="<?= $key ?>>">
+      <label class='contributor'><?= $contributor['name'] ?></label>
+      <?php if (array_key_exists('items',$contributor) && count($contributor['items']) > 0): ?>
+        <ul class="contributor-items">
+          <?php
+          /** @var \Omeka\Api\Representation\ItemRepresentation $item */
+          foreach($contributor['items'] as $itemId => $item):
+            ?>
+            <li class='value' data-id="<?= $item->id() ?>"><a href="<?= $item->url() ?>"><?= $item->displayTitle() ?></a></li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    </div>
+  <?php
+  endforeach;
+  ?>
 </div>

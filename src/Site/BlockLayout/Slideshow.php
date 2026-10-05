@@ -11,10 +11,10 @@ use Laminas\Form\FormElementManager as FormElementManager;
 use Omeka\Entity\SitePageBlock;
 use Omeka\Stdlib\HtmlPurifier;
 use Omeka\Stdlib\ErrorStore;
-use Zend\Form\Element\Text;
+use Laminas\Form\Element\Text;
 use Laminas\Form\Element\Textarea;
 use Laminas\View\Renderer\PhpRenderer;
-use Zend\Form\Element\Checkbox;
+use Laminas\Form\Element\Checkbox;
 
 class Slideshow extends AbstractBlockLayout
 {
@@ -187,7 +187,7 @@ class Slideshow extends AbstractBlockLayout
 
         $values = [
             'block' => $block,
-            'useTitleSlide' => $data['hastitle'],
+            'useTitleSlide' => $data['hastitle'] ?? false,
             'titleSlideAttachment' => null,
             'titleSlideItem' => null,
             'titleSlideMedia' => null,
@@ -205,9 +205,9 @@ class Slideshow extends AbstractBlockLayout
             'targetID' => '#' . $region,
             'hasAudioAttachment' => $audio_attachment != null,
             'audioAttachment' => $audio_attachment,
-            'optionSlidesPerRow' => (int)$data['slidesperrow'],
-            'optionAutoPlay' => $data['autoplay'] ? "true" : "false",
-            'optionFade' => $data['fade'] ? "true" : "false"
+            'optionSlidesPerRow' => array_key_exists('slidesperrow',$data) ? $data['slidesperrow'] ?? 1 : 1,
+            'optionAutoPlay' => array_key_exists('autoplay',$data) && $data['autoplay'] ? "true" : "false",
+            'optionFade' => array_key_exists('fade',$data) && $data['fade'] ? "true" : "false"
         ];
 
 

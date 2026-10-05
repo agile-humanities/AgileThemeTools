@@ -1,0 +1,40 @@
+<?php
+/**
+ * CssTextarea form element: the textarea and the CSS variables reference. Behaviour: asset/js/css-textarea.js.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \AgileThemeTools\Form\Element\CssTextarea $element
+ * @var array $groups From CustomCss::getVariables(): [key => ['label' => …, 'variables' => [name => value]]]
+ * @var \AgileThemeTools\Styling\CustomCss $customCss
+ * @var \Omeka\Api\Representation\SiteRepresentation|null $site
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/css-textarea.css', 'AgileThemeTools'));
+$this->headScript()->appendFile($this->assetUrl('js/css-textarea.js', 'AgileThemeTools'));
+?>
+<div class="agile-css-editor">
+    <?= $this->formTextarea($element) ?>
+    <details class="agile-css-variables">
+        <summary><?= $escape($groups
+            ? ($site ? sprintf($translate('CSS variables available (from the stylesheet of "%s")'), $site->title()) : $translate('CSS variables available (from the default site\'s stylesheet)'))
+            : $translate('CSS variables')) ?></summary>
+        <?php if (!$groups): ?>
+        <p class="agile-css-variables-empty"><?= $escape($translate('No compiled stylesheet was found for this site, so its variables cannot be listed. Build the site theme first.')) ?></p>
+        <?php else: ?>
+        <p class="agile-css-variables-help"><?= $escape($translate('Use a variable as var(--name). Click a name to copy it. Values are those of the current build; rebuilding the theme after changing its settings updates them.')) ?></p>
+        <?php foreach ($groups as $group): ?>
+        <h4><?= $escape($translate($group['label'])) ?></h4>
+        <ul class="agile-css-variable-list">
+            <?php foreach ($group['variables'] as $name => $value): ?>
+            <li>
+                <?php if ($customCss->isColourValue($value)): ?><span class="agile-css-swatch" style="background: <?= $escape($value) ?>"></span><?php endif; ?>
+                <button type="button" class="agile-css-variable-name" data-copy="var(<?= $escape($name) ?>)" title="<?= $escape($translate('Copy')) ?>"><?= $escape($name) ?></button>
+                <span class="agile-css-variable-value"><?= $escape($value) ?></span>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+        <?php endforeach; ?>
+        <?php endif; ?>
+    </details>
+</div>

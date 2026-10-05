@@ -1,9 +1,26 @@
 <?php
   namespace AgileThemeTools;
 
+  use AgileThemeTools\Form\View\Helper\AgileFormCollectionElementGroups;
   use AgileThemeTools\Service\Controller\AgileSearchHandlerFactory;
+  use AgileThemeTools\Service\Settings\SiteThemeSettingsFactory;
+  use AgileThemeTools\Service\ViewHelper\AgileItemSetsTreeHandlerFactory;
   use AgileThemeTools\Service\ViewHelper\AgileSearchHelperFactory;
+  use AgileThemeTools\Service\ViewHelper\ItemSetFacetHandlerFactory;
+  use AgileThemeTools\Service\ViewHelper\SiteHelperFactory;
+  use AgileThemeTools\Service\ControllerPlugin\SiteThemeSettingsControllerPluginFactory;
+  use AgileThemeTools\Media\FileRenderer\TextRenderer;
+  use AgileThemeTools\Media\FileRenderer\VttRenderer;
+  use AgileThemeTools\Service\ViewHelper\SiteAssetUrlFactory;
+  use AgileThemeTools\View\Helper\AgileItemSetsTreeHandler;
+  use AgileThemeTools\View\Helper\ItemSetFacetHandler;
   use AgileThemeTools\View\Helper\AgileSearchHelper;
+  use AgileThemeTools\View\Helper\SitePartial;
+  use AgileThemeTools\Media\FileRenderer\CircularAudioRenderer;
+  use AgileThemeTools\Site\ResourcePageBlockLayout\ItemHeader;
+  use AgileThemeTools\Site\ResourcePageBlockLayout\ItemHeading;
+  use AgileThemeTools\Site\ResourcePageBlockLayout\ItemSummary;
+  use AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia;
 
   return array(
       'view_manager' => [
@@ -11,83 +28,273 @@
               dirname(__DIR__) . '/view',
           ],
       ],
-      'block_layouts' => [
-          'invokables' => [
-              'pageTitle' => Site\BlockLayout\PageTitle::class,
+      'api_assets' => [
+          'allowed_media_types' => [
+              'image/jpeg',
+              'image/png',
+              'image/gif',
+              'image/webp',
+              'application/pdf',
+              'text/vtt',
+              'text/plain'
           ],
-          'factories' => [
-              // 'glossary' => Service\BlockLayout\GlossaryItemFactory::class,
-              'excerpt' => Service\BlockLayout\ExcerptFactory::class,
-              'regionalHtml' => Service\BlockLayout\RegionalHtmlFactory::class,
-              'regionalTitle' => Service\BlockLayout\RegionalTitleFactory::class,
-              'byline' => Service\BlockLayout\BylineFactory::class,
-              'contributorList' => Service\BlockLayout\ContributorListFactory::class,
-              'representativeImage' => Service\BlockLayout\RepresentativeImageFactory::class,
-              'slideshow' => Service\BlockLayout\SlideshowFactory::class,
-              'poster' => Service\BlockLayout\PosterFactory::class,
-              'itemListing' => Service\BlockLayout\ItemListingFactory::class,
-              'linkCards' => Service\BlockLayout\LinkCardsFactory::class,
-              'callout' => Service\BlockLayout\CalloutFactory::class,
-              'quotation' => Service\BlockLayout\QuotationFactory::class,
-              'deck' => Service\BlockLayout\DeckFactory::class,
-              'sectionPageListing' => Service\BlockLayout\SectionPageListingFactory::class,
-              'homepageSplash' => Service\BlockLayout\HomepageSplashFactory::class,
-              'sectionIntroSplash' => Service\BlockLayout\SectionIntroSplashFactory::class,
-              'html' => Service\BlockLayout\HtmlFactory::class,
-
-          ]
+          'allowed_extensions' => [
+              'jpeg',
+              'jpg',
+              'png',
+              'gif',
+              'webp',
+              'pdf',
+              'vtt',
+              'txt'
+          ],
+      ],
+      'block_layouts' => [
+        'invokables' => [
+        'pageTitle' => Site\BlockLayout\PageTitle::class,
+      ],
+      'factories' => [
+        // 'glossary' => Service\BlockLayout\GlossaryItemFactory::class,
+        'excerpt' => Service\BlockLayout\ExcerptFactory::class,
+        'regionalHtml' => Service\BlockLayout\RegionalHtmlFactory::class,
+        'regionalTitle' => Service\BlockLayout\RegionalTitleFactory::class,
+        'byline' => Service\BlockLayout\BylineFactory::class,
+        'contributorList' => Service\BlockLayout\ContributorListFactory::class,
+        'representativeImage' => Service\BlockLayout\RepresentativeImageFactory::class,
+        'slideshow' => Service\BlockLayout\SlideshowFactory::class,
+        'poster' => Service\BlockLayout\PosterFactory::class,
+        'itemListing' => Service\BlockLayout\ItemListingFactory::class,
+        'linkCards' => Service\BlockLayout\LinkCardsFactory::class,
+        'callout' => Service\BlockLayout\CalloutFactory::class,
+        'quotation' => Service\BlockLayout\QuotationFactory::class,
+        'deck' => Service\BlockLayout\DeckFactory::class,
+        'sectionPageListing' => Service\BlockLayout\SectionPageListingFactory::class,
+        'homepageSplash' => Service\BlockLayout\HomepageSplashFactory::class,
+        'sectionIntroSplash' => Service\BlockLayout\SectionIntroSplashFactory::class,
+        'html' => Service\BlockLayout\HtmlFactory::class,
+      ]
+    ],
+      'controllers' => [
+        'invokables' => [
+        ],
+        'factories' => [
+          'AgileThemeTools\Controller\SiteAdmin\SiteTheming' => Service\Controller\SiteAdmin\SiteThemingControllerFactory::class
+        ],
+      ],
+      'controller_plugins' => [
+        'factories' => [
+          'siteThemeSettings' => SiteThemeSettingsControllerPluginFactory::class,
+        ]
+      ],
+      'entity_manager' => [
+        'mapping_classes_paths' => [
+          dirname(__DIR__) . '/src/Entity',
+        ],
+        'proxy_paths' => [
+          dirname(__DIR__) . '/data/doctrine-proxies',
+        ],
+      ],
+      'file_renderers' => [
+        'invokables' => [
+          //'fallback' => Media\FileRenderer\FallbackRenderer::class,
+          //'thumbnail' => Media\FileRenderer\ThumbnailRenderer::class,
+          'audio' => CircularAudioRenderer::class,
+          'vtt' => VttRenderer::class,
+          'text' => TextRenderer::class
+          //'video' => Media\FileRenderer\VideoRenderer::class,
+        ],
+        'aliases' => [
+          'text/vtt' => 'vtt',
+          'text/plain' => 'text',
+        ],
       ],
       'form_elements' => [
           'invokables' => [
               'regionmenu' => Form\Element\RegionMenuSelect::class,
+              Form\Element\PropertyList::class => Form\Element\PropertyList::class,
+              Form\Element\CssTextarea::class => Form\Element\CssTextarea::class,
+              Form\Element\ColourValue::class => Form\Element\ColourValue::class,
+              Form\Element\FontStack::class => Form\Element\FontStack::class,
               'SectionListingTemplateSelect' => Form\Element\SectionListingTemplateSelect::class,
               'SlideViewerCompositionSelect' => Form\Element\SlideViewerCompositionSelect::class,
           ],
           'factories' => [
-              'SectionsMenuSelect' => Service\Form\Element\SectionsMenuSelectFactory::class
+              'SectionsMenuSelect' => Service\Form\Element\SectionsMenuSelectFactory::class,
+              'AgileThemeTools\Form\SiteAdmin\SiteThemeSettingsForm' => Service\Form\SiteAdmin\SiteThemeSettingsFormFactory::class
           ]
+      ],
+      'resource_page_block_layouts' => [
+        'invokables' => [
+          'itemHeader' => ItemHeader::class,
+          'itemMedia' => ItemMedia::class,
+          'itemHeading' => ItemHeading::class,
+          'itemSummary' => ItemSummary::class,
+        ],
       ],
       'service_manager' => [
               'factories' => [
                   'SectionManager' => Service\Controller\SectionManagerFactory::class,
                   'AgileSearchHandler' => AgileSearchHandlerFactory::class,
+                  'AgileThemeTools\Settings\SiteThemeSettings' => SiteThemeSettingsFactory::class,
+                  ThemeBuild\BuildManager::class => Service\ThemeBuild\BuildManagerFactory::class,
+                  Styling\CustomCss::class => Service\Styling\CustomCssFactory::class,
+                  Styling\LogoAudit::class => Service\Styling\LogoAuditFactory::class,
+                  Styling\ThemeFonts::class => Service\Styling\ThemeFontsFactory::class,
               ],
           ],
-     'view_helpers' => [
+      'view_helpers' => [
          'aliases' => [
            'agile_search_helper' => AgileSearchHelper::class,
-           'agileSearchHelper' => AgileSearchHelper::class
+           'agileSearchHelper' => AgileSearchHelper::class,
+           'itemSetFacetHandler' => ItemSetFacetHandler::class,
+           'agileItemSetsTreeHandler' => AgileItemSetsTreeHandler::class
          ],
          'factories' => [
            AgileSearchHelper::class => AgileSearchHelperFactory::class,
+           ItemSetFacetHandler::class => ItemSetFacetHandlerFactory::class,
+           AgileItemSetsTreeHandler::class => AgileItemSetsTreeHandlerFactory::class,
+           'siteAssetUrl' => SiteAssetUrlFactory::class,
+           'siteHelper' => SiteHelperFactory::class,
+           'formPropertyList' => Service\Form\View\Helper\FormPropertyListFactory::class,
+           'formCssTextarea' => Service\Form\View\Helper\FormCssTextareaFactory::class,
+           'customCss' => Service\ViewHelper\CustomCssHelperFactory::class,
+           'formFontStack' => Service\Form\View\Helper\FormFontStackFactory::class,
+           'themeFonts' => Service\ViewHelper\ThemeFontsHelperFactory::class,
+           'propertyTerms' => Service\ViewHelper\PropertyTermsFactory::class,
+           'themeBuildPanel' => Service\ViewHelper\ThemeBuildPanelFactory::class,
+           'themeLogoAudit' => Service\ViewHelper\ThemeLogoAuditFactory::class,
+
          ],
+        'delegators' => [
+            'Laminas\Form\View\Helper\FormElement' => [
+                Service\Delegator\FormElementDelegatorFactory::class,
+            ],
+        ],
         'invokables' => [
+            'agileFormCollectionElementGroups' => AgileFormCollectionElementGroups::class,
             'ckEditor' => View\Helper\CustomCKEditorConfig::class,
             'card' => View\Helper\Card::class,
             'dateHandler' => View\Helper\DateHandler::class,
+            'valueDisplay' => View\Helper\ValueDisplay::class,
             'pageSlug' => View\Helper\PageSlug::class,
-            'textSummary' => View\Helper\TextSummary::class
-
+            'textSummary' => View\Helper\TextSummary::class,
+            'sitePartial' => SitePartial::class,
+            'formColourValue' => Form\View\Helper\FormColourValue::class,
         ],
-     ]
- /*         'router' => [
-              'routes' => [
-                  'add-page-action' => [
-                      'type' => \Zend\Router\Http\Segment::class,
-                      'options' => [
-                          'route' => '/admin/site/s/:site-slug/add-page',
-                          'constraints' => [
-                              'site-slug' => '[a-zA-Z0-9_-]+',
-                          ],
-                          'defaults' => [
-                              '__NAMESPACE__' => 'RegionalOptionsForm\Controller',
-                              'controller' => 'BlockOptionsAdminController',
-                              'action' => 'add',
-                          ]
-                      ]
+     ],
+    'router' => [
+      'routes' => [
+        'admin' => [
+          'child_routes' => [
+            'site' => [
+              'child_routes' => [
+                'slug' => [
+                  'child_routes' => [
+                    'theme-styling' => [
+              'type' => \Laminas\Router\Http\Literal::class,
+              'options' => [
+                'route' => '/theme-styling',
+                'defaults' => [
+                  '__NAMESPACE__' => 'AgileThemeTools\Controller\SiteAdmin',
+                  '__ADMIN__' => true,
+                  'controller' => 'SiteTheming',
+                  'action' => 'edit',
+                ],
+              ],
+              'may_terminate' => true,
+              'child_routes' => [
+                // Site theme build (see ThemeBuild\BuildManager). Literal routes take priority over the
+                // controller/action segment route below.
+                'build' => [
+                  'type' => \Laminas\Router\Http\Literal::class,
+                  'priority' => 10,
+                  'options' => [
+                    'route' => '/build',
+                    'defaults' => [
+                      '__NAMESPACE__' => 'AgileThemeTools\Controller\SiteAdmin',
+                      '__ADMIN__' => true,
+                      'controller' => 'SiteTheming',
+                      'action' => 'build',
+                    ],
+                  ],
+                ],
+                'build-all' => [
+                  'type' => \Laminas\Router\Http\Literal::class,
+                  'priority' => 10,
+                  'options' => [
+                    'route' => '/build-all',
+                    'defaults' => [
+                      '__NAMESPACE__' => 'AgileThemeTools\Controller\SiteAdmin',
+                      '__ADMIN__' => true,
+                      'controller' => 'SiteTheming',
+                      'action' => 'build-all',
+                    ],
+                  ],
+                ],
+                'status' => [
+                  'type' => \Laminas\Router\Http\Literal::class,
+                  'priority' => 10,
+                  'options' => [
+                    'route' => '/status',
+                    'defaults' => [
+                      '__NAMESPACE__' => 'AgileThemeTools\Controller\SiteAdmin',
+                      '__ADMIN__' => true,
+                      'controller' => 'SiteTheming',
+                      'action' => 'status',
+                    ],
+                  ],
+                ],
+                'default' => [
+                  'type' => \Laminas\Router\Http\Segment::class,
+                  'options' => [
+                    'route' => '/:controller[/:action]',
+                    'constraints' => [
+                      'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                      'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                    ],
+                    'defaults' => [
+                      'controller' => 'CheckAndFix',
+                      'action' => 'index',
+                    ],
+                  ],
+                ],
+                'file-manager' => [
+                  'type' => \Laminas\Router\Http\Segment::class,
+                  'options' => [
+                    'route' => '/file-manager[/:action]',
+                    'constraints' => [
+                      'action' => 'browse',
+                    ],
+                    'defaults' => [
+                      '__NAMESPACE__' => 'EasyAdmin\Controller\Admin',
+                      'controller' => 'FileManager',
+                      'action' => 'browse|delete-confirm|delete',
+                    ],
+                  ],
+                ],
+                'upload' => [
+                  'type' => \Laminas\Router\Http\Segment::class,
+                  'options' => [
+                    'route' => '/upload[/:action]',
+                    'constraints' => [
+                      'action' => 'index|upload',
+                    ],
+                    'defaults' => [
+                      '__NAMESPACE__' => 'EasyAdmin\Controller',
+                      'controller' => 'Upload',
+                      'action' => 'index',
+                    ],
+                  ],
+                ],
+              ],
+            ],
                   ]
+                ]
               ]
-          ] */
-
+            ]
+          ],
+        ],
+      ],
+    ]
   );
 

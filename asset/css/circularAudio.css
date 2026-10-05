@@ -1,0 +1,134 @@
+.ca-player-container,
+.ca-player-container *,
+.ca-player-container *:after,
+.ca-player-container *:before {
+    box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    -webkit-font-smoothing:antialiased;
+    -moz-font-smoothing:antialiased;
+    -o-font-smoothing:antialiased;
+    font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+}
+
+.item-viewer {
+    border: none !important;
+}
+
+.cue-active {
+    background-color: yellow
+}
+
+.ca-player-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 10px auto;
+}
+
+/** User Interface **/
+
+.ca-player-container svg {
+    width: 400px;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+/** Control visibility by player state **/
+
+.ca-player-container svg .control { opacity: 0; transition: opacity .2s linear; }
+.ca-player-container svg.not-started .play, svg.paused .play { opacity: 1; }
+.ca-player-container svg.playing .pause { opacity: 1; }
+.ca-player-container svg.ended .stop {opacity: 1; }
+.ca-player-container svg.precache-bar .done {opacity: 0; }
+
+.ca-player-container svg.not-started .progress-bar, svg.ended .progress-bar { display: none; }
+.ca-player-container svg.ended .progress-track { stroke-opacity: 1; }
+
+.ca-player-container svg .progress-bar,
+.ca-player-container svg .precache-bar {
+    stroke-dasharray: 298.1371428256714;
+    stroke-dashoffset: 298.1371428256714;
+}
+
+.ca-timer {
+    margin: 1rem 0;
+    font-size: 0.8rem;
+}
+
+
+.ca-player-container .controls {
+    pointer-events: all;
+}
+
+/* pass through events to controls object */
+.ca-player-container g.control {
+    pointer-events: none;
+}
+
+.ca-player-container svg::-webkit-media-text-track-display {
+    font-size: 20px;
+    // background: transparent !important;
+}
+
+.ca-player-container svg::-webkit-media-text-track-display-backdrop {
+    // background: transparent !important;
+}
+
+.ca-player-container svg::-webkit-media-text-track-container {
+    background: transparent !important;
+}
+
+.ca-player-container #caption {
+    margin-top: 1rem;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.ca-player-container video {
+    visibility: hidden;
+    height: 1px;
+}
+
+/** Extra VTT support **/
+
+.vtt-segment:hover {
+    cursor: pointer;
+    background-color: lightyellow;
+}
+
+
+ */
+
+/** Forget these styles: Now uses custom Javascript. **/
+
+.ca-player-container video::cue {
+    font-size: 1rem;
+    color: white;
+    background-color: black !important;
+}
+
+.ca-player-container video::-webkit-media-text-track-display-backdrop {
+    background-color: black !important;
+    overflow: visible !important;
+    padding: 8px;
+
+}
+
+::cue(u) {
+    color: red;
+}
+
+
+.ca-player-container *::-webkit-media-text-track-display-backdrop {
+    background: transparent !important;
+    border-radius: 0 !important;
+}
+
+
+.ca-player-container svg track {
+    border-radius: 0
+}

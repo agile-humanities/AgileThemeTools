@@ -3,10 +3,42 @@
 namespace AgileThemeTools\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
+use NumericDataTypes\DataType\AbstractDateTimeDataType;
 use Omeka\Api\Representation\ValueRepresentation;
 
 class DateHandler extends AbstractHelper
 {
+  /**
+   * Properties whose literal values may hold dates. dcterms:temporal is deliberately absent: in this data it holds
+   * period names ("Eighteenth century"), not dates.
+   */
+  const DATE_TERMS = [
+    'dcterms:date',
+    'dcterms:created',
+    'dcterms:issued',
+    'dcterms:available',
+    'dcterms:dateAccepted',
+    'dcterms:dateCopyrighted',
+    'dcterms:dateSubmitted',
+    'dcterms:modified',
+    'dcterms:valid',
+  ];
+
+  /**
+   * Data types that are always dates. NumericDataTypes formats them for the locale.
+   */
+  const DATE_TYPES = ['numeric:timestamp', 'numeric:interval'];
+
+  /**
+   * An ISO 8601 date at year, month or day precision, e.g. "1946", "1946-12", "1946-12-29".
+   */
+  const ISO_DATE_PATTERN = '/^-?\d{4}(-\d{2}){0,2}$/';
+
+  /**
+   * A year range entered as text, e.g. "1504-1514" or "1504/1514".
+   */
+  const YEAR_RANGE_PATTERN = '~^(\d{4})\s*[-/–]\s*(\d{4})$~u';
+
   /**
    * A stub function to process numeric dates. There must be a more elegant way to handle unknown date formats
    */
@@ -57,43 +89,58 @@ class DateHandler extends AbstractHelper
   }
 
   /**
+   * Returns display text for a date value.
+   *
+   * Timestamps and intervals use NumericDataTypes' locale formatting ("1741", "December 1946", "1825 – 1875").
+   * ISO dates entered as text get the same formatting, and text year ranges get the interval's dash. Anything
+   * else is returned unchanged.
+   */
+  public function renderValue(ValueRepresentation $value): string {
+    if (in_array($value->type(), self::DATE_TYPES, true)) {
+      return strip_tags($value->asHtml());
+    }
+
+    $date = trim((string) $value->value());
+
+    if (preg_match(self::YEAR_RANGE_PATTERN, $date, $matches)) {
+      return sprintf('%s – %s', $matches[1], $matches[2]);
+    }
+
+    if (preg_match(self::ISO_DATE_PATTERN, $date) && class_exists(AbstractDateTimeDataType::class)) {
+      try {
+        return AbstractDateTimeDataType::getFormattedDateTimeFromValue($date, true, ['lang' => $this->getView()->lang()]);
+      } catch (\Exception $e) {
+        return $date;
+      }
+    }
+
+    return $date;
+  }
+
+  /**
    * @param $valueRepresentation
    * @return bool
    *
-   * Fuzzy logic function which takes a value representation and tries to discern if it's a date. It does not
-   * check if the date is well formed.
+   * Whether a value is a date: a NumericDataTypes timestamp or interval, or a literal date property (see
+   * DATE_TERMS) whose text is an ISO date or a year range. Free text in a date property is not a date.
    */
   public function isDate($valueRepresentation) {
 
-    // Only handles value representations for now.
     if (!$valueRepresentation instanceof ValueRepresentation) {
       return false;
     }
 
-    // Check to see if the data type is a timestamp (via Numeric Data Types module)
-
-    if ($valueRepresentation->type() === 'timestamp') {
+    if (in_array($valueRepresentation->type(), self::DATE_TYPES, true)) {
       return true;
     }
 
-
-
-    // List of date terms
-
-    $dateTerms = [
-      'dcterms:temporal',
-      'dcterms:dateSubmitted'
-    ];
-
-    // Check if term is in list above
-
-    if (method_exists($valueRepresentation,'property')) {
-      return in_array($valueRepresentation->property()->term(),$dateTerms);
+    if (!in_array($valueRepresentation->property()->term(), self::DATE_TERMS, true)) {
+      return false;
     }
 
-    // Return false by default
+    $date = trim((string) $valueRepresentation->value());
 
-    return false;
+    return preg_match(self::ISO_DATE_PATTERN, $date) === 1 || preg_match(self::YEAR_RANGE_PATTERN, $date) === 1;
   }
 
 }

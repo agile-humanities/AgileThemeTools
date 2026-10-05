@@ -160,9 +160,7 @@ class ContributorList extends AbstractBlockLayout
       }
 
       asort($contributors);
-
-      var_dump($contributors);
-
+      
       return $contributors;
     }
 

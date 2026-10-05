@@ -1,0 +1,130 @@
+<?php
+/**
+ * Site theme build panel. Behaviour: asset/js/theme-build.js (polls the status endpoint while a build runs).
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\SiteRepresentation $site
+ * @var \Omeka\Site\Theme\Theme $theme
+ * @var array $status From BuildManager::getStatus()
+ * @var array|null $preflight From BuildManager::preflight(), or null when not run
+ * @var string $log
+ * @var \Omeka\Api\Representation\SiteRepresentation[] $configurableSites
+ * @var bool $compact
+ * @var string $csrfHtml Hidden CSRF input for the build forms
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/theme-build.css', 'AgileThemeTools'));
+$this->headScript()->appendFile($this->assetUrl('js/theme-build.js', 'AgileThemeTools'));
+
+$manifest = $status['manifest'];
+$failed = $status['failed'];
+$job = $status['activeJob'];
+$routeParams = ['site-slug' => $site->slug()];
+$buildUrl = $this->url('admin/site/slug/theme-styling/build', $routeParams);
+$buildAllUrl = $this->url('admin/site/slug/theme-styling/build-all', $routeParams);
+$statusUrl = $this->url('admin/site/slug/theme-styling/status', $routeParams);
+$stylingUrl = $this->url('admin/site/slug/theme-styling', $routeParams);
+
+$formatDate = function (?string $atom) use ($translate) {
+    if (!$atom) {
+        return '';
+    }
+    try {
+        return (new DateTime($atom))->format('Y-m-d H:i');
+    } catch (Exception $e) {
+        return $atom;
+    }
+};
+
+$problems = $preflight ? array_filter($preflight['checks'], fn ($check) => $check['ok'] !== true) : [];
+$canBuild = $preflight ? $preflight['ok'] : true;
+
+if ($job) {
+    $state = 'running';
+    $headline = sprintf($translate('Building… (job #%d)'), $job->getId());
+} elseif ($failed && (!$manifest || ($failed['finishedAt'] ?? '') > ($manifest['finishedAt'] ?? ''))) {
+    $state = 'failed';
+    $headline = sprintf($translate('Last build failed on %s'), $formatDate($failed['finishedAt'] ?? null));
+} elseif (!$manifest) {
+    $state = 'unbuilt';
+    $headline = $status['legacy'] ? $translate('Served from an old build in the theme folder') : $translate('Never built');
+} elseif ($status['stale']) {
+    $state = 'stale';
+    $headline = $translate('Rebuild needed');
+} else {
+    $state = 'current';
+    $headline = $translate('Up to date');
+}
+?>
+<div class="theme-build-panel theme-build-<?= $state ?><?= $compact ? ' theme-build-compact' : '' ?>"
+    data-status-url="<?= $escape($statusUrl) ?>"
+    data-running="<?= $job ? '1' : '0' ?>">
+    <h3 class="theme-build-title"><?= $escape($translate('Site theme build')) ?> <span class="theme-build-state"><?= $escape($headline) ?></span></h3>
+
+    <dl class="theme-build-facts">
+        <?php if ($manifest): ?>
+        <dt><?= $escape($translate('Last successful build')) ?></dt>
+        <dd><?= $escape(sprintf($translate('%1$s, %2$d s, job #%3$s, by %4$s'), $formatDate($manifest['finishedAt'] ?? null), $manifest['durationSeconds'] ?? 0, $manifest['jobId'] ?? '—', $manifest['builtBy'] ?? '?')) ?>
+            <?php if (!empty($manifest['themeVersion']) || !empty($manifest['libraryVersion'])): ?>
+            <span class="theme-build-versions"><?= $escape(sprintf($translate('theme %1$s, theme system %2$s'), $manifest['themeVersion'] ?? '?', $manifest['libraryVersion'] ?? '?')) ?></span>
+            <?php endif; ?>
+        </dd>
+        <?php endif; ?>
+        <?php if ($state === 'failed' && $failed): ?>
+        <dt><?= $escape($translate('Error')) ?></dt>
+        <dd class="theme-build-error"><?= $escape($failed['error'] ?? $translate('Unknown error')) ?></dd>
+        <?php endif; ?>
+        <?php if ($status['reasons'] && !$job): ?>
+        <dt><?= $escape($translate('Why rebuild')) ?></dt>
+        <dd><ul class="theme-build-reasons"><?php foreach ($status['reasons'] as $reason): ?><li><?= $escape($translate($reason)) ?></li><?php endforeach; ?></ul></dd>
+        <?php endif; ?>
+        <?php if ($status['configError']): ?>
+        <dt><?= $escape($translate('Configuration')) ?></dt>
+        <dd class="theme-build-error"><?= $escape($status['configError']) ?></dd>
+        <?php endif; ?>
+        <dt><?= $escape($translate('Build location')) ?></dt>
+        <dd><code><?= $escape($status['buildDir']) ?></code> <span class="theme-build-versions"><?= $escape($translate('config.yml, build.log, build-manifest.json and the compiled assets/')) ?></span></dd>
+    </dl>
+
+    <?php if ($problems): ?>
+    <div class="theme-build-preflight">
+        <h4><?= $escape($translate('Problems that will stop a build')) ?></h4>
+        <ul>
+            <?php foreach ($problems as $check): ?>
+            <li class="<?= $check['ok'] === false ? 'theme-build-fail' : 'theme-build-warn' ?>">
+                <strong><?= $escape($translate($check['label'])) ?>:</strong> <?= $escape($check['detail']) ?>
+                <?php if ($check['fix']): ?><span class="theme-build-fix"><?= $escape($translate('Fix:')) ?> <?= $escape($check['fix']) ?></span><?php endif; ?>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!$job): ?>
+    <div class="theme-build-actions">
+        <form method="post" action="<?= $escape($buildUrl) ?>" class="theme-build-form">
+            <?= $csrfHtml ?>
+            <button type="submit" class="theme-build-button"<?= $canBuild ? '' : ' disabled title="' . $escape($translate('Fix the problems listed above first.')) . '"' ?>><?= $escape($state === 'current' ? $translate('Rebuild this site') : $translate('Build this site')) ?></button>
+        </form>
+        <?php if (count($configurableSites) > 1): ?>
+        <form method="post" action="<?= $escape($buildAllUrl) ?>" class="theme-build-form">
+            <?= $csrfHtml ?>
+            <button type="submit" class="theme-build-button-secondary"<?= $canBuild ? '' : ' disabled' ?>><?= $escape(sprintf($translate('Rebuild all %d sites using this theme'), count($configurableSites))) ?></button>
+        </form>
+        <?php endif; ?>
+        <?php if ($compact): ?>
+        <a class="theme-build-link" href="<?= $escape($stylingUrl) ?>"><?= $escape($translate('Edit theme styles')) ?></a>
+        <?php endif; ?>
+    </div>
+    <?php else: ?>
+    <p class="theme-build-progress"><?= $escape($translate('The build runs in the background; this panel updates itself. You can leave the page.')) ?></p>
+    <?php endif; ?>
+
+    <?php if ($log !== ''): ?>
+    <details class="theme-build-log"<?= $state === 'failed' || $job ? ' open' : '' ?>>
+        <summary><?= $escape($job ? $translate('Build output (live)') : $translate('Build output')) ?></summary>
+        <pre><?= $escape($log) ?></pre>
+    </details>
+    <?php endif; ?>
+</div>

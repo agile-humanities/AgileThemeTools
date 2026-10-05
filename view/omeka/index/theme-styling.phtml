@@ -1,0 +1,25 @@
+<?php
+$this->htmlElement('body')->appendAttribute('class', 'sites theme-resource-pages');
+$this->headScript()->appendFile($this->assetUrl('js/site-theme-resource-pages.js', 'Omeka'));
+$this->headScript()->appendFile($this->assetUrl('vendor/sortablejs/Sortable.min.js', 'Omeka'));
+
+$removeBlockText = $this->escapeHtml($this->translate('Remove block'));
+$restoreBlockText = $this->escapeHtml($this->translate('Restore block'));
+$blockTemplate = <<<EOT
+<li class="block">
+    <span class="sortable-handle"></span>
+    <span class="block-layout-label"></span>
+    <ul class="actions">
+        <li><a href="#" class="o-icon-delete block-remove" aria-label="$removeBlockText" title="$removeBlockText"></a></li>
+        <li><a href="#" class="o-icon-undo block-restore" aria-label="$restoreBlockText" title="$restoreBlockText" style="display: none;"></a></li>
+    </ul>
+    <input type="hidden" class="block-layout-name" name="">
+</li>
+EOT;
+//$form->setAttribute('data-block-template', $blockTemplate);
+?>
+<h1>Theme Styling</h1>
+<?php echo $this->pageTitle($theme->getName(), 1, $this->translate('Theme'), $this->translate('Style this site')); ?>
+
+<?php //echo $this->form()->openTag($form); ?>
+<?php // echo $this->formCollection($form, false); ?>

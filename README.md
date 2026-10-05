@@ -26,6 +26,17 @@ Agile Theme Tools module that extends Omeka S’s standard theming capabilities.
   * A date handler which uses fuzzy logic to provide consistent output for a variety of date styles (in progress)
 * Other programmatic support for sites using the [Agile Base Theme]( https://github.com/agile-humanities/AgileBaseOmekaTheme)
 
+## Site theme builds and custom CSS
+
+Fonts are chosen per role (Google Fonts loaded automatically and checked on save, bundled, system or alias). Administrators can also add plain CSS for all sites (Settings → Theme styling and builds) or for one site (site
+Edit → Theme styling), with a reference of the theme's CSS variables; no build is needed.
+
+Per-site styling settings (Theme → Configure theme styles) are compiled into a site's own CSS/JS by the theme's gulp
+build, run from Omeka as a job. Builds live under `files/theme-assets/<theme>/<site>/`, are verified and recorded in a
+manifest, and are managed from the build panel on the site's Theme page. See [docs/THEME-BUILD.md](docs/THEME-BUILD.md)
+for the layout, the command-line equivalent, deployment requirements (Node.js, `npm install` in the theme on the
+server) and troubleshooting.
+
 ## Note on the Agile Base Theme Dependency
 * The module is intended to provide programmatic support for the theme and its presentation features but can be used independently.
 * Most of the styling for various content features is built in to the theme and not the module, however, so some presentation features will not work optimally.

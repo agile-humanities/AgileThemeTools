@@ -1,0 +1,22 @@
+<?php
+/**
+ * Override of the core template: adds the logo check (AgileThemeTools) above the form. Otherwise as core.
+ */
+$translate = $this->plugin('translate');
+$this->headLink()->appendStylesheet($this->assetUrl('css/asset-form.css', 'Omeka'));
+$this->htmlElement('body')->appendAttribute('class', 'sites theme-settings');
+?>
+<?php echo $this->pageTitle($theme->getName(), 1, $translate('Theme'), $translate('Edit settings')); ?>
+<?php if(isset($this->form)): ?>
+    <?= $this->themeLogoAudit($this->currentSite(), $theme); ?>
+    <?php $form->prepare(); ?>
+    <?php echo $this->form()->openTag($form); ?>
+    <div id="page-actions">
+        <?php echo $this->cancelButton(); ?>
+        <button><?php echo $translate('Save'); ?></button>
+    </div>
+    <?php echo $this->formCollectionElementGroups($form, false); ?>
+    <?php echo $this->form()->closeTag(); ?>
+<?php else: ?>
+    <p><?php echo $translate('The current theme has no configuration options.'); ?></p>
+<?php endif; ?>

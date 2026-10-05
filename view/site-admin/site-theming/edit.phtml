@@ -1,0 +1,29 @@
+<?php
+  use AgileThemeTools\Form\SiteAdmin\SiteThemeSettingsForm;
+  /** @var Laminas\View\Renderer\PhpRenderer $this */
+  /** @var SiteThemeSettingsForm $form */
+  /** @var \Omeka\Api\Representation\SiteRepresentation|null $site */
+  /** @var \Omeka\Site\Theme\Theme|null $theme */
+
+  $agileFormCollectionElementGroups = $this->plugin('agileFormCollectionElementGroups')($form);
+
+?>
+<h1>Theme Styling</h1>
+<?= isset($site) && $site ? $this->themeBuildPanel($site, $theme ?? null) : '' ?>
+<?= $this->form()->openTag($form); ?>
+<?= $this->formHidden($form->getElements()['csrf']); ?>
+<?= $agileFormCollectionElementGroups; ?>
+<?= $this->form()->closeTag($form); ?>
+
+<?php
+/*
+echo $this->form()->openTag($form);
+foreach(range(1,9) as $colourNum):
+  echo $this->formRow($form->get('clr'.$colourNum));
+endforeach;
+echo $this->formHidden($form->get('slug'));
+echo $this->formHidden($form->get('site_id'));
+echo $this->formInput($form->get('submit'));
+echo $this->form()->closeTag();
+*/
+?>
