@@ -137,6 +137,7 @@
                   'AgileSearchHandler' => AgileSearchHandlerFactory::class,
                   'AgileThemeTools\Settings\SiteThemeSettings' => SiteThemeSettingsFactory::class,
                   ThemeBuild\BuildManager::class => Service\ThemeBuild\BuildManagerFactory::class,
+                  Dependency\DependencyAudit::class => Service\Dependency\DependencyAuditFactory::class,
                   Styling\CustomCss::class => Service\Styling\CustomCssFactory::class,
                   Styling\LogoAudit::class => Service\Styling\LogoAuditFactory::class,
                   Styling\ThemeFonts::class => Service\Styling\ThemeFontsFactory::class,
@@ -147,7 +148,8 @@
            'agile_search_helper' => AgileSearchHelper::class,
            'agileSearchHelper' => AgileSearchHelper::class,
            'itemSetFacetHandler' => ItemSetFacetHandler::class,
-           'agileItemSetsTreeHandler' => AgileItemSetsTreeHandler::class
+           'agileItemSetsTreeHandler' => AgileItemSetsTreeHandler::class,
+           'themeIdentity' => View\Helper\ThemeIdentity::class,
          ],
          'factories' => [
            AgileSearchHelper::class => AgileSearchHelperFactory::class,
@@ -163,6 +165,8 @@
            'propertyTerms' => Service\ViewHelper\PropertyTermsFactory::class,
            'themeBuildPanel' => Service\ViewHelper\ThemeBuildPanelFactory::class,
            'themeLogoAudit' => Service\ViewHelper\ThemeLogoAuditFactory::class,
+           'agileDependencies' => Service\ViewHelper\AgileDependenciesFactory::class,
+           View\Helper\ThemeIdentity::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
 
          ],
         'delegators' => [

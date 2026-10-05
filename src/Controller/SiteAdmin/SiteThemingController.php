@@ -74,12 +74,16 @@ class SiteThemingController extends AbstractActionController {
       $formElements = $form->getElements();
       unset($formElements['csrf']); // The CSRF token is managed elsewhere
 
+      // Styling values saved for another base theme are not this theme's: the form then shows the theme defaults.
+      $currentTheme = $this->getCurrentTheme();
+      $stylingApplies = !$currentTheme || $this->builder->stylingApplies($currentTheme, $this->currentSite());
+
       // Set individual values in the site_theme_settings table
       foreach (array_keys($formElements) as $id) {
         if ($id === \AgileThemeTools\Styling\CustomCss::SITE_SETTING) {
           continue; // A site setting, not a styling setting.
         }
-        $value = $this->siteThemeSettings()->get($id);
+        $value = $stylingApplies ? $this->siteThemeSettings()->get($id) : null;
         if ($value) {
           $form->get($id)->setValue($value);
         } // else use the default value as determined by _00_main_configuration in theme.
@@ -91,6 +95,11 @@ class SiteThemingController extends AbstractActionController {
     $view->setVariable('form',$form);
     $view->setVariable('site', $this->currentSite());
     $view->setVariable('theme', $this->getCurrentTheme() ?: null);
+    // Set when the site's saved styling values belong to another base theme than the current theme's.
+    $theme = $this->getCurrentTheme();
+    $view->setVariable('otherStylingBase', $theme && !$this->builder->stylingApplies($theme, $this->currentSite())
+        ? $this->builder->getStylingBase($this->currentSite())
+        : null);
     $view->setTemplate('site-admin/site-theming/edit');
 
     /*
@@ -126,6 +135,15 @@ class SiteThemingController extends AbstractActionController {
     foreach($form->getSiteIdentificationValues() + $form->getDefaultValues() as $id => $value) {
       $this->siteThemeSettings()->set($id, $value);
     }
+    $this->recordStylingBase();
+  }
+
+  /** The styling values just saved belong to the current theme's base (theme.ini agile_base). */
+  protected function recordStylingBase(): void {
+    $theme = $this->getCurrentTheme();
+    if ($theme) {
+      $this->builder->setStylingBase($theme, $this->currentSite());
+    }
   }
 
   /*
@@ -149,6 +167,7 @@ class SiteThemingController extends AbstractActionController {
       foreach ($formData as $id => $value) {
         $this->siteThemeSettings()->set($id, $value);
       }
+      $this->recordStylingBase();
 
       // Saving records the settings; building is a separate, visible step (the panel now reports "Rebuild needed").
       $this->messenger()->addSuccess('Theme styling settings saved. Build the site theme to apply them.'); // @translate

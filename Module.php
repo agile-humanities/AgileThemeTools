@@ -21,14 +21,6 @@ require __DIR__ . '/vendor/autoload.php';
 class Module extends AbstractModule {
   const NAMESPACE = __NAMESPACE__;
 
-  protected $dependencies = [
-    'AdvancedSearch',
-    'BlocksDisposition',
-    'IiifServer',
-    'ImageServer',
-    'UniversalViewer'
-  ];
-
   public function init(ModuleManager $moduleManager) {
     $events = $moduleManager->getEventManager();
 
@@ -38,7 +30,38 @@ class Module extends AbstractModule {
   }
 
   public function install(ServiceLocatorInterface $serviceLocator) {
+    $this->refuseWithoutRequiredModules($serviceLocator);
     $this->makeSiteThemeSettingTable($serviceLocator);
+  }
+
+  /**
+   * Omeka does not enforce dependencies between modules, so this module does: it will not install while a module it
+   * requires is missing, inactive or too old. The list is config/dependencies.php (see Dependency\DependencyAudit).
+   * This module is not loaded while it is being installed, so the class is included by hand.
+   */
+  protected function refuseWithoutRequiredModules(ServiceLocatorInterface $serviceLocator): void {
+    require_once __DIR__ . '/src/Dependency/DependencyAudit.php';
+    $audit = new \AgileThemeTools\Dependency\DependencyAudit(
+      $serviceLocator->get('Omeka\ModuleManager'),
+      $serviceLocator->get('Omeka\Connection'),
+      require \AgileThemeTools\Dependency\DependencyAudit::manifestFile()
+    );
+    $errors = $audit->errors();
+    if ($errors) {
+      $lines = array_map(fn ($row) => sprintf('%s: %s %s', $row['label'], $row['message'], $row['fix']), $errors);
+      throw new \Omeka\Module\Exception\ModuleCannotInstallException(
+        'Agile Theme Tools needs these modules first. ' . implode(' ', $lines) // @translate
+      );
+    }
+  }
+
+  /** The module's configuration page shows the modules it depends on and their tested versions. Nothing to save. */
+  public function getConfigForm(\Laminas\View\Renderer\PhpRenderer $renderer) {
+    return $renderer->agileDependencies();
+  }
+
+  public function handleConfigForm(\Laminas\Mvc\Controller\AbstractController $controller) {
+    return true;
   }
 
   public function upgrade($oldVersion, $newVersion, ServiceLocatorInterface $serviceLocator)
@@ -89,6 +112,21 @@ class Module extends AbstractModule {
     // Site settings > Theme styling: the site's custom CSS (see Styling\CustomCss).
     $sharedEventManager->attach(\Omeka\Form\SiteSettingsForm::class, 'form.add_elements', [$this, 'addSiteSettingFormElements']);
     $sharedEventManager->attach(\Omeka\Form\SiteSettingsForm::class, 'form.add_input_filters', [$this, 'addSiteSettingFormInputFilters']);
+
+    // Dashboard and Modules page: what is wrong with the modules this one depends on, when something is.
+    $dependencySummary = function (\Laminas\EventManager\Event $event) {
+      echo $event->getTarget()->agileDependencies('summary');
+    };
+    $sharedEventManager->attach('Omeka\Controller\Admin\Index', 'view.browse.before', $dependencySummary);
+    $sharedEventManager->attach('Omeka\Controller\Admin\Module', 'view.browse.before', $dependencySummary);
+
+    // Easy Admin > Check and fix: an "Agile modules" group (see Dependency\EasyAdminTasks).
+    if (class_exists(\EasyAdmin\Form\CheckAndFixForm::class)) {
+      $dependencyTasks = new \AgileThemeTools\Dependency\EasyAdminTasks();
+      $sharedEventManager->attach(\EasyAdmin\Form\CheckAndFixForm::class, 'form.add_elements', [$dependencyTasks, 'addFormElements']);
+      $sharedEventManager->attach(\EasyAdmin\Form\CheckAndFixForm::class, 'form.add_input_filters', [$dependencyTasks, 'addInputFilters']);
+      $sharedEventManager->attach(\EasyAdmin\Controller\Admin\CheckAndFixController::class, 'easyadmin.job', [$dependencyTasks, 'handleJob']);
+    }
 
     // Easy Admin > Check and fix: a "Theme builds" group (see ThemeBuild\EasyAdminTasks). Only when Easy Admin is active.
     if (class_exists(\EasyAdmin\Form\CheckAndFixForm::class)) {

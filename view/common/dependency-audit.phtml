@@ -1,0 +1,68 @@
+<?php
+/**
+ * The dependency audit as a table (View\Helper\AgileDependencies), on this module's configuration page.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var array[] $rows
+ * @var \AgileThemeTools\Dependency\DependencyAudit $audit
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/dependency-audit.css', 'AgileThemeTools'));
+
+$summary = $audit->summary();
+$needs = function (array $row) use ($translate) {
+    if ($row['level'] === 'required') {
+        return $row['when'] === 'internal-search'
+            ? ($row['required'] ? $translate('Required (internal search engine in use)') : $translate('Required only with the internal search engine'))
+            : $translate('Required');
+    }
+    return $row['level'] === 'recommended' ? $translate('Recommended') : $translate('Optional');
+};
+$badges = ['error' => $translate('Problem'), 'warning' => $translate('Warning'), 'note' => $translate('Note'), 'ok' => $translate('OK')];
+?>
+<div class="dependency-audit">
+    <h3><?= $escape($translate('Modules this theme system depends on')) ?></h3>
+    <p class="dependency-audit-lead">
+        <?php if ($summary['error']): ?>
+            <strong class="dependency-audit-error"><?= $escape(sprintf($translate('%d problem(s) need attention.'), $summary['error'])) ?></strong>
+        <?php elseif ($summary['warning']): ?>
+            <strong class="dependency-audit-warning"><?= $escape(sprintf($translate('%d warning(s). Nothing is missing.'), $summary['warning'])) ?></strong>
+        <?php else: ?>
+            <strong class="dependency-audit-ok"><?= $escape($translate('Every required module is present at a tested version.')) ?></strong>
+        <?php endif; ?>
+        <?= $escape($translate('“Tested with” is the version this release of Agile Theme Tools was checked against. Some of these modules change often, so a newer version is flagged until it has been tested.')) ?>
+    </p>
+    <table class="tablesaw">
+        <thead>
+            <tr>
+                <th><?= $escape($translate('Module')) ?></th>
+                <th><?= $escape($translate('Needed')) ?></th>
+                <th><?= $escape($translate('Installed')) ?></th>
+                <th><?= $escape($translate('Tested with')) ?></th>
+                <th><?= $escape($translate('Status')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($rows as $row): ?>
+            <tr class="dependency-audit-row-<?= $escape($row['severity']) ?>">
+                <td>
+                    <strong><?php if ($row['source']): ?><a href="<?= $escape($row['source']) ?>" target="_blank" rel="noopener"><?= $escape($row['label']) ?></a><?php else: ?><?= $escape($row['label']) ?><?php endif; ?></strong>
+                    <?php if ($row['for'] !== ''): ?><div class="dependency-audit-for"><?= $escape($translate($row['for'])) ?></div><?php endif; ?>
+                </td>
+                <td><?= $escape($needs($row)) ?></td>
+                <td><?= $row['installed'] !== null ? $escape($row['installed']) : '—' ?></td>
+                <td><?= $row['pinned'] !== null ? $escape($row['pinned']) : '—' ?></td>
+                <td>
+                    <span class="dependency-audit-badge dependency-audit-<?= $escape($row['severity']) ?>"><?= $escape($badges[$row['severity']]) ?></span>
+                    <?= $escape($translate($row['message'])) ?>
+                    <?php if ($row['fix'] !== '' && $row['severity'] !== 'ok'): ?><em><?= $escape($translate($row['fix'])) ?></em><?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php if ($mismatch = $audit->iniMismatch()): ?>
+        <p class="dependency-audit-developer"><strong><?= $escape($translate('For developers:')) ?></strong> <?= $escape($mismatch) ?></p>
+    <?php endif; ?>
+</div>

@@ -1,6 +1,7 @@
 <?php
 namespace AgileThemeTools\Styling;
 
+use AgileThemeTools\Theme\ThemeProfile;
 use AgileThemeTools\ThemeBuild\BuildManager;
 use Doctrine\ORM\EntityManager;
 use Laminas\Http\Client as HttpClient;
@@ -135,13 +136,14 @@ class ThemeFonts
             return $this->bundledCache[$id];
         }
         $families = [];
-        $sass = $theme->getPath() . '/source/sass/00_configuration/_04_typography_fonts.sass';
+        $profile = ThemeProfile::of($theme);
+        $sass = $profile->fontsFile();
         if (is_readable($sass) && preg_match_all("/^\s*\+load_font\(\s*'([^']+)'\s*,\s*'([^']+)'/m", (string) file_get_contents($sass), $m, PREG_SET_ORDER)) {
             foreach ($m as $match) {
                 $families[$match[1]] = ['basename' => $match[2], 'weights' => []];
             }
         }
-        foreach (glob($theme->getPath() . '/source/fonts/*-[0-9][0-9][0-9]', GLOB_ONLYDIR) ?: [] as $dir) {
+        foreach (glob($profile->sourceDir() . '/fonts/*-[0-9][0-9][0-9]', GLOB_ONLYDIR) ?: [] as $dir) {
             [$base, $weight] = [substr(basename($dir), 0, -4), substr(basename($dir), -3)];
             $family = null;
             foreach ($families as $name => $info) {
@@ -172,7 +174,8 @@ class ThemeFonts
         $theme = $this->builder->getSiteTheme($site);
         $defaults = $theme ? $this->builder->getDefaultConfig($theme) : [];
         $bundled = $theme ? $this->getBundledFamilies($theme) : [];
-        $rows = $this->entityManager->getConnection()->fetchAllKeyValue(
+        // Saved font choices are styling values: only used with a theme of the base they were saved for.
+        $rows = ($theme && !$this->builder->stylingApplies($theme, $site)) ? [] : $this->entityManager->getConnection()->fetchAllKeyValue(
             'SELECT id, value FROM site_theme_setting WHERE site_id = ?',
             [$site->id()]
         );
@@ -320,7 +323,7 @@ class ThemeFonts
             foreach ($info['weights'] as $weight) {
                 foreach (['normal', 'italic'] as $style) {
                     $relative = sprintf('%1$s-%2$d/%1$s-%3$s-%2$d.woff2', $info['basename'], $weight, $style);
-                    if (!is_file($theme->getPath() . '/source/fonts/' . $relative)) {
+                    if (!is_file(ThemeProfile::of($theme)->sourceDir() . '/fonts/' . $relative)) {
                         continue;
                     }
                     $css .= sprintf("@font-face{font-family:\"%s\";font-style:%s;font-weight:%d;font-display:swap;src:url(\"%s/%s\") format(\"woff2\")}\n", $family, $style, $weight, $fontsUri, $relative);

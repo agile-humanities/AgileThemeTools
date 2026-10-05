@@ -9,6 +9,17 @@
 
 ?>
 <h1>Theme Styling</h1>
+<?php if (!empty($otherStylingBase)): ?>
+<?php $this->headLink()->appendStylesheet($this->assetUrl('css/theme-identity.css', 'AgileThemeTools')); ?>
+<div class="theme-identity theme-identity-warning" role="status">
+    <h4><?= $this->escapeHtml($this->translate('Saved styling belongs to another base theme')) ?></h4>
+    <p><?= $this->escapeHtml(sprintf(
+        $this->translate('This site has styling values saved for the base theme “%1$s”. The current theme is built on “%2$s”, so they are kept but not used, and this form shows the current theme’s defaults. Saving this form replaces the saved values.'),
+        $otherStylingBase,
+        isset($theme) && $theme ? (string) $this->themeIdentity()->profile($theme)->base() : ''
+    )) ?></p>
+</div>
+<?php endif; ?>
 <?= isset($site) && $site ? $this->themeBuildPanel($site, $theme ?? null) : '' ?>
 <?= $this->form()->openTag($form); ?>
 <?= $this->formHidden($form->getElements()['csrf']); ?>

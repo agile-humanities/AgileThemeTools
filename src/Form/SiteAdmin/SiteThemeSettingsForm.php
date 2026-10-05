@@ -270,8 +270,8 @@
 
         $currentTheme = $this->themeManager->getTheme($site->theme());
 
-        $themePath = $currentTheme->getPath();
-        $defaultConfigPath = $themePath . '/_00_main_configuration.yml';
+        // The theme's default configuration file: _00_main_configuration.yml unless theme.ini declares another.
+        $defaultConfigPath = \AgileThemeTools\Theme\ThemeProfile::of($currentTheme)->configFile();
 
         if ($defaultConfigPath) {
           $cache = Yaml::parse(file_get_contents($defaultConfigPath));

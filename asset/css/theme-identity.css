@@ -1,0 +1,58 @@
+/* A theme's Agile declaration (view/common/theme-identity.phtml). */
+
+.theme-identity {
+    margin: 0 0 24px;
+    padding: 12px 16px;
+    border: 1px solid #dfdfdf;
+    border-radius: 3px;
+    background: #fafafa;
+}
+
+.theme-identity-warning {
+    border-color: #e6d9a8;
+    background: #fdf8e4;
+}
+
+.theme-identity-error {
+    border-color: #e3a8a0;
+    background: #fdecea;
+}
+
+.theme-identity h4 {
+    margin: 0 0 8px;
+}
+
+.theme-identity dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 2px 16px;
+    margin: 0;
+}
+
+.theme-identity dt {
+    font-weight: bold;
+}
+
+.theme-identity dd {
+    margin: 0;
+}
+
+.theme-identity-good {
+    margin-left: 6px;
+    color: #2e6b2e;
+}
+
+.theme-identity ul {
+    margin: 10px 0 0;
+    padding: 10px 0 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    list-style: none;
+}
+
+.theme-identity li + li {
+    margin-top: 6px;
+}
+
+.theme-identity li em {
+    display: block;
+}

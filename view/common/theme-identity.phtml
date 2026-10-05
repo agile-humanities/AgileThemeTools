@@ -1,0 +1,54 @@
+<?php
+/**
+ * A theme's Agile declaration and anything wrong with it (View\Helper\ThemeIdentity). Shown on a site's Theme page.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \AgileThemeTools\Theme\ThemeProfile $profile
+ * @var array[] $findings
+ * @var string $moduleVersion
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/theme-identity.css', 'AgileThemeTools'));
+
+$levels = array_column($findings, 'level');
+$state = in_array('error', $levels) ? 'error' : (in_array('warning', $levels) ? 'warning' : 'ok');
+$levelLabels = ['error' => $translate('Problem'), 'warning' => $translate('Warning'), 'note' => $translate('Note')];
+$compatible = $profile->isModuleCompatible();
+?>
+<div class="theme-identity theme-identity-<?= $state ?>" role="status">
+    <h4><?= $escape($translate('Agile theme')) ?></h4>
+    <dl>
+        <dt><?= $escape($translate('Base theme')) ?></dt>
+        <dd>
+            <code><?= $escape($profile->base()) ?></code><?php if ($profile->baseVersion()): ?> <?= $escape($profile->baseVersion()) ?><?php endif; ?>
+            <?php if (!$profile->isDeclared()): ?><em><?= $escape($translate('(not declared by the theme)')) ?></em><?php endif; ?>
+        </dd>
+        <dt><?= $escape($translate('Agile Theme Tools')) ?></dt>
+        <dd>
+            <?php if ($profile->moduleConstraint()): ?>
+                <?= $escape(sprintf($translate('needs %1$s; %2$s is installed'), $profile->moduleConstraint(), $moduleVersion)) ?>
+                <?php if ($compatible === true): ?><span class="theme-identity-good"><?= $escape($translate('compatible')) ?></span><?php endif; ?>
+            <?php else: ?>
+                <?= $escape(sprintf($translate('no requirement declared; %s is installed'), $moduleVersion)) ?>
+            <?php endif; ?>
+        </dd>
+        <dt><?= $escape($translate('Per-site styling builds')) ?></dt>
+        <dd><?= $escape($profile->supportsSiteBuilds() ? $translate('supported') : $translate('not available in this theme')) ?></dd>
+        <?php if ($profile->supportsSiteBuilds() && (!$profile->hasDefaultConfigFileName() || !$profile->hasDefaultSourceDirName())): ?>
+        <dt><?= $escape($translate('Build files')) ?></dt>
+        <dd><code><?= $escape($profile->configFileName()) ?></code>, <code><?= $escape($profile->sourceDirName()) ?>/</code></dd>
+        <?php endif; ?>
+    </dl>
+    <?php if ($findings): ?>
+    <ul>
+        <?php foreach ($findings as $finding): ?>
+        <li class="theme-identity-<?= $escape($finding['level']) ?>">
+            <strong><?= $escape($levelLabels[$finding['level']] ?? $finding['level']) ?></strong>
+            <?= $escape($translate($finding['message'])) ?>
+            <?php if ($finding['fix'] !== ''): ?><em><?= $escape($translate($finding['fix'])) ?></em><?php endif; ?>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+    <?php endif; ?>
+</div>

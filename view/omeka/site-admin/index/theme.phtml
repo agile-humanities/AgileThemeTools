@@ -15,7 +15,12 @@ $fallbackThumbnailUrl = $this->assetUrl('img/theme.jpg', 'Omeka');
 ?>
 <?php echo $this->pageTitle($translate('Theme'), 1, $translate('Sites')); ?>
 
-<?php if(isset($this->form) && $themeSettings('configurable_site_theme') && Manager::STATE_ACTIVE === $currentTheme->getState()): ?>
+<?php // What the theme declares about itself; empty for a theme that is not an Agile one. ?>
+<?php if (Manager::STATE_ACTIVE === $currentTheme->getState()): ?>
+    <?= $this->themeIdentity($currentTheme); ?>
+<?php endif; ?>
+
+<?php if(isset($this->form) && $themeSettings('configurable_site_theme') && Manager::STATE_ACTIVE === $currentTheme->getState() && $this->themeIdentity()->profile($currentTheme)->supportsSiteBuilds()): ?>
     <?= $this->themeBuildPanel($this->currentSite(), $currentTheme, ['compact' => true]); ?>
 <?php endif; ?>
 

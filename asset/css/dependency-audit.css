@@ -1,0 +1,86 @@
+/* Dependency audit (view/common/dependency-audit.phtml and dependency-audit-summary.phtml). */
+
+.dependency-audit {
+    margin: 0 0 24px;
+}
+
+.dependency-audit-lead {
+    max-width: 60em;
+}
+
+.dependency-audit table {
+    width: 100%;
+}
+
+.dependency-audit td {
+    vertical-align: top;
+}
+
+.dependency-audit-for {
+    font-size: 0.85em;
+    color: #676767;
+}
+
+.dependency-audit td em,
+.dependency-audit-summary li em {
+    display: block;
+}
+
+.dependency-audit-badge {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 0 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+    background: #676767;
+}
+
+.dependency-audit-badge.dependency-audit-error { background: #a91919; }
+.dependency-audit-badge.dependency-audit-warning { background: #8a6d00; }
+.dependency-audit-badge.dependency-audit-note { background: #4a6785; }
+.dependency-audit-badge.dependency-audit-ok { background: #2e6b2e; }
+
+strong.dependency-audit-error { color: #a91919; }
+strong.dependency-audit-warning { color: #8a6d00; }
+strong.dependency-audit-ok { color: #2e6b2e; }
+
+.dependency-audit-row-error td { background: #fdecea; }
+.dependency-audit-row-warning td { background: #fdf8e4; }
+
+.dependency-audit-summary {
+    padding: 12px 16px;
+    border: 1px solid #e6d9a8;
+    border-radius: 3px;
+    background: #fdf8e4;
+}
+
+.dependency-audit-summary-error {
+    border-color: #e3a8a0;
+    background: #fdecea;
+}
+
+.dependency-audit-summary h4 {
+    margin: 0 0 8px;
+}
+
+.dependency-audit-summary ul {
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+}
+
+.dependency-audit-summary li + li {
+    margin-top: 6px;
+}
+
+.dependency-audit-summary p {
+    margin: 0;
+}
+
+.dependency-audit-developer {
+    font-size: 0.85em;
+    color: #676767;
+}

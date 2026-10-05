@@ -1,0 +1,30 @@
+<?php
+/**
+ * What is wrong with the modules the theme system depends on (View\Helper\AgileDependencies). Shown on the admin
+ * dashboard and on the Modules page, and only when there is something to report.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var array[] $problems
+ * @var \AgileThemeTools\Dependency\DependencyAudit $audit
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/dependency-audit.css', 'AgileThemeTools'));
+$hasErrors = (bool) $audit->errors();
+$badges = ['error' => $translate('Problem'), 'warning' => $translate('Warning')];
+$detailsUrl = $this->url('admin/default', ['controller' => 'module', 'action' => 'configure'], ['query' => ['id' => 'AgileThemeTools']]);
+?>
+<div class="dependency-audit dependency-audit-summary dependency-audit-summary-<?= $hasErrors ? 'error' : 'warning' ?>" role="status">
+    <h4><?= $escape($translate('Agile Theme Tools: modules it depends on')) ?></h4>
+    <ul>
+        <?php foreach ($problems as $row): ?>
+        <li>
+            <span class="dependency-audit-badge dependency-audit-<?= $escape($row['severity']) ?>"><?= $escape($badges[$row['severity']]) ?></span>
+            <strong><?= $escape($row['label']) ?></strong>
+            <?= $escape($translate($row['message'])) ?>
+            <?php if ($row['fix'] !== ''): ?><em><?= $escape($translate($row['fix'])) ?></em><?php endif; ?>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+    <p><a href="<?= $escape($detailsUrl) ?>"><?= $escape($translate('See every module and its tested version')) ?></a></p>
+</div>

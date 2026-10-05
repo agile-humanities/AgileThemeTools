@@ -2,6 +2,7 @@
 namespace AgileThemeTools\ThemeBuild;
 
 use AgileThemeTools\Settings\SiteThemeSettings;
+use AgileThemeTools\Theme\ThemeProfile;
 use Doctrine\ORM\EntityManager;
 use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Representation\SiteRepresentation;
@@ -60,8 +61,14 @@ class BuildManager
     /** Bytes of free space below which preflight fails. */
     const MIN_FREE_BYTES = 300 * 1024 * 1024;
 
+    /**
+     * Row in the styling table that records which base theme (theme.ini agile_base) the site's styling values were
+     * saved for. The values are only used with themes of that base. See getStylingBase().
+     */
+    const STYLING_BASE_KEY = '_agile_base';
+
     /** Settings keys saved by the styling form that are not SASS configuration. */
-    const NON_CONFIG_KEYS = ['slug', 'site_id', 'submit', 'reset', 'csrf', 'source_imgs', 'source_dir'];
+    const NON_CONFIG_KEYS = ['slug', 'site_id', 'submit', 'reset', 'csrf', 'source_imgs', 'source_dir', self::STYLING_BASE_KEY];
 
     /** Per-site build options (not SASS configuration) saved by the styling form. */
     const OPTION_KEYS = ['source_imgs', 'source_dir'];
@@ -165,6 +172,10 @@ class BuildManager
      */
     public function isSiteConfigurable(Theme $theme, SiteRepresentation $site): bool
     {
+        // The theme must say it supports per-site builds (theme.ini, see Theme\ThemeProfile).
+        if (!ThemeProfile::of($theme)->supportsSiteBuilds()) {
+            return false;
+        }
         $value = $this->entityManager->getConnection()->fetchOne(
             'SELECT value FROM site_setting WHERE site_id = ? AND id = ?',
             [$site->id(), $theme->getSettingsKey()]
@@ -219,7 +230,8 @@ class BuildManager
     // ------------------------------------------------------------------ configuration
 
     /**
-     * The theme's default styling configuration (_00_main_configuration.yml), keyed by variable name.
+     * The theme's default styling configuration (_00_main_configuration.yml unless the theme declares another
+     * file), keyed by variable name.
      *
      * @throws \RuntimeException when the file is missing or not valid YAML.
      */
@@ -227,7 +239,7 @@ class BuildManager
     {
         $id = $theme->getId();
         if (!isset($this->defaultConfigCache[$id])) {
-            $file = $theme->getPath() . '/_00_main_configuration.yml';
+            $file = ThemeProfile::of($theme)->configFile();
             if (!is_readable($file)) {
                 throw new \RuntimeException(sprintf('The theme has no readable default configuration at %s.', $file));
             }
@@ -244,13 +256,68 @@ class BuildManager
         return $this->defaultConfigCache[$id];
     }
 
+    // ------------------------------------------------------------------ which base the styling belongs to
+
+    /**
+     * The base theme (theme.ini agile_base) the site's styling values were saved for. Null when the site has no
+     * styling values. Values saved before this was recorded are taken to belong to the Advanced base theme, the
+     * only one that had per-site styling. Read straight from the table: see isSiteConfigurable().
+     */
+    public function getStylingBase(SiteRepresentation $site): ?string
+    {
+        $connection = $this->entityManager->getConnection();
+        $stored = $connection->fetchOne(
+            'SELECT value FROM site_theme_setting WHERE site_id = ? AND id = ?',
+            [$site->id(), self::STYLING_BASE_KEY]
+        );
+        if ($stored !== false) {
+            $base = json_decode((string) $stored, true);
+            if (is_string($base) && $base !== '') {
+                return $base;
+            }
+        }
+        $hasValues = (bool) $connection->fetchOne(
+            'SELECT 1 FROM site_theme_setting WHERE site_id = ? AND id <> ? LIMIT 1',
+            [$site->id(), self::STYLING_BASE_KEY]
+        );
+        return $hasValues ? ThemeProfile::BASE_ADVANCED : null;
+    }
+
+    /**
+     * Whether the site's saved styling values are used with this theme: they were saved for the same base theme, or
+     * there are none. A fork keeps its base's value, so a site that moves between a base theme and its forks keeps
+     * its styling; with a theme of another base the values stay in the table, unused.
+     */
+    public function stylingApplies(Theme $theme, SiteRepresentation $site): bool
+    {
+        $base = $this->getStylingBase($site);
+        return $base === null || $base === ThemeProfile::of($theme)->base();
+    }
+
+    /** Records that the site's styling values now belong to this theme's base. Called when they are saved. */
+    public function setStylingBase(Theme $theme, SiteRepresentation $site): void
+    {
+        $base = ThemeProfile::of($theme)->base();
+        if ($base === null) {
+            return;
+        }
+        $this->entityManager->getConnection()->executeStatement(
+            'INSERT INTO site_theme_setting (id, site_id, value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)',
+            [self::STYLING_BASE_KEY, $site->id(), json_encode($base)]
+        );
+    }
+
     /**
      * The site's styling configuration: the theme defaults overlaid with every setting the site has saved. A setting
-     * saved empty means "use the default". Only keys the theme declares are used.
+     * saved empty means "use the default". Only keys the theme declares are used, and only when the saved values
+     * belong to this theme's base (stylingApplies()).
      */
     public function getSiteConfig(Theme $theme, SiteRepresentation $site): array
     {
         $config = $this->getDefaultConfig($theme);
+        if (!$this->stylingApplies($theme, $site)) {
+            return $config;
+        }
         $this->siteThemeSettings->setTargetId($site->id());
         foreach (array_keys($config) as $key) {
             if (in_array($key, self::NON_CONFIG_KEYS, true)) {
@@ -267,8 +334,13 @@ class BuildManager
     /** Build options saved with the styling settings: alternative image and source directories. */
     public function getBuildOptions(SiteRepresentation $site): array
     {
+        $options = array_fill_keys(self::OPTION_KEYS, '');
+        // They are paths inside a theme of the base they were saved for: meaningless with another.
+        $theme = $this->getSiteTheme($site);
+        if ($theme && !$this->stylingApplies($theme, $site)) {
+            return $options;
+        }
         $this->siteThemeSettings->setTargetId($site->id());
-        $options = [];
         foreach (self::OPTION_KEYS as $key) {
             $value = $this->siteThemeSettings->get($key);
             $options[$key] = is_string($value) ? trim($value) : '';
@@ -295,16 +367,18 @@ class BuildManager
     public function getSourceFingerprint(Theme $theme): string
     {
         $path = $theme->getPath();
+        $profile = ThemeProfile::of($theme);
+        $source = $profile->sourceDir();
         $newest = 0;
         $count = 0;
-        foreach (['gulpfile.js', 'package.json', '_00_main_configuration.yml', 'config/theme.ini', 'custom.css', 'custom.js'] as $file) {
+        foreach (['gulpfile.js', 'package.json', $profile->configFileName(), 'config/theme.ini', 'custom.css', 'custom.js'] as $file) {
             if (is_file("$path/$file")) {
                 $newest = max($newest, (int) filemtime("$path/$file"));
                 $count++;
             }
         }
-        if (is_dir("$path/source")) {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("$path/source", \FilesystemIterator::SKIP_DOTS));
+        if (is_dir($source)) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS));
             foreach ($iterator as $file) {
                 $newest = max($newest, (int) $file->getMTime());
                 $count++;
@@ -318,7 +392,7 @@ class BuildManager
     {
         $config = $this->getSiteConfig($theme, $site);
         $yaml = "# Theme styling configuration for site \"" . $site->slug() . "\" (" . $theme->getId() . "), generated from its saved settings.\n"
-            . "# Layered over the theme's _00_main_configuration.yml by the theme build. Regenerated on every build.\n"
+            . "# Layered over the theme's " . ThemeProfile::of($theme)->configFileName() . " by the theme build. Regenerated on every build.\n"
             . Yaml::dump($config, 1, 2, Yaml::DUMP_EXCEPTION_ON_INVALID_TYPE);
         $file = $dir . '/' . self::CONFIG_FILE;
         if (file_put_contents($file, $yaml) === false) {
@@ -426,17 +500,22 @@ class BuildManager
         $checks = [];
         $themePath = $theme->getPath();
         $user = $this->getProcessUser();
+        $profile = ThemeProfile::of($theme);
+        $configName = $profile->configFileName();
+        $sourceName = $profile->sourceDirName();
 
-        $hasBuildFiles = is_file("$themePath/gulpfile.js") && is_file("$themePath/package.json") && is_dir("$themePath/source");
+        $checks[] = $this->identityCheck($profile);
+
+        $hasBuildFiles = is_file("$themePath/gulpfile.js") && is_file("$themePath/package.json") && is_dir($profile->sourceDir());
         $checks[] = $this->check('theme_files', 'Theme build files', $hasBuildFiles, // @translate
-            $hasBuildFiles ? "gulpfile.js, package.json and source/ found in $themePath." : "$themePath must contain gulpfile.js, package.json and a source directory.",
+            $hasBuildFiles ? "gulpfile.js, package.json and $sourceName/ found in $themePath." : "$themePath must contain gulpfile.js, package.json and the source directory ($sourceName).",
             'Deploy the theme with its build files. They are part of the theme repository.');
 
         try {
             $this->getDefaultConfig($theme);
-            $checks[] = $this->check('default_config', 'Theme default configuration', true, "$themePath/_00_main_configuration.yml parses."); // @translate
+            $checks[] = $this->check('default_config', 'Theme default configuration', true, "$themePath/$configName parses."); // @translate
         } catch (\RuntimeException $e) {
-            $checks[] = $this->check('default_config', 'Theme default configuration', false, $e->getMessage(), 'Fix the YAML in _00_main_configuration.yml in the theme.'); // @translate
+            $checks[] = $this->check('default_config', 'Theme default configuration', false, $e->getMessage(), "Fix the YAML in $configName in the theme."); // @translate
         }
 
         $gulp = "$themePath/node_modules/gulp/bin/gulp.js";
@@ -682,12 +761,20 @@ class BuildManager
     {
         $node = $this->findNode();
         $command = [$node ?? 'node', $theme->getPath() . '/node_modules/gulp/bin/gulp.js', 'build', '--config', $configFile, '--dest', $destination];
+        $profile = ThemeProfile::of($theme);
+        // A theme that declares its own default configuration file or source directory (theme.ini).
+        if (!$profile->hasDefaultConfigFileName()) {
+            array_push($command, '--mainconfig', $profile->configFileName());
+        }
         $options = $this->getBuildOptions($site);
         if ($options['source_imgs'] !== '') {
             array_push($command, '--sourceimgs', $options['source_imgs']);
         }
+        // The site's own source directory, if it has one, wins over the theme's.
         if ($options['source_dir'] !== '') {
             array_push($command, '--source', $options['source_dir']);
+        } elseif (!$profile->hasDefaultSourceDirName()) {
+            array_push($command, '--source', $profile->sourceDirName());
         }
         return $command;
     }
@@ -971,6 +1058,27 @@ class BuildManager
             }
         }
         return 'uid ' . $uid;
+    }
+
+    /**
+     * The theme's declaration (Theme\ThemeProfile) as a preflight check: fails when the theme is made for another
+     * version of this module, warns when the declaration is missing or incomplete.
+     */
+    protected function identityCheck(ThemeProfile $profile): array
+    {
+        $findings = $profile->findings();
+        $errors = array_filter($findings, fn ($f) => $f['level'] === 'error');
+        $warnings = array_filter($findings, fn ($f) => $f['level'] === 'warning');
+        $worst = $errors ?: $warnings;
+        if ($worst) {
+            $first = reset($worst);
+            return $this->check('theme_identity', 'Theme declaration', $errors ? false : null, $first['message'], $first['fix']); // @translate
+        }
+        $detail = sprintf('Declares base theme "%s"%s%s.',
+            $profile->base(),
+            $profile->baseVersion() ? ' ' . $profile->baseVersion() : '',
+            $profile->moduleConstraint() ? sprintf('; works with Agile Theme Tools %s (%s installed)', $profile->moduleConstraint(), ThemeProfile::moduleVersion()) : '');
+        return $this->check('theme_identity', 'Theme declaration', true, $detail); // @translate
     }
 
     protected function check(string $id, string $label, ?bool $ok, string $detail, string $fix = ''): array
