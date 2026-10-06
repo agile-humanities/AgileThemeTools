@@ -1,0 +1,65 @@
+<?php
+/**
+ * Colours and fonts: the quick styling page. Saved values apply at once; nothing to build.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \AgileThemeTools\Form\SiteAdmin\ColoursAndFontsForm $form
+ * @var \Omeka\Api\Representation\SiteRepresentation $site
+ * @var \Omeka\Site\Theme\Theme $theme
+ * @var bool $supportsSiteBuilds
+ * @var bool $siteHasBuild
+ * @var string|null $otherStylingBase
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->htmlElement('body')->appendAttribute('class', 'sites theme colours-and-fonts');
+$this->headLink()->appendStylesheet($this->assetUrl('css/theme-identity.css', 'AgileThemeTools'));
+$form->prepare();
+?>
+<?= $this->pageTitle($translate('Colours and fonts'), 1, $translate('Sites')) ?>
+
+<?php if (!empty($otherStylingBase)): ?>
+<div class="theme-identity theme-identity-warning" role="status">
+    <p><?= $escape(sprintf($translate('This site has styling values saved for the base theme “%s”. They are not used by the current theme; saving this form replaces them.'), $otherStylingBase)) ?></p>
+</div>
+<?php endif; ?>
+
+<?php if (!empty($siteHasBuild)): ?>
+<div class="theme-identity" role="status">
+    <p><?= $escape($translate('This site is served from its own theme build, which has its colours and fonts compiled in. What you save here is kept and used the next time the site theme is built.')) ?>
+    <?= $this->hyperlink($translate('Build it from the Theme page.'), $this->url(null, ['action' => 'theme'], true)) ?></p>
+</div>
+<?php endif; ?>
+
+<p class="colours-and-fonts-lead">
+    <?= $escape($translate('The palette and the fonts. What you save here is applied to the site straight away, without building the theme.')) ?>
+    <?php if ($supportsSiteBuilds): ?>
+        <?= sprintf($escape($translate('Sizes, spacing and every other setting are on %s, which needs a theme build.')), $this->hyperlink($translate('Configure theme styles'), $this->url(null, ['action' => 'theme-styling'], true))) ?>
+    <?php endif; ?>
+</p>
+
+<?= $this->form()->openTag($form) ?>
+<div id="page-actions">
+    <?= $this->hyperlink($translate('Cancel'), $this->url(null, ['action' => 'theme'], true), ['class' => 'button']) ?>
+    <?= $this->formSubmit($form->get('submit')) ?>
+</div>
+<?= $this->formHidden($form->get('csrf')) ?>
+
+<fieldset id="colours-and-fonts-colours" class="section active">
+    <legend><?= $escape($translate('Palette')) ?></legend>
+    <p class="explanation"><?= $escape($translate('Nine colours. Everything else — greys, tints, hover states — is mixed from them.')) ?></p>
+    <?php foreach ($form->colourKeys() as $key): ?>
+        <?= $this->formRow($form->get($key)) ?>
+    <?php endforeach; ?>
+</fieldset>
+
+<fieldset id="colours-and-fonts-fonts" class="section active">
+    <legend><?= $escape($translate('Fonts')) ?></legend>
+    <p class="explanation"><?= $escape($translate('A Google font loads automatically; a font bundled with the theme or a system font is used as it is.')) ?></p>
+    <?php foreach ($form->fontKeys() as $key): ?>
+        <?= $this->formRow($form->get($key)) ?>
+        <?= $this->formHidden($form->get($key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX)) ?>
+    <?php endforeach; ?>
+</fieldset>
+
+<?= $this->form()->closeTag() ?>

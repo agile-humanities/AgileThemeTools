@@ -126,6 +126,98 @@ class SiteThemingController extends AbstractActionController {
 
   }
 
+  /**
+   * Colours and fonts: the palette and font roles, saved to the same styling settings as the full form and applied
+   * at once through the palette stylesheet (Styling\PaletteCss). No build.
+   */
+  public function coloursAction() {
+    $site = $this->currentSite();
+    $theme = $this->themeManager->getTheme($site->theme());
+    $profile = $theme ? \AgileThemeTools\Theme\ThemeProfile::of($theme) : null;
+    if (!$theme || !$profile->isAgile()) {
+      $this->messenger()->addError('Colours and fonts can only be set for an Agile theme.'); // @translate
+      return $this->redirect()->toRoute('admin/site/slug/action', ['site-slug' => $site->slug(), 'action' => 'theme']);
+    }
+    $palette = $this->builder->getPaletteCss();
+    if (!$palette->isVariableDriven($site)) {
+      $this->messenger()->addError($profile->supportsSiteBuilds()
+        ? 'This theme\'s stylesheet has its colours and fonts compiled in, so they cannot be changed without a build: use "Configure theme styles". A stylesheet that takes variables is made with "gulp build --variables".' // @translate
+        : 'This theme\'s stylesheet has its colours and fonts compiled in; they cannot be changed from here.'); // @translate
+      return $this->redirect()->toRoute('admin/site/slug/action', ['site-slug' => $site->slug(), 'action' => 'theme']);
+    }
+    try {
+      $inputs = $palette->inputs($theme);
+    } catch (\RuntimeException $e) {
+      $this->messenger()->addError($e->getMessage());
+      return $this->redirect()->toRoute('admin/site/slug/action', ['site-slug' => $site->slug(), 'action' => 'theme']);
+    }
+    $current = $palette->values($theme, $site);
+    foreach ($inputs as $key => &$input) {
+      $input['default'] = $current[$key];
+    }
+    unset($input);
+
+    /** @var \AgileThemeTools\Form\SiteAdmin\ColoursAndFontsForm $form */
+    $form = $this->getForm(\AgileThemeTools\Form\SiteAdmin\ColoursAndFontsForm::class, ['inputs' => $inputs]);
+    $form->setAttribute('action', $this->url()->fromRoute(null, [], true));
+
+    if ($this->getRequest()->isPost()) {
+      $form->setData($this->params()->fromPost());
+      if ($form->isValid()) {
+        $data = $form->getData();
+        foreach ($inputs as $key => $input) {
+          $value = (string) ($data[$key] ?? '');
+          $usable = $input['kind'] === 'colour' ? \AgileThemeTools\Styling\PaletteCss::isColour($value) : \AgileThemeTools\Styling\PaletteCss::isFontList($value);
+          if (!$usable) {
+            $this->messenger()->addWarning(sprintf($this->translate('"%1$s" is not a colour or font list that can be applied directly; %2$s was left unchanged.'), $value, $key));
+            continue;
+          }
+          $this->siteThemeSettings()->set($key, $value);
+          if ($input['kind'] === 'font' && isset($data[$key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX])) {
+            $this->siteThemeSettings()->set($key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX, (string) $data[$key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX]);
+          }
+        }
+        $this->recordStylingBase();
+        $status = $this->builder->getStatus($theme, $site);
+        if (!empty($status['built']) || !empty($status['legacy'])) {
+          // A per-site build has the colours compiled in; the variables cannot change them until it is rebuilt.
+          $this->messenger()->addSuccess('Colours and fonts saved. This site is served from its own theme build, so they take effect when the site theme is next built.'); // @translate
+        } else {
+          $this->messenger()->addSuccess('Colours and fonts saved. They apply to the site now.'); // @translate
+        }
+        foreach ($this->fonts->getGoogleFamilies($site) as $family) {
+          $probe = $this->fonts->probeGoogleFamily($family, false);
+          if (!$probe['ok']) {
+            $this->messenger()->addError($probe['message']);
+          } elseif ($probe['weights'] && count($probe['weights']) < 4) {
+            $this->messenger()->addWarning($probe['message']);
+          }
+        }
+        return $this->redirect()->toRoute(null, [], [], true);
+      }
+      $this->messenger()->addFormErrors($form);
+    } else {
+      // The font sources saved with the values.
+      foreach ($form->fontKeys() as $key) {
+        $source = $this->siteThemeSettings()->get($key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX);
+        if ($source && $form->has($key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX)) {
+          $form->get($key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX)->setValue($source);
+        }
+      }
+    }
+
+    $view = new ViewModel([
+      'form' => $form,
+      'site' => $site,
+      'theme' => $theme,
+      'supportsSiteBuilds' => $profile->supportsSiteBuilds(),
+      'siteHasBuild' => (function () use ($theme, $site) { $s = $this->builder->getStatus($theme, $site); return !empty($s['built']) || !empty($s['legacy']); })(),
+      'otherStylingBase' => !$this->builder->stylingApplies($theme, $site) ? $this->builder->getStylingBase($site) : null,
+    ]);
+    $view->setTemplate('site-admin/site-theming/colours');
+    return $view;
+  }
+
   /*
    * Resets form values in database. User must still run the build.
    */

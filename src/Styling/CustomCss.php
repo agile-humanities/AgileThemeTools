@@ -33,6 +33,7 @@ class CustomCss
     protected EntityManager $entityManager;
     protected string $filesPath;
     protected ?string $filesUri;
+    protected ?PaletteCss $paletteCss = null;
 
     public function __construct(Settings $settings, ApiManager $api, BuildManager $builder, EntityManager $entityManager, string $filesPath, ?string $filesUri)
     {
@@ -42,6 +43,17 @@ class CustomCss
         $this->entityManager = $entityManager;
         $this->filesPath = rtrim($filesPath, '/');
         $this->filesUri = $filesUri !== null ? rtrim($filesUri, '/') : null;
+    }
+
+    public function setPaletteCss(PaletteCss $paletteCss): self
+    {
+        $this->paletteCss = $paletteCss;
+        return $this;
+    }
+
+    public function getPaletteCss(): ?PaletteCss
+    {
+        return $this->paletteCss;
     }
 
     public function getGlobalCss(): string
@@ -75,6 +87,13 @@ class CustomCss
     public function getStylesheets(?SiteRepresentation $site, string $basePath = ''): array
     {
         $sheets = [];
+        // The site's saved colours and fonts first, so custom CSS can still override them.
+        if ($site && $this->paletteCss) {
+            $palette = $this->paletteCss->getCss($site);
+            if ($palette !== '') {
+                $sheets[] = $this->serve('palette-' . $site->slug(), $palette, $basePath);
+            }
+        }
         $global = $this->getGlobalCss();
         if ($global !== '') {
             $sheets[] = $this->serve('global', $global, $basePath);

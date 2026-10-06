@@ -120,7 +120,8 @@
           ],
           'factories' => [
               'SectionsMenuSelect' => Service\Form\Element\SectionsMenuSelectFactory::class,
-              'AgileThemeTools\Form\SiteAdmin\SiteThemeSettingsForm' => Service\Form\SiteAdmin\SiteThemeSettingsFormFactory::class
+              'AgileThemeTools\Form\SiteAdmin\SiteThemeSettingsForm' => Service\Form\SiteAdmin\SiteThemeSettingsFormFactory::class,
+              Form\SiteAdmin\ColoursAndFontsForm::class => Service\Form\SiteAdmin\ColoursAndFontsFormFactory::class,
           ]
       ],
       'resource_page_block_layouts' => [
@@ -138,6 +139,7 @@
                   'AgileThemeTools\Settings\SiteThemeSettings' => SiteThemeSettingsFactory::class,
                   ThemeBuild\BuildManager::class => Service\ThemeBuild\BuildManagerFactory::class,
                   Dependency\DependencyAudit::class => Service\Dependency\DependencyAuditFactory::class,
+                  Styling\PaletteCss::class => Service\Styling\PaletteCssFactory::class,
                   Styling\CustomCss::class => Service\Styling\CustomCssFactory::class,
                   Styling\LogoAudit::class => Service\Styling\LogoAuditFactory::class,
                   Styling\ThemeFonts::class => Service\Styling\ThemeFontsFactory::class,
@@ -194,6 +196,19 @@
               'child_routes' => [
                 'slug' => [
                   'child_routes' => [
+                    // Colours and fonts: applied on save, no build (see Styling\PaletteCss).
+                    'theme-colours' => [
+                      'type' => \Laminas\Router\Http\Literal::class,
+                      'options' => [
+                        'route' => '/theme-colours',
+                        'defaults' => [
+                          '__NAMESPACE__' => 'AgileThemeTools\Controller\SiteAdmin',
+                          '__ADMIN__' => true,
+                          'controller' => 'SiteTheming',
+                          'action' => 'colours',
+                        ],
+                      ],
+                    ],
                     'theme-styling' => [
               'type' => \Laminas\Router\Http\Literal::class,
               'options' => [

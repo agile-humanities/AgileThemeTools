@@ -213,3 +213,32 @@ blocked: these are advisories.
 A theme setting is audited when it is an `Omeka\Form\Element\Asset` element in `config/theme.ini` whose key or name
 contains "logo"; set `elements.<key>.options.logo_audit = true` (or `false`) to include another image or exclude
 one. Files are read from the local store, or over HTTP when assets are stored elsewhere (e.g. S3).
+
+## Building everything from the command line
+
+Two ways, for two purposes.
+
+**Every site, through the module.** The same path as the admin's Build button — preflight, staged build,
+verification, swap, manifest — for every site that has "Use theme configuration" switched on. One site after
+another; a failure does not stop the rest; a summary at the end and exit code 1 if any failed. Run it as the web
+server's user, from the Omeka root:
+
+```bash
+sudo -u www-data php modules/AgileThemeTools/data/scripts/build-site-themes.php --all
+sudo -u www-data php modules/AgileThemeTools/data/scripts/build-site-themes.php --all --check   # checks only
+sudo -u www-data php modules/AgileThemeTools/data/scripts/build-site-themes.php --site my-site
+sudo -u www-data php modules/AgileThemeTools/data/scripts/build-site-themes.php --list
+```
+
+**Every configuration, through gulp.** For theme developers working from `alt-config/*.yml` files: the default
+build, then one build per file to its own `asset-<name>` folder, each in its own process. Summary and a non-zero
+exit if any failed. Does not touch the sites' builds in `files/`.
+
+```bash
+./node_modules/.bin/gulp build --all
+```
+
+A note on partial alternative configurations: an `alt-config` file that sets only `clr2` does not change keys
+defined from it (`impact: $clr2`), because the theme system evaluates a key when it is read. The module's site
+builds are unaffected (they write the whole configuration); hand-written files should list every key that
+should follow.

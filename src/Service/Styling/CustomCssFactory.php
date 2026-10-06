@@ -11,13 +11,13 @@ class CustomCssFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $local = $services->get('Config')['file_store']['local'] ?? [];
-        return new CustomCss(
+        return (new CustomCss(
             $services->get('Omeka\Settings'),
             $services->get('Omeka\ApiManager'),
             $services->get(BuildManager::class),
             $services->get('Omeka\EntityManager'),
             $local['base_path'] ?: (OMEKA_PATH . '/files'),
             $local['base_uri'] ?: null
-        );
+        ))->setPaletteCss($services->get(\AgileThemeTools\Styling\PaletteCss::class));
     }
 }

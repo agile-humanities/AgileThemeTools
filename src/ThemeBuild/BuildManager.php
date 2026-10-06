@@ -108,6 +108,20 @@ class BuildManager
         $this->filesUri = $filesUri !== null ? rtrim($filesUri, '/') : null;
     }
 
+    /** @var \AgileThemeTools\Styling\PaletteCss|null Set by the factory; the palette stylesheet (colours and fonts without a build). */
+    protected $paletteCss = null;
+
+    public function setPaletteCss(\AgileThemeTools\Styling\PaletteCss $paletteCss): self
+    {
+        $this->paletteCss = $paletteCss;
+        return $this;
+    }
+
+    public function getPaletteCss(): \AgileThemeTools\Styling\PaletteCss
+    {
+        return $this->paletteCss ?? new \AgileThemeTools\Styling\PaletteCss($this);
+    }
+
     // ------------------------------------------------------------------ paths
 
     public function getRootDir(): string
