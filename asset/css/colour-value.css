@@ -126,3 +126,28 @@
 .agile-scale-preview-sample {
     white-space: nowrap;
 }
+
+/* The colour-roles panel (see renderRolesPanel in colour-value.js). */
+.agile-colour-roles { margin: 1em 0 1.5em; padding: 1em 1.25em; border: 1px solid #dfdfdf; border-radius: 3px; background: #fafafa; }
+.agile-colour-roles h4 { margin: 0 0 0.5em; }
+.agile-roles-lead { margin: 0.5em 0; color: #555; font-size: 0.9em; max-width: 60em; }
+.agile-roles-warning { margin: 0.5em 0; padding: 0.5em 0.75em; border-radius: 3px; background: #f9dede; color: #8a1f1f; }
+.agile-roles-ok { margin: 0.5em 0; padding: 0.5em 0.75em; border-radius: 3px; background: #d9f2dc; color: #1d5a26; }
+.agile-roles-continuum { display: flex; gap: 2px; margin: 0.75em 0; }
+.agile-roles-step { flex: 1 1 0; min-height: 5em; padding: 0.5em 0.6em; border: 1px solid rgba(0, 0, 0, 0.15); }
+.agile-roles-step-name { font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.4em; }
+.agile-roles-sample { font-size: 0.95em; line-height: 1.5; }
+.agile-roles-sample.is-bad { text-decoration: underline wavy #c00; }
+.agile-roles-brand { border-collapse: collapse; margin: 0.5em 0 1em; font-size: 0.9em; }
+.agile-roles-brand th, .agile-roles-brand td { border: 1px solid #e3e3e3; padding: 0.4em 0.6em; text-align: left; vertical-align: middle; }
+.agile-roles-brand th[scope="row"] { min-width: 12em; font-weight: normal; }
+.agile-roles-brand th[scope="row"] .agile-roles-chip { margin-right: 0.3em; }
+.agile-roles-chip { display: inline-block; width: 1em; height: 1em; border: 1px solid rgba(0, 0, 0, 0.25); border-radius: 2px; vertical-align: -0.15em; }
+.agile-roles-sample-text { display: inline-block; min-width: 2.2em; padding: 0.15em 0.4em; margin-right: 0.5em; border-radius: 2px; font-weight: bold; text-align: center; }
+.agile-roles-use { display: block; }
+.agile-roles-ratio { display: block; color: #777; font-size: 0.85em; }
+.agile-roles-use-body .agile-roles-use { color: #1d5a26; }
+.agile-roles-use-large .agile-roles-use { color: #7a5a00; }
+.agile-roles-use-accent .agile-roles-use { color: #8a1f1f; }
+.agile-roles-derived { list-style: none; margin: 0.5em 0; padding: 0; font-size: 0.9em; }
+.agile-roles-derived li { margin: 0.25em 0; }

@@ -28,7 +28,7 @@ $fallbackThumbnailUrl = $this->assetUrl('img/theme.jpg', 'Omeka');
     </div>
 <?php endif; ?>
 
-<?php if(isset($this->form) && $themeSettings('configurable_site_theme') && Manager::STATE_ACTIVE === $currentTheme->getState() && $this->themeIdentity()->profile($currentTheme)->supportsSiteBuilds()): ?>
+<?php if(isset($this->form) && $themeSettings('configurable_site_theme', true) && Manager::STATE_ACTIVE === $currentTheme->getState() && $this->themeIdentity()->profile($currentTheme)->supportsSiteBuilds()): ?>
     <?= $this->themeBuildPanel($this->currentSite(), $currentTheme, ['compact' => true]); ?>
 <?php endif; ?>
 
@@ -75,11 +75,16 @@ $fallbackThumbnailUrl = $this->assetUrl('img/theme.jpg', 'Omeka');
             <?php // Colours and fonts without a build: only where the served stylesheet reads its palette from variables
                   // (the Simplified theme; the Advanced theme built with --variables). The full styling page where the site builds. ?>
             <?php $paletteCss = $this->customCss()->getService()->getPaletteCss(); ?>
-            <?php if ($this->themeIdentity()->profile($currentTheme)->isAgile() && $paletteCss && $paletteCss->isVariableDriven($this->currentSite())): ?>
+            <?php $isAgileTheme = $this->themeIdentity()->profile($currentTheme)->isAgile(); ?>
+            <?php if ($isAgileTheme && $paletteCss && $paletteCss->isVariableDriven($this->currentSite())): ?>
                 <?= $this->hyperlink($translate('Colours and fonts'), $this->url(null, ['action' => 'theme-colours'], true), ['class' => 'theme-colours button']); ?>
+            <?php elseif ($isAgileTheme && $this->themeIdentity()->profile($currentTheme)->supportsSiteBuilds()): ?>
+                <p class="theme-styling-note"><?= $escape($translate('Colours and fonts without a build is offered when the theme’s stylesheet reads its palette from CSS variables (built with "gulp build --variables"). This stylesheet has its colours compiled in: use Configure theme styles and build.')) ?></p>
             <?php endif; ?>
-            <?php if ($themeSettings('configurable_site_theme') && $this->themeIdentity()->profile($currentTheme)->supportsSiteBuilds()): ?>
+            <?php if ($themeSettings('configurable_site_theme', true) && $this->themeIdentity()->profile($currentTheme)->supportsSiteBuilds()): ?>
                 <?= $this->hyperlink($translate('Configure theme styles'), $this->url(null, ['action' => 'theme-styling'], true), ['class' => 'theme-styling-pages button']); ?>
+            <?php elseif ($isAgileTheme && $this->themeIdentity()->profile($currentTheme)->supportsSiteBuilds()): ?>
+                <p class="theme-styling-note"><?= $escape($translate('Configure theme styles is offered when "Use theme configuration" is ticked in this theme’s Settings.')) ?></p>
             <?php endif; ?>
             <div class="version-notification" style="display: none;"
                 data-addon-id="<?php echo $this->escapeHtml($currentTheme->getId()); ?>"

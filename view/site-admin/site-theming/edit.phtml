@@ -5,6 +5,9 @@
   /** @var \Omeka\Api\Representation\SiteRepresentation|null $site */
   /** @var \Omeka\Site\Theme\Theme|null $theme */
 
+  // The effective colour configuration, for the live colour-roles panel (colour-value.js resolves the roles
+  // against the form's values, and against this for keys the form does not show).
+  $form->setAttribute('data-agile-colour-config', json_encode(\AgileThemeTools\Styling\ColourRoles::colourConfig($form->getDefaultValues()), JSON_UNESCAPED_SLASHES));
   $agileFormCollectionElementGroups = $this->plugin('agileFormCollectionElementGroups')($form);
 
 ?>

@@ -1,0 +1,23 @@
+<?php
+/**
+ * Page summary block, shown on the page only when the block asks for it. Listings read the block through the card
+ * display mode instead (DisplayMode\Card).
+ *
+ * @var \Omeka\Api\Representation\SitePageBlockRepresentation $block
+ * @var string $summary
+ * @var string $byline
+ * @var string $label
+ * @var \Omeka\Api\Representation\SiteBlockAttachmentRepresentation[] $attachments
+ */
+$escape = $this->plugin('escapeHtml');
+$attachment = $attachments[0] ?? null;
+$media = $attachment ? ($attachment->media() ?: ($attachment->item() ? $attachment->item()->primaryMedia() : null)) : null;
+?>
+<div id="block-<?= $block->id() ?>" class="page-summary region region-default">
+    <?php if ($media && $media->hasThumbnails()): ?>
+        <figure class="page-summary-image"><?= $this->thumbnail($media, 'medium') ?></figure>
+    <?php endif; ?>
+    <?php if ($label !== ''): ?><div class="item-label"><?= $escape($label) ?></div><?php endif; ?>
+    <?php if ($byline !== ''): ?><div class="byline"><?= $escape($byline) ?></div><?php endif; ?>
+    <div class="page-summary-text"><?= $summary ?></div>
+</div>

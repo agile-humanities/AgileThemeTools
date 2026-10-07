@@ -111,6 +111,27 @@ class PaletteCss
     }
 
     /**
+     * Brand-approved replacements a site has saved for derived roles (ColourRoles::OVERRIDABLE): plain colours only.
+     *
+     * @return array [key => colour]
+     */
+    public function overrides(Theme $theme, SiteRepresentation $site): array
+    {
+        if (!$this->builder->stylingApplies($theme, $site)) {
+            return [];
+        }
+        $saved = $this->builder->getSiteConfig($theme, $site);
+        $out = [];
+        foreach (array_keys(ColourRoles::OVERRIDABLE) as $key) {
+            $value = isset($saved[$key]) && is_scalar($saved[$key]) ? trim((string) $saved[$key]) : '';
+            if (self::isColour($value)) {
+                $out[$key] = $value;
+            }
+        }
+        return $out;
+    }
+
+    /**
      * The site's saved values for those inputs, as they can be applied: plain values only, defaults where the saved
      * value is empty or an expression.
      *
@@ -191,14 +212,15 @@ class PaletteCss
         }
         $lines = [];
         $values = $this->values($theme, $site);
-        $paletteChanged = false;
+        $overrides = $this->overrides($theme, $site);
+        $paletteChanged = (bool) $overrides;
         foreach ($values as $key => $value) {
             if (strcasecmp($value, $inputs[$key]['default']) !== 0) {
                 $lines[] = sprintf('    %s: %s;', $inputs[$key]['variable'], $value);
                 $paletteChanged = $paletteChanged || $inputs[$key]['kind'] === 'colour';
             }
         }
-        if (!$lines) {
+        if (!$lines && !$overrides) {
             return '';
         }
         // The derived roles follow the palette by rule, not by proportion: recompute every one of them from the
@@ -209,6 +231,9 @@ class PaletteCss
                 if ($inputs[$key]['kind'] === 'colour') {
                     $config[$key] = $value;
                 }
+            }
+            foreach ($overrides as $key => $value) {
+                $config[$key] = $value; // a brand-approved tint in place of the derivation
             }
             $evaluator = new ColourExpression($config);
             foreach ($this->derivedRoles($theme) as $key => $role) {

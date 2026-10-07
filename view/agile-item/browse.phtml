@@ -58,13 +58,7 @@ foreach ($items as $item):
     $heading = $headingTerm ? $item->value($headingTerm, ['default' => $translate('[Untitled]')]) : $item->displayTitle();
     $body = $bodyTerm ? $item->value($bodyTerm) : $item->displayDescription();
 ?>
-    <li class="item resource">
-        <?php echo $item->linkRaw($this->thumbnail($item, 'medium')); ?>
-        <h4><?php echo $item->link($heading); ?></h4>
-        <?php if ($body): ?>
-        <div class="description"><?php echo $escape($body); ?></div>
-        <?php endif; ?>
-    </li>
+    <?= $this->card($item, ['containerElement' => 'li', 'classes' => 'item resource']) ?>
 <?php endforeach; ?>
 </ul>
 <?php echo ($itemSetShow) ? '</div>' : ''; ?>

@@ -203,6 +203,9 @@ class Module extends AbstractModule {
       ],
     ]);
 
+    // Cards: what the card display mode shows (DisplayMode\CardSettings); sites may override each value.
+    \AgileThemeTools\DisplayMode\CardSettingsForm::addElements($form, fn ($key) => $settings->get($key), false);
+
     $form->add([
       'name' => AgileSearchHelper::UNLINKED_TERMS_SETTING,
       'type' => PropertyList::class,
@@ -241,6 +244,7 @@ class Module extends AbstractModule {
       'name' => \AgileThemeTools\Styling\BasicStyles::SETTING,
       'required' => false,
     ]);
+    \AgileThemeTools\DisplayMode\CardSettingsForm::addInputFilters($event->getParam('inputFilter'));
   }
 
   /**
@@ -278,6 +282,9 @@ class Module extends AbstractModule {
         'placeholder' => "/* Example */\n#main-menu {\n    background-color: var(--colour--1);\n}",
       ],
     ]);
+
+    // Cards for this site: each value empty means the installation's setting.
+    \AgileThemeTools\DisplayMode\CardSettingsForm::addElements($form, fn ($key) => $siteSettings->get($key), true);
   }
 
   public function addSiteSettingFormInputFilters(\Laminas\EventManager\Event $event) {
@@ -285,6 +292,7 @@ class Module extends AbstractModule {
       'name' => \AgileThemeTools\Styling\CustomCss::SITE_SETTING,
       'required' => false,
     ]);
+    \AgileThemeTools\DisplayMode\CardSettingsForm::addInputFilters($event->getParam('inputFilter'));
   }
 
   public function getConfig() {

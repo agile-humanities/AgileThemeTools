@@ -53,6 +53,17 @@ library's `_contrast.sass`) and redefines those variables. The Simplified theme 
 with a standalone copy of the evaluator (`agile-colour.php`) and its colour configuration baked in by the
 generator.
 
+## The colour-roles panel
+
+Both styling pages show, live as values change, how the colours work together (`asset/js/colour-value.js`,
+which resolves the theme's expressions in the browser, the colour-role functions included): the continuum
+`$black | $surface-dark | $surface-light | $white` with every guaranteed pair and its WCAG grade and a warning
+naming any that fails; each brand and accent colour's permitted use on each step (body text, large text and UI
+parts, accent only) with a sample; and the derived text variants in play, with where each came from. The page
+hands the script the effective colour configuration (`Styling\ColourRoles::colourConfig`), so roles the form does
+not show still resolve. On Colours and fonts, four fields take brand-approved tints in place of the automatic
+variants (empty = automatic; the swatch shows the automatic value); saving warns on failing guaranteed pairs.
+
 ## For themers
 
 The theme ships `asset/css/theme-variables.css`: every variable with notes — the palette and fonts to change,

@@ -9,11 +9,13 @@
  * @var bool $supportsSiteBuilds
  * @var bool $siteHasBuild
  * @var string|null $otherStylingBase
+ * @var array $colourConfig  the effective colour configuration, for the live roles panel (colour-value.js)
  */
 $translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $this->htmlElement('body')->appendAttribute('class', 'sites theme colours-and-fonts');
 $this->headLink()->appendStylesheet($this->assetUrl('css/theme-identity.css', 'AgileThemeTools'));
+$form->setAttribute('data-agile-colour-config', json_encode($colourConfig ?? [], JSON_UNESCAPED_SLASHES));
 $form->prepare();
 ?>
 <?= $this->pageTitle($translate('Colours and fonts'), 1, $translate('Sites')) ?>
@@ -47,8 +49,17 @@ $form->prepare();
 
 <fieldset id="colours-and-fonts-colours" class="section active">
     <legend><?= $escape($translate('Palette')) ?></legend>
-    <p class="explanation"><?= $escape($translate('Nine colours. Everything else — greys, tints, hover states — is mixed from them.')) ?></p>
+    <p class="explanation"><?= $escape($translate('Nine colours, each with a role. Everything else — greys, tints, hover states, the text colours that keep brand colours legible — is worked out from them.')) ?></p>
     <?php foreach ($form->colourKeys() as $key): ?>
+        <?= $this->formRow($form->get($key)) ?>
+    <?php endforeach; ?>
+</fieldset>
+
+<fieldset id="colours-and-fonts-roles" class="section active">
+    <legend><?= $escape($translate('How the colours work together')) ?></legend>
+    <div id="agile-colour-roles-host"><noscript><p><?= $escape($translate('The live check of the colour roles needs JavaScript. Saving reports any guaranteed pair that fails.')) ?></p></noscript></div>
+    <p class="explanation"><?= $escape($translate('Brand-approved tints. Where a brand colour cannot be used as text on a surface, the theme darkens or lightens it until it reads. If the brand supplies its own tint for that, set it here; leave a field empty to keep the automatic variant.')) ?></p>
+    <?php foreach ($form->overrideKeys() as $key): ?>
         <?= $this->formRow($form->get($key)) ?>
     <?php endforeach; ?>
 </fieldset>

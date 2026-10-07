@@ -157,8 +157,9 @@ class SiteThemingController extends AbstractActionController {
     }
     unset($input);
 
+    $overrides = $palette->overrides($theme, $site);
     /** @var \AgileThemeTools\Form\SiteAdmin\ColoursAndFontsForm $form */
-    $form = $this->getForm(\AgileThemeTools\Form\SiteAdmin\ColoursAndFontsForm::class, ['inputs' => $inputs]);
+    $form = $this->getForm(\AgileThemeTools\Form\SiteAdmin\ColoursAndFontsForm::class, ['inputs' => $inputs, 'overrides' => $overrides]);
     $form->setAttribute('action', $this->url()->fromRoute(null, [], true));
 
     if ($this->getRequest()->isPost()) {
@@ -177,7 +178,22 @@ class SiteThemingController extends AbstractActionController {
             $this->siteThemeSettings()->set($key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX, (string) $data[$key . \AgileThemeTools\Styling\ThemeFonts::SOURCE_SUFFIX]);
           }
         }
+        // Brand-approved tints for the derived roles: a plain colour replaces the derivation, empty restores it.
+        foreach ($form->overrideKeys() as $key) {
+          $value = trim((string) ($data[$key] ?? ''));
+          if ($value === '') {
+            $this->siteThemeSettings()->delete($key);
+          } elseif (\AgileThemeTools\Styling\PaletteCss::isColour($value)) {
+            $this->siteThemeSettings()->set($key, $value);
+          } else {
+            $this->messenger()->addWarning(sprintf($this->translate('"%1$s" is not a plain colour; %2$s keeps its automatic value.'), $value, $key));
+            $this->siteThemeSettings()->delete($key);
+          }
+        }
         $this->recordStylingBase();
+        foreach (\AgileThemeTools\Styling\ColourRoles::failures($this->builder->getSiteConfig($theme, $site)) as $failure) {
+          $this->messenger()->addWarning($this->translate('Colour roles: ') . $failure . '.');
+        }
         $status = $this->builder->getStatus($theme, $site);
         if (!empty($status['built']) || !empty($status['legacy'])) {
           // A per-site build has the colours compiled in; the variables cannot change them until it is rebuilt.
@@ -213,6 +229,7 @@ class SiteThemingController extends AbstractActionController {
       'supportsSiteBuilds' => $profile->supportsSiteBuilds(),
       'siteHasBuild' => (function () use ($theme, $site) { $s = $this->builder->getStatus($theme, $site); return !empty($s['built']) || !empty($s['legacy']); })(),
       'otherStylingBase' => !$this->builder->stylingApplies($theme, $site) ? $this->builder->getStylingBase($site) : null,
+      'colourConfig' => \AgileThemeTools\Styling\ColourRoles::colourConfig($this->builder->stylingApplies($theme, $site) ? $this->builder->getSiteConfig($theme, $site) : $this->builder->getDefaultConfig($theme)),
     ]);
     $view->setTemplate('site-admin/site-theming/colours');
     return $view;

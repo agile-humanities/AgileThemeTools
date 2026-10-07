@@ -49,6 +49,12 @@
               'txt'
           ],
       ],
+      // Display modes: alternative presentations of a resource or page (DisplayMode\Manager; see docs/CARDS.md).
+      'display_modes' => [
+        'invokables' => [
+          'card' => DisplayMode\Card::class,
+        ],
+      ],
       'block_layouts' => [
         'invokables' => [
         'pageTitle' => Site\BlockLayout\PageTitle::class,
@@ -56,6 +62,7 @@
       'factories' => [
         // 'glossary' => Service\BlockLayout\GlossaryItemFactory::class,
         'excerpt' => Service\BlockLayout\ExcerptFactory::class,
+        'pageSummary' => Service\BlockLayout\PageSummaryFactory::class,
         'regionalHtml' => Service\BlockLayout\RegionalHtmlFactory::class,
         'regionalTitle' => Service\BlockLayout\RegionalTitleFactory::class,
         'byline' => Service\BlockLayout\BylineFactory::class,
@@ -141,6 +148,7 @@
                   Dependency\DependencyAudit::class => Service\Dependency\DependencyAuditFactory::class,
                   Styling\PaletteCss::class => Service\Styling\PaletteCssFactory::class,
                   Styling\BasicStyles::class => Service\Styling\BasicStylesFactory::class,
+                  DisplayMode\Manager::class => Service\DisplayModeManagerFactory::class,
                   Styling\CustomCss::class => Service\Styling\CustomCssFactory::class,
                   Styling\LogoAudit::class => Service\Styling\LogoAuditFactory::class,
                   Styling\ThemeFonts::class => Service\Styling\ThemeFontsFactory::class,
@@ -170,6 +178,8 @@
            'themeLogoAudit' => Service\ViewHelper\ThemeLogoAuditFactory::class,
            'agileDependencies' => Service\ViewHelper\AgileDependenciesFactory::class,
            'agileBasicStyles' => Service\ViewHelper\AgileBasicStylesFactory::class,
+           'card' => Service\ViewHelper\DisplayModeHelpersFactory::class,
+           'displayMode' => Service\ViewHelper\DisplayModeHelpersFactory::class,
            View\Helper\ThemeIdentity::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
 
          ],
@@ -181,7 +191,7 @@
         'invokables' => [
             'agileFormCollectionElementGroups' => AgileFormCollectionElementGroups::class,
             'ckEditor' => View\Helper\CustomCKEditorConfig::class,
-            'card' => View\Helper\Card::class,
+
             'dateHandler' => View\Helper\DateHandler::class,
             'valueDisplay' => View\Helper\ValueDisplay::class,
             'pageSlug' => View\Helper\PageSlug::class,

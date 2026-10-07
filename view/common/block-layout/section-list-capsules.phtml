@@ -12,18 +12,14 @@
     <div class="cards">
         <?php foreach($this->pages as $page): ?>
             <div class='capsule'>
-                <?php if ($page['hasEmbeddedBlocks'] && array_key_exists('representativeImage',$page['embeddedBlocks'])): ?>
-                    <?php echo $page['embeddedBlocks']['representativeImage'][0]; ?>
+                <?php $card = $this->card()->prepare($page); $escape = $this->plugin('escapeHtml'); ?>
+                <?php if (!empty($card['image'])): ?>
+                    <div class="representative-image"><div class="item resource"><figure><a href="<?= $escape($card['url']) ?>"><?= $card['image'] ?></a></figure></div></div>
                 <?php endif; ?>
-                <h3><a href='<?php echo $page['o:url']; ?>'><?php echo $page['o:title']; ?></a></h3>
-                <?php if ($page['hasEmbeddedBlocks'] && array_key_exists('byline',$page['embeddedBlocks'])): ?>
-                    <?php echo $page['embeddedBlocks']['byline'][0]; ?>
-                <?php endif; ?>
-
-                <?php if ($page['hasEmbeddedBlocks'] && array_key_exists('excerpt',$page['embeddedBlocks'])): ?>
-                    <?php echo $page['embeddedBlocks']['excerpt'][0]; ?>
-                <?php endif; ?>
-                <a class='btn' href='<?php echo $page['o:url']; ?>'>View this item</a>
+                <h3><a href='<?= $escape($card['url'] ?? $page['o:url']) ?>'><?= $escape($card['title'] ?? $page['o:title']) ?></a></h3>
+                <?php if (!empty($card['byline'])): ?><div class="byline"><?= $escape($card['byline']) ?></div><?php endif; ?>
+                <?php if (!empty($card['summary'])): ?><div class="excerpt"><p><?= $card['summary'] ?></p></div><?php endif; ?>
+                <a class='btn' href='<?= $escape($card['url'] ?? $page['o:url']) ?>'>View this item</a>
             </div>
         <?php endforeach ?>
     </div>

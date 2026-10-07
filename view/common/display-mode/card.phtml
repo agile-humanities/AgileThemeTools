@@ -1,0 +1,64 @@
+<?php
+/**
+ * The card display mode (DisplayMode\Card): the module's own markup, kept plain. A theme overrides this template
+ * for its own markup; every value arrives prepared, so a template needs no representation calls.
+ *
+ * @var string $containerElement  div, li, article …
+ * @var string $cardStyle         card (the default), list-item, …: the first class
+ * @var string $classes           further classes
+ * @var string|null $slot
+ * @var string $type              item | item_set | media | resource | page
+ * @var string $url
+ * @var string $label
+ * @var string $title
+ * @var string $subtitle          HTML
+ * @var string $summary           escaped text
+ * @var string|null $image        thumbnail HTML
+ * @var bool $imageIsPlaceholder
+ * @var array $metadata           [['term', 'label', 'values' => [html]]]
+ * @var array $itemSets           [['title', 'url']]
+ * @var array|null $rights        ['label', 'value' => html]
+ * @var string $byline
+ */
+$escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
+$classes = trim($cardStyle . ' ' . $classes . ' card-' . $type . ($cardStyle !== 'card' ? ' card' : ''));
+?>
+<<?= $containerElement ?> class="<?= $escape($classes) ?>"<?= $slot !== null ? ' slot="' . $escape($slot) . '"' : '' ?>>
+<div>
+    <a href="<?= $escape($url) ?>">
+        <figure class="item-thumbnail<?= $imageIsPlaceholder ? ' default' : '' ?>">
+            <?= $image ?? '' ?>
+        </figure>
+    </a>
+    <div class="item-info">
+        <?php if ($label !== ''): ?><div class="item-label"><?= $escape($label) ?></div><?php endif; ?>
+        <h3 class="item-title"><a href="<?= $escape($url) ?>"><?= $escape($title) ?></a></h3>
+        <?php if ($subtitle !== ''): ?><div class="item-sublabel"><?= $subtitle ?></div><?php endif; ?>
+        <?php if ($byline !== ''): ?><div class="byline"><?= $escape($byline) ?></div><?php endif; ?>
+        <?php if ($summary !== ''): ?><div class="item-description"><?= $summary ?></div><?php endif; ?>
+        <?php if ($metadata || $itemSets || $rights): ?>
+        <div class="metadata-list">
+            <?php foreach ($metadata as $row): ?>
+            <div class="property" data-term="<?= $escape($row['term']) ?>">
+                <div class="label"><?= $escape($row['label']) ?></div>
+                <div class="values"><?php foreach ($row['values'] as $value): ?><div class="value"><?= $value ?></div><?php endforeach; ?></div>
+            </div>
+            <?php endforeach; ?>
+            <?php if ($itemSets): ?>
+            <div class="metadata-item">
+                <div class="label"><?= $escape(count($itemSets) > 1 ? $translate('Collections') : $translate('Collection')) ?></div>
+                <div class="value"><?php foreach ($itemSets as $i => $set): ?><?= $i ? ', ' : '' ?><a class="card--item-set-link" href="<?= $escape($set['url']) ?>"><?= $escape($set['title']) ?></a><?php endforeach; ?></div>
+            </div>
+            <?php endif; ?>
+            <?php if ($rights): ?>
+            <div class="metadata-item license">
+                <div class="label"><?= $escape($rights['label']) ?></div>
+                <div class="value"><?= $rights['value'] ?></div>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+</<?= $containerElement ?>>

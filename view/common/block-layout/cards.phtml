@@ -10,20 +10,7 @@
     <?php if ($this->hasPages): ?>
     <div class="cards">
         <?php foreach($this->pages as $page): ?>
-            <div class='card'>
-                <?php if ($page['hasEmbeddedBlocks'] && array_key_exists('representativeImage',$page['embeddedBlocks'])): ?>
-                    <?php echo $page['embeddedBlocks']['representativeImage'][0]; ?>
-                <?php endif; ?>
-                <h3><a href='<?php echo $page['o:url']; ?>'><?php echo $page['o:title']; ?></a></h3>
-                <?php if ($page['hasEmbeddedBlocks'] && array_key_exists('byline',$page['embeddedBlocks'])): ?>
-                    <?php echo $page['embeddedBlocks']['byline'][0]; ?>
-                <?php endif; ?>
-
-                <?php if ($page['hasEmbeddedBlocks'] && array_key_exists('excerpt',$page['embeddedBlocks'])): ?>
-                    <?php echo $page['embeddedBlocks']['excerpt'][0]; ?>
-                <?php endif; ?>
-                <a class='btn' href='<?php echo $page['o:url']; ?>'>View this item</a>
-            </div>
+            <?= $this->card($page, ['containerElement' => 'div']) ?>
         <?php endforeach ?>
     </div>
     <?php endif; ?>
