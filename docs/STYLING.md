@@ -40,6 +40,19 @@ says so when such a value is saved.
 Styling values belong to the base theme they were saved for (THEME-IDENTITY.md, "Styling values belong to a base
 theme").
 
+## Derived colour roles
+
+The theme's configuration defines some colours by rule rather than by proportion: `on_impact`,
+`brand_primary_on_light`, `on_brand` and the like are `on-colour()` and `ensure-contrast()` expressions that the
+build evaluates (a brand colour as it is when it reads on its surface, otherwise darkened or lightened until it
+does; the text colour for a surface). `color-mix()` cannot express them, so the theme's variables tool leaves
+their `:root` definitions as built values and makes the rules that use them read `var(--colour--on-impact)` and
+so on. When a site changes a palette colour on the Colours and fonts page, the palette stylesheet recomputes
+every derived role from the new palette with the build's own maths (`Styling\ColourExpression`, a port of the
+library's `_contrast.sass`) and redefines those variables. The Simplified theme does the same in its own layout,
+with a standalone copy of the evaluator (`agile-colour.php`) and its colour configuration baked in by the
+generator.
+
 ## For themers
 
 The theme ships `asset/css/theme-variables.css`: every variable with notes — the palette and fonts to change,

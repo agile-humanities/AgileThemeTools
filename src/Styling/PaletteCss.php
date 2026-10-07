@@ -11,9 +11,11 @@ use Omeka\Site\Theme\Theme;
  *
  * The theme's compiled stylesheet reads its palette and fonts from CSS variables (see the theme's
  * tools/css-variables.js), so a few :root declarations loaded after it restyle the site. This class turns the
- * site's saved styling values into those declarations: only the inputs — the palette colours and the font roles —
- * and only where the saved value is a plain colour or font list that differs from the theme's default. Values
- * written as theme-system expressions ($clr2, neutral(40)) are left to the build.
+ * site's saved styling values into those declarations: the inputs — the palette colours and the font roles —
+ * where the saved value is a plain colour or font list that differs from the theme's default, and, when a palette
+ * colour changed, the derived colour roles recomputed from the new palette (derivedRoles(), ColourExpression).
+ * Other values written as theme-system expressions ($clr2, neutral(40)) follow the palette through color-mix()
+ * in the stylesheet itself.
  *
  * The block sits inside @supports for color-mix(): browsers that cannot mix colours in CSS keep the built palette
  * throughout, rather than the inputs with the derived colours left behind.
@@ -87,6 +89,25 @@ class PaletteCss
             }
         }
         return $inputs;
+    }
+
+    /**
+     * The derived colour roles: configuration keys whose default value is an expression the build evaluates
+     * non-linearly (on-colour, ensure-contrast). They cannot be written as color-mix() of the palette, so when a
+     * site's palette changes without a build they are recomputed here (Styling\ColourExpression).
+     *
+     * @return array [key => ['variable' => string, 'expression' => string]]
+     */
+    public function derivedRoles(Theme $theme): array
+    {
+        $roles = [];
+        foreach ($this->builder->getDefaultConfig($theme) as $key => $value) {
+            $value = is_scalar($value) ? trim((string) $value) : '';
+            if ($value !== '' && ColourExpression::isDerived($value)) {
+                $roles[$key] = ['variable' => self::variableFor($key), 'expression' => $value];
+            }
+        }
+        return $roles;
     }
 
     /**
@@ -169,13 +190,33 @@ class PaletteCss
             return ''; // No default configuration to compare with (a theme without a build system).
         }
         $lines = [];
-        foreach ($this->values($theme, $site) as $key => $value) {
+        $values = $this->values($theme, $site);
+        $paletteChanged = false;
+        foreach ($values as $key => $value) {
             if (strcasecmp($value, $inputs[$key]['default']) !== 0) {
                 $lines[] = sprintf('    %s: %s;', $inputs[$key]['variable'], $value);
+                $paletteChanged = $paletteChanged || $inputs[$key]['kind'] === 'colour';
             }
         }
         if (!$lines) {
             return '';
+        }
+        // The derived roles follow the palette by rule, not by proportion: recompute every one of them from the
+        // palette as it now is (the defaults with the saved colours laid over), with the build's own maths.
+        if ($paletteChanged) {
+            $config = $this->builder->getDefaultConfig($theme);
+            foreach ($values as $key => $value) {
+                if ($inputs[$key]['kind'] === 'colour') {
+                    $config[$key] = $value;
+                }
+            }
+            $evaluator = new ColourExpression($config);
+            foreach ($this->derivedRoles($theme) as $key => $role) {
+                $colour = $evaluator->resolve($key);
+                if ($colour) {
+                    $lines[] = sprintf('    %s: %s;', $role['variable'], ColourExpression::toCss($colour));
+                }
+            }
         }
         return "/* Colours and fonts saved for this site (Agile Theme Tools). */\n@supports " . self::SUPPORTS . " {\n  :root {\n" . implode("\n", $lines) . "\n  }\n}\n";
     }
