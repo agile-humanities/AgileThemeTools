@@ -1,0 +1,7 @@
+<?php
+/**
+ * The module's item controller resolves to agile-theme-tools/agile-item/search. The Advanced Agile Base Theme overrides
+ * this template; every other theme gets the module's own version, kept under agile-item/ for the view helpers that
+ * share it. Without this file, item pages fail with "Unable to render template" under any other theme.
+ */
+echo $this->render('agile-item/search');

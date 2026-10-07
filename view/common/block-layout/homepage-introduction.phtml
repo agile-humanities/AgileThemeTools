@@ -43,7 +43,7 @@ $partial = $this->plugin('partial');
   </div>
   <?php if($hasAttachments): ?>
     <div class='slide-container'>
-      <slide-viewer class="<?php echo $hasAudioAttachment ? 'slideshow-with-audio' : ''; ?>" option-slidesPerRow='<?php echo $optionSlidesPerRow; ?>' option-slidesToShow='<?php echo $optionSlideToShow; ?>' option-autoplay='<?php echo $optionAutoPlay; ?>' option-fade='<?php echo $optionFade; ?>' integratedcontrols>
+      <slide-viewer class="<?php echo $hasAudioAttachment ? 'slideshow-with-audio' : ''; ?>" option-slidesPerRow='<?php echo $optionSlidesPerRow; ?>' option-slidesToShow='<?php echo $optionSlidesToShow; ?>' option-autoplay='<?php echo $optionAutoPlay; ?>' option-fade='<?php echo $optionFade; ?>' integratedcontrols>
         <div slot='slides'>
             <?php foreach ($attachments as $attachment): ?>
                 <?php

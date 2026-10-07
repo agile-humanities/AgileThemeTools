@@ -38,7 +38,7 @@ $itemMedia = $item->media();
 <?php
 $page = $this->params()->fromQuery('page', 1);
 $property = $this->params()->fromQuery('property');
-$subjectValues = $item->displaySubjectValues($page, 25, $property);
+$subjectValues = $item->displaySubjectValues(['page' => $page, 'perPage' => 25, 'property' => $property]); // Omeka 4 signature
 ?>
 <?php if ($subjectValues): ?>
 <div id="item-linked">
