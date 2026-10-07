@@ -50,3 +50,16 @@ need into the site's custom CSS, inside the same `@supports` block; loading the 
 
 Browsers older than early 2023 cannot mix colours in CSS. They show the theme's built palette throughout: the
 palette stylesheet and the derived-colour definitions both sit inside `@supports (color: color-mix(…))`.
+
+## Basic styles for the module's templates
+
+The module's own templates — its page blocks, the card, item browse, the item header and media blocks — carry no
+styling of their own. **Settings > Agile Theme Tools > "Basic styles for the module's templates"** (global, default
+off) loads four small, plain stylesheets on public pages so they are presentable under any theme, in the usual
+Omeka manner: `asset/css/basic/agile-text-blocks.css`, `agile-listings.css`, `agile-slide-viewer.css`,
+`agile-item.css` (`Styling\BasicStyles`). They read the palette variables `--colour--1/3/4` when the theme defines
+them and fall back to neutral greys.
+
+They are never loaded for an Agile theme (one that declares `agile_base`): the Advanced theme styles the
+templates from its SASS and the Simplified theme carries that compiled stylesheet. When the setting is on, a site using such a theme sees a note on its Theme
+page. The stylesheets are hand-maintained and deliberately minimal; a template change may need a matching edit.

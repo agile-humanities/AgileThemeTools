@@ -1,0 +1,60 @@
+/*
+ * Agile Theme Tools — basic styles for the module's text blocks: byline, deck, excerpt, quotation, callout,
+ * regional title, page title, contributor list, glossary.
+ *
+ * Plain, minimal rules so the blocks are presentable under any theme (the "Omeka way"). Loaded only when the
+ * module setting "Basic styles for the module's templates" is on; the Agile base themes style these blocks
+ * themselves. Palette variables are read when a theme defines them, with neutral fallbacks otherwise.
+ */
+
+:root {
+  --agile-basic-gap: 1.25rem;
+  --agile-basic-radius: 4px;
+  --agile-basic-border: #d9d9d9;
+  --agile-basic-surface: #f4f4f4;
+  --agile-basic-muted: #666;
+  --agile-basic-accent: var(--colour--1, #2a6f7c);
+  --agile-basic-dark: var(--colour--3, #222);
+  --agile-basic-light: var(--colour--4, #fff);
+}
+
+/* Every module block is a .region with its block id; give them a common rhythm. */
+.region[id^="block-"] { margin-bottom: var(--agile-basic-gap); }
+
+.page-title h1 { margin: 0 0 var(--agile-basic-gap); }
+
+.byline { font-size: 0.875em; color: var(--agile-basic-muted); }
+.byline h6 { margin: 0; font-size: 0.8em; letter-spacing: 0.08em; text-transform: uppercase; }
+.byline p { margin: 0.25em 0 0; }
+
+.deck { font-size: 1.2em; line-height: 1.5; }
+.deck p { margin: 0 0 0.5em; }
+
+.excerpt { color: var(--agile-basic-muted); }
+.excerpt p { margin: 0 0 0.5em; }
+
+.quotation blockquote { margin: 0; padding: 0.5em 0 0.5em 1.25em; border-left: 4px solid var(--agile-basic-accent); font-size: 1.15em; }
+.quotation blockquote p { margin: 0 0 0.5em; }
+.quotation cite { display: block; margin-top: 0.5em; font-size: 0.8em; font-style: normal; color: var(--agile-basic-muted); }
+
+/* Callout: the pulled text floats beside the running text; stacked on narrow screens. */
+.callout { display: flow-root; }
+.callout .callout-text { padding: 0.75em 1em; margin: 0 0 1em; background: var(--agile-basic-surface); border-radius: var(--agile-basic-radius); font-size: 1.15em; line-height: 1.4; }
+.callout .callout-text p { margin: 0; }
+@media (min-width: 48em) {
+  .callout .callout-text { width: 36%; }
+  .callout.callout-right .callout-text { float: right; margin-left: 1.5em; }
+  .callout.callout-left .callout-text { float: left; margin-right: 1.5em; }
+  .callout.callout-centre .callout-text { width: auto; float: none; text-align: center; }
+}
+
+.title-block h1 { margin: 0 0 0.25em; }
+.title-block .deck { margin-bottom: var(--agile-basic-gap); }
+
+.contributor-list .contributor-entry { margin-bottom: 1em; }
+.contributor-list .contributor { font-weight: bold; }
+.contributor-list .contributor-items { margin: 0.25em 0 0 1em; padding: 0; list-style: none; }
+.contributor-list .contributor-items li { margin: 0.15em 0; }
+
+dt.dl-item { font-weight: bold; margin-top: 0.75em; }
+dd.dl-item { margin: 0.25em 0 0.75em 1.5em; }

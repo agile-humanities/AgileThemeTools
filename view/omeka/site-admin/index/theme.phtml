@@ -20,6 +20,14 @@ $fallbackThumbnailUrl = $this->assetUrl('img/theme.jpg', 'Omeka');
     <?= $this->themeIdentity($currentTheme); ?>
 <?php endif; ?>
 
+<?php // The module's basic stylesheets are on, but this theme styles the module's templates itself (Styling\BasicStyles). ?>
+<?php if (Manager::STATE_ACTIVE === $currentTheme->getState() && $this->agileBasicStyles()->isRedundantFor($currentTheme)): ?>
+    <div class="theme-identity theme-identity-warning" role="status">
+        <ul><li class="theme-identity-warning"><strong><?= $escape($translate('Note')) ?></strong>
+        <?= $escape($translate('"Basic styles for the module\'s templates" is switched on in the global settings (Agile Theme Tools). This theme styles those templates itself, so the basic stylesheets are not loaded for it; switch the setting off unless another site needs it.')) ?></li></ul>
+    </div>
+<?php endif; ?>
+
 <?php if(isset($this->form) && $themeSettings('configurable_site_theme') && Manager::STATE_ACTIVE === $currentTheme->getState() && $this->themeIdentity()->profile($currentTheme)->supportsSiteBuilds()): ?>
     <?= $this->themeBuildPanel($this->currentSite(), $currentTheme, ['compact' => true]); ?>
 <?php endif; ?>

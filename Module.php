@@ -109,6 +109,9 @@ class Module extends AbstractModule {
     $sharedEventManager->attach(\Omeka\Form\SettingForm::class, 'form.add_elements', [$this, 'addSettingFormElements']);
     $sharedEventManager->attach(\Omeka\Form\SettingForm::class, 'form.add_input_filters', [$this, 'addSettingFormInputFilters']);
 
+    // Public pages: the module's basic stylesheets for its own templates, when switched on (see Styling\BasicStyles).
+    $sharedEventManager->attach('*', 'view.layout', [$this, 'addBasicStyles']);
+
     // Site settings > Theme styling: the site's custom CSS (see Styling\CustomCss).
     $sharedEventManager->attach(\Omeka\Form\SiteSettingsForm::class, 'form.add_elements', [$this, 'addSiteSettingFormElements']);
     $sharedEventManager->attach(\Omeka\Form\SiteSettingsForm::class, 'form.add_input_filters', [$this, 'addSiteSettingFormInputFilters']);
@@ -137,6 +140,16 @@ class Module extends AbstractModule {
     }
   }
 
+  /** view.layout on public pages: append the basic stylesheets unless the theme styles the module's templates itself. */
+  public function addBasicStyles(\Laminas\EventManager\Event $event) {
+    $view = $event->getTarget();
+    if (!$view instanceof \Laminas\View\Renderer\PhpRenderer || !$view->status()->isSiteRequest()) {
+      return;
+    }
+    $services = $this->getServiceLocator();
+    $services->get(\AgileThemeTools\Styling\BasicStyles::class)->inject($view, $services->get('Omeka\Site\ThemeManager')->getCurrentTheme());
+  }
+
   /**
    * Global settings: the properties whose values are never linked to search on public pages. One list serves every
    * site, since it rarely differs between them. See AgileSearchHelper::getUnlinkedTerms().
@@ -160,6 +173,19 @@ class Module extends AbstractModule {
         'id' => \AgileThemeTools\Styling\CustomCss::GLOBAL_SETTING,
         'value' => $settings->get(\AgileThemeTools\Styling\CustomCss::GLOBAL_SETTING),
         'placeholder' => "/* Example */\n.item-label {\n    color: var(--colour--2);\n}",
+      ],
+    ]);
+    $form->add([
+      'name' => \AgileThemeTools\Styling\BasicStyles::SETTING,
+      'type' => \Laminas\Form\Element\Checkbox::class,
+      'options' => [
+        'element_group' => 'agilethemetools_build',
+        'label' => 'Basic styles for the module\'s templates', // @translate
+        'info' => 'Load a few small, plain stylesheets on public pages so the module\'s own blocks and item templates are presentable under a theme that is not an Agile one (Omeka\'s default theme, others). Minimal rules, no design. Never loaded for the Agile base themes, which style these templates themselves.', // @translate
+      ],
+      'attributes' => [
+        'id' => \AgileThemeTools\Styling\BasicStyles::SETTING,
+        'value' => (bool) $settings->get(\AgileThemeTools\Styling\BasicStyles::SETTING, false),
       ],
     ]);
     $form->add([
@@ -209,6 +235,10 @@ class Module extends AbstractModule {
     ]);
     $event->getParam('inputFilter')->add([
       'name' => \AgileThemeTools\Styling\CustomCss::GLOBAL_SETTING,
+      'required' => false,
+    ]);
+    $event->getParam('inputFilter')->add([
+      'name' => \AgileThemeTools\Styling\BasicStyles::SETTING,
       'required' => false,
     ]);
   }

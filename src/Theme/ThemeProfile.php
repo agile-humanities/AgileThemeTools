@@ -126,6 +126,16 @@ class ThemeProfile
         return $this->isLegacy() ? self::BASE_ADVANCED : null;
     }
 
+    /**
+     * Whether the theme styles the module's own templates itself, so the module's basic stylesheets
+     * (Styling\BasicStyles) are redundant for it. True for every Agile theme: the Simplified theme carries the
+     * Advanced theme's compiled stylesheet, block styles included.
+     */
+    public function stylesModuleTemplates(): bool
+    {
+        return $this->isAgile();
+    }
+
     /** The version of the base theme this theme corresponds to, as declared. Null when not declared. */
     public function baseVersion(): ?string
     {

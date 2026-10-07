@@ -140,6 +140,7 @@
                   ThemeBuild\BuildManager::class => Service\ThemeBuild\BuildManagerFactory::class,
                   Dependency\DependencyAudit::class => Service\Dependency\DependencyAuditFactory::class,
                   Styling\PaletteCss::class => Service\Styling\PaletteCssFactory::class,
+                  Styling\BasicStyles::class => Service\Styling\BasicStylesFactory::class,
                   Styling\CustomCss::class => Service\Styling\CustomCssFactory::class,
                   Styling\LogoAudit::class => Service\Styling\LogoAuditFactory::class,
                   Styling\ThemeFonts::class => Service\Styling\ThemeFontsFactory::class,
@@ -168,6 +169,7 @@
            'themeBuildPanel' => Service\ViewHelper\ThemeBuildPanelFactory::class,
            'themeLogoAudit' => Service\ViewHelper\ThemeLogoAuditFactory::class,
            'agileDependencies' => Service\ViewHelper\AgileDependenciesFactory::class,
+           'agileBasicStyles' => Service\ViewHelper\AgileBasicStylesFactory::class,
            View\Helper\ThemeIdentity::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
 
          ],

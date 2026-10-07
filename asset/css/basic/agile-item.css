@@ -1,0 +1,60 @@
+/*
+ * Agile Theme Tools — basic styles for the module's item templates: the card (agile-item/card), the item browse
+ * list, the item header resource-page block (item-info, wayfinding, tabs and panels, key metadata, rights,
+ * download) and the item media block.
+ *
+ * Plain, minimal rules so the pages are presentable under any theme. Loaded only when the module setting
+ * "Basic styles for the module's templates" is on. See agile-text-blocks.css for the variables.
+ */
+
+/* Cards (agile-item/card.phtml) wherever they appear */
+.card { display: flex; flex-direction: column; border: 1px solid var(--agile-basic-border); border-radius: var(--agile-basic-radius); overflow: hidden; background: #fff; }
+.card .item-thumbnail { margin: 0; }
+.card .item-thumbnail img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.card > .item-label { display: none; }
+.card .item-info { padding: 1em; }
+.card .item-info .item-label { margin: 0 0 0.25em; font-size: 0.75em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--agile-basic-muted); }
+.card .item-title { margin: 0 0 0.5em; font-size: 1.1em; }
+.card .item-description { font-size: 0.9em; color: var(--agile-basic-muted); }
+.card .item-link { margin-top: 0.75em; font-size: 0.9em; }
+.card .item-link span { color: var(--agile-basic-muted); }
+
+/* Item browse (agile-item/browse.phtml) */
+.item.browse .browse-controls { display: flex; flex-wrap: wrap; gap: 1em; align-items: center; margin: var(--agile-basic-gap) 0; }
+.item.browse .resource-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(16em, 1fr)); gap: var(--agile-basic-gap); }
+.item.browse .resource-list .item.resource { border: 1px solid var(--agile-basic-border); border-radius: var(--agile-basic-radius); padding: 1em; background: #fff; }
+.item.browse .resource-list .item.resource img { display: block; max-width: 100%; height: auto; margin-bottom: 0.5em; }
+.item.browse .resource-list .item.resource h4 { margin: 0 0 0.25em; font-size: 1.05em; }
+.item.browse .resource-list .description { font-size: 0.9em; color: var(--agile-basic-muted); }
+.item.browse .item-set-items > h3 { margin-top: var(--agile-basic-gap); }
+
+/* Item page: media block and header block */
+.item.show .item-viewer { margin-bottom: var(--agile-basic-gap); }
+.item.show .item-viewer img, .item.show .item-viewer video, .item.show .item-viewer iframe { max-width: 100%; }
+.item.show .media-embeds > * + * { margin-top: 1em; }
+
+.item-info.item-text .wayfinding { font-size: 0.85em; color: var(--agile-basic-muted); margin-bottom: 1em; }
+.item-info.item-text .wayfinding a { color: inherit; }
+.item-info.item-text .wayfinding .icon-home::before { content: "⌂ "; }
+.item-info.item-text header .item-label { font-size: 0.75em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--agile-basic-muted); }
+.item-info.item-text header h1 { margin: 0.1em 0 0.25em; }
+.item-info.item-text .subtitle { font-size: 1.1em; }
+.item-info.item-text .deck { font-size: 1.05em; color: var(--agile-basic-muted); margin-bottom: 1em; }
+
+.container-with-tabs-and-panels .tabs { margin: 1em 0; border-bottom: 2px solid var(--agile-basic-border); }
+.container-with-tabs-and-panels .tab { display: inline-block; padding: 0.5em 1em; margin-bottom: -2px; border-bottom: 2px solid transparent; cursor: pointer; }
+.container-with-tabs-and-panels .tab.active-tab { border-bottom-color: var(--agile-basic-accent); font-weight: bold; }
+.container-with-tabs-and-panels .transcription-panel { display: none; }
+.container-with-tabs-and-panels .transcription-panel.active-panel { display: block; }
+.container-with-tabs-and-panels .description-text { margin: 0 0 1em; }
+
+.metadata-list .property { display: grid; grid-template-columns: minmax(8em, 12em) 1fr; gap: 0.5em 1em; padding: 0.4em 0; border-top: 1px solid var(--agile-basic-border); }
+.metadata-list .metadata-label, .metadata-list .label { font-size: 0.85em; font-weight: bold; color: var(--agile-basic-muted); }
+.metadata-list .values .value + .value { margin-top: 0.25em; }
+.rights-statement .metadata-label, .rights .metadata-label { font-size: 0.85em; font-weight: bold; color: var(--agile-basic-muted); margin: 1em 0 0.25em; }
+.rights-statement .metadata-value { margin: 0; }
+
+/* Download block and media renderers */
+.download-media a, .download-item a { display: inline-block; padding: 0.4em 0.8em; border: 1px solid var(--agile-basic-border); border-radius: var(--agile-basic-radius); text-decoration: none; }
+.media-container { margin-bottom: 1em; }
+.media-container.text { max-height: 24em; overflow: auto; padding: 1em; background: var(--agile-basic-surface); border-radius: var(--agile-basic-radius); }

@@ -1,0 +1,90 @@
+/*
+ * Agile Theme Tools — basic styles for the module's listing blocks: section listings (cards, capsules, feature,
+ * tabs, vertical), site link cards, item listing, representative image, poster, section introduction splash,
+ * and the title area / introduction / button they share.
+ *
+ * Plain, minimal rules so the blocks are presentable under any theme. Loaded only when the module setting
+ * "Basic styles for the module's templates" is on. See agile-text-blocks.css for the shared variables.
+ */
+
+/* Shared: title area, introduction, button */
+.region .title-area { margin-bottom: var(--agile-basic-gap); }
+.region .title-area h2, .region > h2 { margin: 0 0 0.35em; }
+.region .block-introduction { max-width: 48em; margin-bottom: 1em; }
+.region .block-introduction p { margin: 0 0 0.5em; }
+.region a.btn {
+  display: inline-block; padding: 0.5em 1em; border: 1px solid var(--agile-basic-dark); border-radius: var(--agile-basic-radius);
+  color: var(--agile-basic-dark); text-decoration: none; font-size: 0.9em; line-height: 1.2;
+}
+.region a.btn:hover, .region a.btn:focus { background: var(--agile-basic-dark); color: var(--agile-basic-light); }
+
+/* Thumbnails inside blocks never overflow their box */
+.region img { max-width: 100%; height: auto; }
+
+/* Section listings: cards and capsules on a responsive grid */
+.listing-cards .cards, .listing-capsules .cards, .listing-feature .cards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(14em, 1fr)); gap: var(--agile-basic-gap); margin: 0; padding: 0;
+}
+.listing-cards .card, .listing-capsules .capsule, .listing-feature .capsule {
+  display: flex; flex-direction: column; border: 1px solid var(--agile-basic-border); border-radius: var(--agile-basic-radius); padding: 1em; background: #fff;
+}
+.listing-cards .card h3, .listing-capsules .capsule h3, .listing-feature .capsule h3 { margin: 0.5em 0 0.25em; font-size: 1.1em; }
+.listing-cards .card .btn, .listing-capsules .capsule .btn, .listing-feature .capsule .btn { margin-top: auto; align-self: flex-start; }
+.listing-cards .card .representative-image, .listing-capsules .capsule .representative-image, .listing-feature .capsule .representative-image { margin: -1em -1em 0; }
+.listing-cards .card .representative-image figure, .listing-capsules .capsule .representative-image figure { margin: 0; }
+.listing-capsules .capsule { flex-direction: row; gap: 1em; align-items: flex-start; }
+.listing-capsules .capsule .representative-image { margin: 0; flex: 0 0 30%; }
+.listing-feature .title-section { margin-bottom: var(--agile-basic-gap); }
+
+/* Section listings: tabs and vertical lists */
+.item-list ul { list-style: none; margin: 0; padding: 0; }
+.item-list .item-link { display: block; padding: 0.4em 0; text-decoration: none; border-bottom: 1px solid var(--agile-basic-border); }
+.item-list .item-link.active { font-weight: bold; }
+.item-list-tabs ul { display: flex; flex-wrap: wrap; gap: 0.25em; border-bottom: 2px solid var(--agile-basic-border); }
+.item-list-tabs .item-link { padding: 0.5em 1em; border: 0; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.item-list-tabs .item-link.active { border-bottom-color: var(--agile-basic-accent); }
+
+/* Site link cards */
+.featured-exhibits { display: grid; grid-template-columns: repeat(auto-fill, minmax(14em, 1fr)); gap: var(--agile-basic-gap); }
+.featured-exhibits .featured-exhibits-intro { grid-column: 1 / -1; }
+.featured-exhibits .link-card { border: 1px solid var(--agile-basic-border); border-radius: var(--agile-basic-radius); overflow: hidden; background: #fff; }
+.featured-exhibits .link-card > a { display: block; color: inherit; text-decoration: none; }
+.featured-exhibits .link-card img { display: block; width: 100%; }
+.featured-exhibits .link-card-info { padding: 1em; }
+.featured-exhibits .link-card-info h3 { margin: 0.25em 0; font-size: 1.1em; }
+.featured-exhibits .link-card-info hr { border: 0; border-top: 1px solid var(--agile-basic-border); margin: 0.75em 0; }
+.featured-exhibits .item-label { font-size: 0.75em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--agile-basic-muted); }
+.featured-exhibits .card-link { display: inline-block; margin-top: 0.5em; color: var(--agile-basic-accent); }
+
+/* Item listing with introduction */
+.item-listing { display: grid; grid-template-columns: repeat(auto-fill, minmax(12em, 1fr)); gap: var(--agile-basic-gap); }
+.item-listing .title-area { grid-column: 1 / -1; }
+.item-listing .item.resource img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--agile-basic-radius); }
+.item-listing .item.resource h3 { margin: 0.5em 0 0.25em; font-size: 1em; }
+.item-listing .caption { font-size: 0.875em; color: var(--agile-basic-muted); }
+
+/* Representative image */
+.representative-image figure { margin: 0; }
+.representative-image img { display: block; width: 100%; }
+.representative-image figcaption { font-size: 0.875em; color: var(--agile-basic-muted); padding: 0.5em 0; }
+
+/* Poster: image behind text */
+.poster { position: relative; display: grid; min-height: 18em; border-radius: var(--agile-basic-radius); overflow: hidden; background: var(--agile-basic-dark); color: var(--agile-basic-light); }
+.poster .image-background { position: absolute; inset: 0; z-index: 0; }
+.poster .image-background figure { margin: 0; height: 100%; }
+.poster .image-background img { width: 100%; height: 100%; object-fit: cover; opacity: 0.45; }
+.poster .title, .poster .poster-text { position: relative; z-index: 1; padding: 0 1.5em; }
+.poster .title { padding-top: 1.5em; font-size: 1.75em; font-weight: bold; line-height: 1.2; }
+.poster .poster-text { padding-bottom: 1.5em; }
+.poster .poster-text a { color: inherit; }
+.poster.treatment-1 .title { font-size: 2.25em; }
+
+/* Section introduction splash: images beside the introduction */
+.section-intro-splash { display: grid; gap: var(--agile-basic-gap); align-items: center; }
+@media (min-width: 48em) {
+  .section-intro-splash { grid-template-columns: 1fr 1fr; }
+  .section-intro-splash.right .introduction { order: 2; }
+}
+.section-intro-splash .items figure { margin: 0; }
+.section-intro-splash .items img { display: block; width: 100%; border-radius: var(--agile-basic-radius); }
+.section-intro-splash .introductory-text h1 { margin-top: 0; }

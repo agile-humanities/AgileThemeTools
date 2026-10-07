@@ -1,0 +1,33 @@
+/*
+ * Agile Theme Tools — basic styles for the slide viewer blocks (Slide Viewer, Homepage Introduction).
+ *
+ * The <slide-viewer> web component carries its own structural styles (asset/js/slideViewerComponent.js); these
+ * rules only place the block and its title area and give the captions a readable default. Loaded only when the
+ * module setting "Basic styles for the module's templates" is on. See agile-text-blocks.css for the variables.
+ */
+
+.slideviewer-container .slide-container { margin-bottom: var(--agile-basic-gap); }
+.slideviewer-container slide-viewer { display: block; }
+.slideviewer-container slide-item img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+
+/* Slide captions and the title slide */
+.slideviewer-container [slot="slide-caption"] { padding: 0.75em 0; font-size: 0.9em; }
+.slideviewer-container [slot="slide-caption"] h3 { margin: 0 0 0.25em; font-size: 1.05em; }
+.slideviewer-container [slot="slide-caption"] p { margin: 0 0 0.5em; }
+.slideviewer-container .slide-title-content h2 { margin: 0.25em 0; }
+.slideviewer-container .item-label { font-size: 0.75em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--agile-basic-muted); }
+.slideviewer-container .next-slide { cursor: pointer; }
+.slideviewer-container .next-slide .more { display: inline-block; padding: 0.5em 1em; border: 1px solid currentColor; border-radius: var(--agile-basic-radius); }
+
+/* Homepage introduction: title area above the slides */
+.homepage-introduction .title-area { padding: var(--agile-basic-gap) 0; }
+.homepage-introduction .title-area h1 { margin: 0 0 0.25em; }
+.homepage-introduction .title-area .label { font-size: 0.75em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--agile-basic-muted); }
+.homepage-introduction .title-area .subtitle { font-size: 1.1em; margin-bottom: 0.5em; }
+.homepage-introduction .title-area .introductory-text { max-width: 48em; }
+.homepage-introduction #intro-browse { margin: 1em 0; }
+.homepage-introduction .intro-browse--title { font-weight: bold; }
+
+/* Audio slideshows */
+.slideviewer-container .audio-controls { margin-top: 0.5em; font-size: 0.9em; }
+.slideviewer-container .audio-caption { color: var(--agile-basic-muted); }
