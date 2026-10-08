@@ -1,0 +1,44 @@
+<?php
+/**
+ * The Agile Theme Tools search form (Search\AgileFormAdapter): Advanced Search's form object, laid out element by
+ * element through the form-layout helper (View\Helper\FormLayout) instead of printed whole. The buttons sit
+ * outside the collection so a theme can place them; the submit stays in the form.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \AdvancedSearch\Form\MainSearchForm $form
+ * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $searchConfig
+ */
+$params = $this->params()->fromQuery() ?: [];
+$form->setData($params)->prepare();
+$formId = $form->getAttribute('id') ?: 'form-search';
+$form->setAttribute('id', $formId);
+
+$reset = null;
+$submit = null;
+if ($form->has('form-reset')) {
+    $reset = $form->get('form-reset');
+    $form->remove('form-reset');
+}
+if ($form->has('submit')) {
+    $submit = $form->get('submit');
+    $form->remove('submit');
+}
+?>
+<!-- BEGIN search/agile/form -->
+<div id="advanced-search-form-wrapper">
+    <div id="advanced-search-form" class="advanced-search-form agile-search-form">
+        <?= $this->form()->openTag($form) ?>
+        <?php $form->removeAttribute('id'); // formLayout keeps element ids; the form's own id is on the tag ?>
+        <?= $this->formLayout($form) ?>
+        <div class="search-form-buttons form-field field-type-buttons">
+            <?= $reset ? $this->formButton($reset) : '' ?>
+            <?php if ($submit): ?>
+                <?= $this->formButton($submit) ?>
+            <?php else: ?>
+                <button type="submit" name="submit" class="search-submit button" value=""><?= $this->escapeHtml($this->translate('Submit')) ?></button>
+            <?php endif; ?>
+        </div>
+        <?= $this->form()->closeTag() ?>
+    </div>
+</div>
+<!-- END search/agile/form -->

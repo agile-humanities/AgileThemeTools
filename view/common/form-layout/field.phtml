@@ -1,0 +1,29 @@
+<?php
+/**
+ * A single form element (text, search, number, select, checkbox, multi-checkbox, radio, range, textarea …):
+ * wrapper, label, the control through Laminas' element helper, info. See View\Helper\FormLayout.
+ *
+ * @var \Laminas\Form\ElementInterface $element
+ * @var string $type
+ * @var string $name
+ * @var string|null $label
+ * @var string|null $info
+ * @var string $classes
+ */
+$escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
+$id = $element->getAttribute('id') ?: preg_replace('/[^a-zA-Z0-9_-]+/', '-', $name);
+$element->setAttribute('id', $id);
+$labelAfter = $type === 'checkbox';
+$groupLabel = in_array($type, ['multi-checkbox', 'radio'], true); // a group of controls: the label is a legend
+?>
+<div class="<?= $escape($classes) ?>">
+  <?php if ($label !== null && $label !== '' && !$labelAfter && !$groupLabel): ?>
+    <label class="field-label" for="<?= $escape($id) ?>"><?= $escape($translate($label)) ?></label>
+  <?php endif; ?>
+  <?php if ($groupLabel): ?><fieldset class="field-group"><legend class="field-label"><?= $escape($translate((string) $label)) ?></legend><?php endif; ?>
+  <div class="field-control"><?= $this->formElement($element) ?><?php if ($labelAfter && $label): ?> <label class="field-label" for="<?= $escape($id) ?>"><?= $escape($translate($label)) ?></label><?php endif; ?></div>
+  <?php if ($groupLabel): ?></fieldset><?php endif; ?>
+  <?php if ($info): ?><div class="field-info"><?= $escape($translate($info)) ?></div><?php endif; ?>
+  <?php if ($element->getMessages()): ?><div class="field-errors"><?= $this->formElementErrors($element) ?></div><?php endif; ?>
+</div>

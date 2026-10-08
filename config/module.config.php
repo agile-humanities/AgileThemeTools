@@ -49,6 +49,13 @@
               'txt'
           ],
       ],
+      // The Agile search form, offered in an Advanced Search configuration's Form select (Search\AgileFormAdapter;
+      // see docs/SEARCH.md). Advanced Search reads this registry; without that module it is simply unused.
+      'advanced_search_form_adapters' => [
+        'factories' => [
+          'agile' => Service\Search\AgileFormAdapterFactory::class,
+        ],
+      ],
       // Display modes: alternative presentations of a resource or page (DisplayMode\Manager; see docs/CARDS.md).
       'display_modes' => [
         'invokables' => [
@@ -189,6 +196,7 @@
             ],
         ],
         'invokables' => [
+           'formLayout' => View\Helper\FormLayout::class,
             'agileFormCollectionElementGroups' => AgileFormCollectionElementGroups::class,
             'ckEditor' => View\Helper\CustomCKEditorConfig::class,
 

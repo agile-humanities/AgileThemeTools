@@ -1,0 +1,38 @@
+<?php
+/**
+ * The Advanced Search configurations and whether the Agile form layout knows every element class their forms use
+ * (Search\FormCoverage). Shown under the dependency audit on the module's configuration page.
+ *
+ * @var array $coverage
+ * @var string $advancedSearchVersion
+ */
+$escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
+?>
+<div class="dependency-audit search-form-coverage">
+    <h3><?= $escape($translate('Search forms')) ?></h3>
+    <p><?= $escape(sprintf($translate('Each Advanced Search configuration (version %s), the form it uses, and whether the Agile form layout knows every element class in its form. An unknown class still renders, through Laminas\' row helper, but without the Agile layout: after a pin change, this is where an upstream addition shows up.'), $advancedSearchVersion)) ?></p>
+    <table class="tablesaw">
+        <thead><tr><th><?= $escape($translate('Search configuration')) ?></th><th><?= $escape($translate('Form')) ?></th><th><?= $escape($translate('Element classes')) ?></th><th><?= $escape($translate('Agile layout')) ?></th></tr></thead>
+        <tbody>
+        <?php foreach ($coverage as $row): ?>
+            <tr class="dependency-audit-row-<?= $row['error'] ? 'error' : ($row['unknown'] ? 'warning' : 'ok') ?>">
+                <td><strong><?= $escape($row['name']) ?></strong></td>
+                <td><?= $escape($row['adapter'] ?: '—') ?></td>
+                <td><?= $escape(count($row['classes'])) ?></td>
+                <td>
+                    <?php if ($row['error']): ?>
+                        <span class="dependency-audit-badge dependency-audit-error"><?= $escape($translate('Problem')) ?></span> <?= $escape($row['error']) ?>
+                    <?php elseif ($row['unknown']): ?>
+                        <span class="dependency-audit-badge dependency-audit-warning"><?= $escape($translate('Warning')) ?></span>
+                        <?= $escape(sprintf($translate('%d element class(es) not known to the layout:'), count($row['unknown']))) ?>
+                        <?php foreach ($row['unknown'] as $class => $name): ?><code><?= $escape($class) ?></code> (<?= $escape($name) ?>) <?php endforeach; ?>
+                    <?php else: ?>
+                        <span class="dependency-audit-badge dependency-audit-ok"><?= $escape($translate('OK')) ?></span> <?= $escape($translate('every element class is laid out')) ?>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>

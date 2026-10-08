@@ -1,0 +1,10 @@
+<?php
+/**
+ * A collection (repeatable rows, e.g. Advanced Search's advanced filters): rendered by Laminas' collection helper
+ * inside the wrapper, so the attributes, the row template and the scripts that add rows keep working.
+ * @var \Laminas\Form\Element\Collection $element
+ * @var string $classes
+ */
+$escape = $this->plugin('escapeHtml');
+?>
+<div class="<?= $escape($classes) ?>"><?= $this->formCollection($element) ?></div>

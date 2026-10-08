@@ -25,6 +25,19 @@ class AgileDependencies extends AbstractHelper
             $problems = $this->audit->problems();
             return $problems ? $this->getView()->partial('common/dependency-audit-summary', ['problems' => $problems, 'audit' => $this->audit]) : '';
         }
-        return $this->getView()->partial('common/dependency-audit', ['rows' => $this->audit->rows(), 'audit' => $this->audit]);
+        $html = $this->getView()->partial('common/dependency-audit', ['rows' => $this->audit->rows(), 'audit' => $this->audit]);
+        // The Advanced Search configurations and the form element classes the Agile form layout knows (G2 fixtures).
+        if (class_exists(\AdvancedSearch\Api\Representation\SearchConfigRepresentation::class)) {
+            try {
+                $view = $this->getView();
+                $configs = $view->api()->search('search_configs')->getContent();
+                $coverage = \AgileThemeTools\Search\FormCoverage::report($configs, $view->plugin('formLayout'));
+                $version = ($this->audit->rows()['AdvancedSearch']['installed'] ?? null) ?: ($this->audit->manifest()['AdvancedSearch']['pinned'] ?? '');
+                $html .= $view->partial('common/search-form-coverage', ['coverage' => $coverage, 'advancedSearchVersion' => (string) $version]);
+            } catch (\Throwable $e) {
+                // The panel is informational; a failure here must not break the configuration page.
+            }
+        }
+        return $html;
     }
 }

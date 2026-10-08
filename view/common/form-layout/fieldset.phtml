@@ -1,0 +1,17 @@
+<?php
+/**
+ * A fieldset: its elements laid out recursively. See View\Helper\FormLayout.
+ * @var \Laminas\Form\FieldsetInterface $element
+ * @var string $classes
+ * @var \AgileThemeTools\View\Helper\FormLayout $layout
+ */
+$escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
+$label = $element->getLabel();
+$attributes = $element->getAttributes();
+$fieldsetClass = trim('form-fieldset ' . ($attributes['class'] ?? '') . ' ' . str_replace('form-field ', '', $classes));
+?>
+<fieldset class="<?= $escape($fieldsetClass) ?>"<?= isset($attributes['id']) ? ' id="' . $escape($attributes['id']) . '"' : '' ?><?= isset($attributes['data-count-default']) ? ' data-count-default="' . $escape($attributes['data-count-default']) . '"' : '' ?>>
+  <?php if ($label): ?><legend><?= $escape($translate($label)) ?></legend><?php endif; ?>
+  <?= $layout->render($element, $options ?? []) ?>
+</fieldset>

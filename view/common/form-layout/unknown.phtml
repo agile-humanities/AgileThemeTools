@@ -1,0 +1,2 @@
+<?php /** An element class the layout does not know: Laminas' row rendering inside a generic wrapper; the dependency audit reports the class. @var \Laminas\Form\ElementInterface $element */ $escape = $this->plugin('escapeHtml'); ?>
+<div class="<?= $escape($classes) ?>" data-unknown-element="<?= $escape(get_class($element)) ?>"><?= $this->formRow($element) ?></div>
