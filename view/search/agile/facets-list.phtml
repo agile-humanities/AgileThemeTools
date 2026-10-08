@@ -112,11 +112,28 @@ if (!empty($itemSet)) {
                         <details open="<?= $stateExpand ? 'true' : 'false' ?>" aria-label="<?= $translate($stateExpand ? 'Collapse' : 'Expand') ?>" >
                         <summary><?= $escape($translate($facetParams['label'] ?? $name)) ?></summary>
                         <div class="facet-elements<?= $hasState ? ' collapsible' : '' ?>"<?= $hasState && $facetParams['state'] === 'collapse' ? ' hidden="hidden"' : '' ?>>
-                            <?= $facetElements($facetParams['field'], $facetValues, $facetParams) ?>
+                            <?php
+                            // Advanced Search's facet helpers render their own partials (search/facet-*); for the
+                            // facet types this module ships partials for, take the helper's prepared data (labels,
+                            // active state, urls) and render the module's partial instead, so the markup the search
+                            // support script and the theme expect (.search-facet-items, .facet-item.inactive) is used
+                            // under any theme. Other types (tree, select, range) keep Advanced Search's partials.
+                            $facetType = (string) ($facetParams['type'] ?? '');
+                            $ownPartial = in_array($facetType, ['', 'Checkbox'], true) ? 'search/agile/facet-checkboxes' : ($facetType === 'Link' ? 'search/agile/facet-links' : null);
+                            $facetData = $ownPartial ? $facetElements($facetParams['field'], $facetValues, $facetParams, true) : null;
+                            if (is_array($facetData)) {
+                                if (!isset($facetData['facetValues'])) {
+                                    $facetData = ['name' => $facetParams['field'], 'facetValues' => $facetData, 'options' => $facetParams, 'tree' => null];
+                                }
+                                echo $this->partial($ownPartial, $facetData);
+                            } else {
+                                echo $facetElements($facetParams['field'], $facetValues, $facetParams);
+                            }
+                            ?>
                             <?php if (($facetParams['more'] ?? '') !== '' && in_array($facetParams['type'] ?? '', ['', 'Checkbox', 'Link', 'Tree', 'TreeLink', 'Thesaurus', 'ThesaurusLink']) && count($facetValues) > (int) trim((string) $facetParams['more'])): ?>
                                 <div class="facet--controls">
-                                    <button type="button" class="ghost facet--expand">More options</button>
-                                    <button type="button" class="ghost facet--collapse" style="display:none">Fewer options</button>
+                                    <button type="button" class="agile-button ghost facet--expand">More options</button>
+                                    <button type="button" class="agile-button ghost facet--collapse" style="display:none">Fewer options</button>
                                 </div>
                             <?php endif; ?>
                         </div>

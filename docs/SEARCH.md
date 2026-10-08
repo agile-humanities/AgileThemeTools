@@ -24,9 +24,21 @@ The adapter's form template lays the form out element by element through the `fo
 `view/common/form-layout/` — `field` (text, search, number, select, checkbox, multi-checkbox, radio, range,
 textarea), `fieldset` (recursed), `collection` (repeatable rows), `hidden`, `button`, `range-double` and
 `multi-text` (Advanced Search's own elements, drawn by their own helpers inside the wrapper so its script keeps
-working), and `unknown`. Wrapper classes: `.form-field .field-type-<type> .field-name-<name>`, plus
-`.field-required` and `.field-has-error`. A theme overrides a partial for markup; the rules that decide grouping
-and columns are still to come (the design pass).
+working), and `unknown`. The wrappers use Omeka's row vocabulary, so one theme stylesheet covers Omeka core forms,
+the stock Advanced Search form (rendered through Omeka's `formRow` partial) and this one:
+
+    div.field.form-field.field-type-<type>.field-name-<name> [.required] [.field-has-error] #<id>_field
+      div.field-meta > label.field-label [+ div.field-description]     (absent when the element has no label)
+      div.inputs     > the control [+ label after, for a single checkbox]
+      ul.messages                                                      (errors only)
+
+A group of controls (multi-checkbox, radio) is a `fieldset.field` with a `legend`. `.form-field`, `.field-type-*`
+and `.field-name-*` are the layout hooks: rules target fields by name (`.field-name-q`), never by position. Buttons
+rendered by the layout carry `agile-button <type>` (the search submit is `agile-button search`), the theme's button
+vocabulary, so no stylesheet needs an element selector. Selects rendered by the layout get `agile-select` and lose
+Advanced Search's `chosen-select`: the Agile search page enhances its selects with Select2 (`search-support.js`,
+scope `#search-page`, including filter rows added later); Chosen is left to Advanced Search's own forms. A theme
+overrides a partial for markup; the rules that decide grouping and columns are still to come (the design pass).
 
 The hooks Advanced Search's script expects are preserved: `.search-filters-advanced > fieldset.filter` with the
 `.search-filter-plus` button and the row template for the advanced filters, the range slider's classes, the

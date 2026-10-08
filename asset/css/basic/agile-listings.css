@@ -21,6 +21,10 @@
 /* Thumbnails inside blocks never overflow their box */
 .region img { max-width: 100%; height: auto; }
 
+/* Cards without a representative image show a placeholder from the module's set (asset/img/thumbnails) */
+.item-thumbnail.default { background: var(--agile-basic-border, #eee); }
+.item-thumbnail.default img.placeholder { display: block; width: 100%; max-height: 12em; object-fit: contain; padding: 15%; box-sizing: border-box; opacity: 0.8; }
+
 /* Section listings: cards and capsules on a responsive grid */
 .listing-cards .cards, .listing-capsules .cards, .listing-feature .cards {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(14em, 1fr)); gap: var(--agile-basic-gap); margin: 0; padding: 0;

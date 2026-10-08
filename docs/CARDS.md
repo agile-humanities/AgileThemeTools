@@ -54,7 +54,14 @@ In order, the first that exists:
      that vocabulary, say).
 3. **The primary media** — the first attached media, in the order set on the item.
 4. **The first attached media that has a thumbnail** (an image among documents).
-5. None: the theme shows its placeholder.
+5. None: a placeholder from the module's set, chosen by `DisplayMode\Card::placeholderType()` — by the primary
+   media's type when the resource has media without a thumbnail (audio, video, text/PDF, spreadsheet …), else by
+   the resource class (`dctype:StillImage` → image, `dctype:Text` → text, `dctype:Sound` → audio, `dctype:MovingImage`
+   → video, Dataset, InteractiveResource, Collection, PhysicalObject → object; the common `bibo` classes likewise),
+   else `collection` for an item set and `item` otherwise; pages get `page`. The names are file names: the theme's
+   `img/svg/thumbnails/<name>.svg` (the Agile Base theme ships a neutral line-art set, `source/img/svg/thumbnails/`;
+   a fork replaces the files), or the module's `asset/img/thumbnails/<name>.svg` under other themes. The card's
+   figure carries `default placeholder-<name>` so a theme can style them (the Agile theme: `60_site_elements/cards/_card.sass`).
 
 ## Site pages
 

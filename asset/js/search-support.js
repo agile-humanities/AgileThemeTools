@@ -211,49 +211,40 @@ if (searchViewType === null) {
 
     });
 
-    /* Apply Select2 to Advanced Search Filters when dynamically created. */
-
-    let observer = new MutationObserver(mutations => {
-
-      for(let mutation of mutations) {
-
-        for(let node of mutation.addedNodes) {
-          if (!(node instanceof HTMLElement)) continue;
-          updateSelect(node);
-          // Check to see if child nodes of newly created element are select elements.
-          if (node.hasChildNodes()) {
-            for (const childNode of node.childNodes) {
-              if (!(childNode instanceof HTMLElement)) continue;
-              updateSelect(childNode);
-            }
-          }
-        }
-      }
-
-    });
+    /* Select2 on the Agile search page's selects: the form's fields, the advanced filter rows (including the
+     * rows Advanced Search's script adds later) and the results header's sort and per-page selects. One
+     * enhancer per page: selects marked .no-select2 or .chosen-select are left to their own script. The theme's
+     * formElements.js only enhances selects that opt in with .agile-select, so nothing is enhanced twice. */
 
     function updateSelect(element) {
-      // Ignore non-select elements
-      if (element.tagName != "SELECT") {
-        return;
-      }
-
+      if (!(element instanceof HTMLSelectElement)) { return; }
       const select = $(element);
-
-      if (!select.data('select2')) { // Only update if not already a select2 element
-        if (!select.hasClass('no-select2')) {
-          select.select2({
-            width: 'element',
-            minimumResultsForSearch: 40
-          });
-        }
-      }
+      if (select.data('select2') || select.is('.no-select2, .chosen-select')) { return; }
+      select.select2({
+        width: 'element',
+        minimumResultsForSearch: 40
+      });
     }
 
-    const searchFilters = document.getElementById("search-filters");
+    const searchPage = document.getElementById('search-page');
 
-    if(searchFilters instanceof Node) {
-      observer.observe(searchFilters, {childList: true, subtree: true});
+    if (searchPage instanceof Node) {
+      searchPage.querySelectorAll('select').forEach(updateSelect);
+
+      // Advanced Search's script clones the filter row template when a row is added.
+      const observer = new MutationObserver(mutations => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (!(node instanceof HTMLElement)) continue;
+            updateSelect(node);
+            node.querySelectorAll('select').forEach(updateSelect);
+          }
+        }
+      });
+      const searchFilters = document.getElementById('search-filters');
+      if (searchFilters instanceof Node) {
+        observer.observe(searchFilters, {childList: true, subtree: true});
+      }
     }
   });
 

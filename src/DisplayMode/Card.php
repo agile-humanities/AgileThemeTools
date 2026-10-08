@@ -49,6 +49,7 @@ class Card implements DisplayModeInterface
             'summary' => '',
             'image' => null,          // thumbnail HTML, or null
             'imageIsPlaceholder' => false,
+            'placeholder' => null,    // when there is no image: which placeholder stands in (image, text, audio, video, dataset, interactive, collection, object, page, item)
             'metadata' => [],         // [['term' => , 'label' => , 'values' => [html]]]
             'itemSets' => [],         // [['title' => , 'url' => ]]
             'rights' => null,         // ['label' => , 'value' => html]
@@ -123,6 +124,7 @@ class Card implements DisplayModeInterface
         // Image
         $data['image'] = $this->resourceImage($view, $resource, $settings['image_term'], $thumbnailType);
         $data['imageIsPlaceholder'] = $data['image'] === null;
+        $data['placeholder'] = $data['imageIsPlaceholder'] ? self::placeholderType($resource) : null;
 
         // The short metadata list
         $values = $resource->values();
@@ -260,5 +262,49 @@ class Card implements DisplayModeInterface
             }
         }
         $data['imageIsPlaceholder'] = $data['image'] === null;
+        $data['placeholder'] = $data['imageIsPlaceholder'] ? 'page' : null;
+    }
+
+    /**
+     * Which placeholder image stands in for a resource without a representative image: by the primary media's
+     * type when it has one (a sound file without a thumbnail gets the audio placeholder), else by the resource
+     * class, else by the kind of resource. The names are the file names of the placeholder set: the theme's
+     * img/svg/thumbnails/<name>.svg, or the module's asset/img/thumbnails/<name>.svg under other themes.
+     */
+    public static function placeholderType(AbstractResourceEntityRepresentation $resource): string
+    {
+        $media = $resource instanceof MediaRepresentation ? $resource : $resource->primaryMedia();
+        $mediaType = $media ? (string) $media->mediaType() : '';
+        if ($mediaType !== '') {
+            foreach (['image/' => 'image', 'audio/' => 'audio', 'video/' => 'video', 'text/' => 'text', 'application/pdf' => 'text', 'application/epub' => 'text', 'application/msword' => 'text', 'application/vnd.openxmlformats-officedocument.wordprocessingml' => 'text', 'application/vnd.ms-excel' => 'dataset', 'application/vnd.openxmlformats-officedocument.spreadsheetml' => 'dataset', 'application/json' => 'dataset', 'application/xml' => 'dataset'] as $prefix => $name) {
+                if (str_starts_with($mediaType, $prefix)) {
+                    return $name;
+                }
+            }
+        }
+        $term = $resource->resourceClass() ? (string) $resource->resourceClass()->term() : '';
+        $byClass = [
+            'dctype:StillImage' => 'image', 'dctype:Image' => 'image', 'bibo:Image' => 'image', 'bibo:Map' => 'image',
+            'dctype:Text' => 'text', 'bibo:Document' => 'text', 'bibo:Book' => 'text', 'bibo:Article' => 'text', 'bibo:Letter' => 'text', 'bibo:Manuscript' => 'text', 'bibo:Report' => 'text', 'bibo:Thesis' => 'text', 'bibo:Periodical' => 'text',
+            'dctype:Sound' => 'audio', 'bibo:AudioDocument' => 'audio',
+            'dctype:MovingImage' => 'video', 'bibo:Film' => 'video', 'bibo:AudioVisualDocument' => 'video',
+            'dctype:Dataset' => 'dataset', 'dctype:Software' => 'dataset',
+            'dctype:InteractiveResource' => 'interactive', 'bibo:Website' => 'interactive',
+            'dctype:Collection' => 'collection',
+            'dctype:PhysicalObject' => 'object',
+        ];
+        if (isset($byClass[$term])) {
+            return $byClass[$term];
+        }
+        // No class: a dcterms:type value such as "Text", "Still Image", "Sound" (the DCMI type vocabulary as text).
+        $typeValue = $resource->value('dcterms:type');
+        if ($typeValue) {
+            $typeText = strtolower(trim(preg_replace('/[^a-z]+/i', ' ', (string) $typeValue)));
+            $byType = ['still image' => 'image', 'image' => 'image', 'text' => 'text', 'sound' => 'audio', 'audio' => 'audio', 'moving image' => 'video', 'video' => 'video', 'dataset' => 'dataset', 'software' => 'dataset', 'interactive resource' => 'interactive', 'collection' => 'collection', 'physical object' => 'object'];
+            if (isset($byType[$typeText])) {
+                return $byType[$typeText];
+            }
+        }
+        return $resource instanceof ItemSetRepresentation ? 'collection' : 'item';
     }
 }

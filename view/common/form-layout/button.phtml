@@ -1,2 +1,12 @@
-<?php /** A button or submit. @var \Laminas\Form\ElementInterface $element @var string $classes */ $escape = $this->plugin('escapeHtml'); ?>
+<?php
+/**
+ * A button or submit. Buttons rendered by the layout carry the theme's button vocabulary (.agile-button plus the
+ * button type), so no stylesheet needs an element selector to style them.
+ * @var \Laminas\Form\ElementInterface $element
+ * @var string $classes
+ */
+$escape = $this->plugin('escapeHtml');
+$buttonType = $element->getAttribute('type') ?: 'button';
+$element->setAttribute('class', trim(($element->getAttribute('class') ?? '') . ' agile-button ' . $buttonType));
+?>
 <div class="<?= $escape($classes) ?>"><?= $this->formButton($element) ?></div>

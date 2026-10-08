@@ -1,7 +1,15 @@
 <?php
 /**
- * A single form element (text, search, number, select, checkbox, multi-checkbox, radio, range, textarea …):
- * wrapper, label, the control through Laminas' element helper, info. See View\Helper\FormLayout.
+ * A single form element (text, search, number, select, checkbox, multi-checkbox, radio, range, textarea …), in
+ * Omeka's row vocabulary so one stylesheet covers core forms, the stock Advanced Search form and this one:
+ *
+ *   div.field.form-field.field-type-<type>.field-name-<name> [.required] [.field-has-error] #<id>_field
+ *     div.field-meta  > label.field-label [+ div.field-description]        (absent when the element has no label)
+ *     div.inputs      > the control (Laminas' element helper) [+ label after, for a single checkbox]
+ *     ul.messages                                                          (only with errors)
+ *
+ * A group of controls (multi-checkbox, radio) is a fieldset.field with a legend instead of .field-meta.
+ * The .form-field / .field-type-* / .field-name-* classes are the layout hooks (View\Helper\FormLayout).
  *
  * @var \Laminas\Form\ElementInterface $element
  * @var string $type
@@ -14,16 +22,39 @@ $escape = $this->plugin('escapeHtml');
 $translate = $this->plugin('translate');
 $id = $element->getAttribute('id') ?: preg_replace('/[^a-zA-Z0-9_-]+/', '-', $name);
 $element->setAttribute('id', $id);
+if ($type === 'select') {
+    // One enhancer per select: the Agile search page enhances its selects with Select2 (asset/js/search-support.js),
+    // so Advanced Search's Chosen hook is removed from them; .agile-select marks them for the theme's opt-in script.
+    $classAttr = preg_split('/\s+/', trim((string) $element->getAttribute('class')), -1, PREG_SPLIT_NO_EMPTY);
+    $classAttr = array_values(array_diff($classAttr, ['chosen-select']));
+    $classAttr[] = 'agile-select';
+    $element->setAttribute('class', implode(' ', array_unique($classAttr)));
+}
 $labelAfter = $type === 'checkbox';
 $groupLabel = in_array($type, ['multi-checkbox', 'radio'], true); // a group of controls: the label is a legend
+$hasLabel = $label !== null && $label !== '';
+$classes = 'field ' . $classes . ($element->getAttribute('required') ? ' required' : '');
+$fieldId = ' id="' . $escape($id) . '_field"';
+$messages = $element->getMessages() ? $this->formElementErrors($element, ['class' => 'messages']) : '';
+$description = $info ? '<div class="field-description">' . $escape($translate($info)) . '</div>' : '';
 ?>
-<div class="<?= $escape($classes) ?>">
-  <?php if ($label !== null && $label !== '' && !$labelAfter && !$groupLabel): ?>
+<?php if ($groupLabel): ?>
+<fieldset class="<?= $escape($classes) ?> field-group"<?= $fieldId ?>>
+  <?php if ($hasLabel): ?><legend class="field-label"><?= $escape($translate($label)) ?></legend><?php endif; ?>
+  <?= $description ?>
+  <div class="inputs"><?= $this->formElement($element) ?></div>
+  <?= $messages ?>
+</fieldset>
+<?php else: ?>
+<div class="<?= $escape($classes) ?>"<?= $fieldId ?>>
+  <?php if ($hasLabel && !$labelAfter): ?>
+  <div class="field-meta">
     <label class="field-label" for="<?= $escape($id) ?>"><?= $escape($translate($label)) ?></label>
+    <?= $description ?>
+  </div>
   <?php endif; ?>
-  <?php if ($groupLabel): ?><fieldset class="field-group"><legend class="field-label"><?= $escape($translate((string) $label)) ?></legend><?php endif; ?>
-  <div class="field-control"><?= $this->formElement($element) ?><?php if ($labelAfter && $label): ?> <label class="field-label" for="<?= $escape($id) ?>"><?= $escape($translate($label)) ?></label><?php endif; ?></div>
-  <?php if ($groupLabel): ?></fieldset><?php endif; ?>
-  <?php if ($info): ?><div class="field-info"><?= $escape($translate($info)) ?></div><?php endif; ?>
-  <?php if ($element->getMessages()): ?><div class="field-errors"><?= $this->formElementErrors($element) ?></div><?php endif; ?>
+  <div class="inputs"><?= $this->formElement($element) ?><?php if ($labelAfter && $hasLabel): ?> <label class="field-label" for="<?= $escape($id) ?>"><?= $escape($translate($label)) ?></label><?php endif; ?></div>
+  <?php if ($labelAfter && $description): ?><?= $description ?><?php endif; ?>
+  <?= $messages ?>
 </div>
+<?php endif; ?>

@@ -10,6 +10,6 @@ $this->htmlElement('body')->appendAttribute('class', 'items search');
     ['query' => $this->params()->fromQuery(), 'resourceType' => 'item']
 ); ?>
 <div id="page-actions">
-    <input type="submit" name="submit" value="<?php echo $this->escapeHtml($translate('Search')); ?>">
+    <input type="submit" class="agile-button submit" name="submit" value="<?php echo $this->escapeHtml($translate('Search')); ?>">
 </div>
 </form>

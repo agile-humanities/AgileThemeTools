@@ -18,10 +18,12 @@ $submit = null;
 if ($form->has('form-reset')) {
     $reset = $form->get('form-reset');
     $form->remove('form-reset');
+    $reset->setAttribute('class', trim(($reset->getAttribute('class') ?? '') . ' agile-button reset'));
 }
 if ($form->has('submit')) {
     $submit = $form->get('submit');
     $form->remove('submit');
+    $submit->setAttribute('class', trim(($submit->getAttribute('class') ?? '') . ' agile-button search'));
 }
 ?>
 <!-- BEGIN search/agile/form -->
@@ -35,7 +37,7 @@ if ($form->has('submit')) {
             <?php if ($submit): ?>
                 <?= $this->formButton($submit) ?>
             <?php else: ?>
-                <button type="submit" name="submit" class="search-submit button" value=""><?= $this->escapeHtml($this->translate('Submit')) ?></button>
+                <button type="submit" name="submit" class="search-submit button agile-button search" value=""><?= $this->escapeHtml($this->translate('Submit')) ?></button>
             <?php endif; ?>
         </div>
         <?= $this->form()->closeTag() ?>
