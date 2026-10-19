@@ -31,6 +31,8 @@
 /* Item page: media block and header block */
 .item.show .item-viewer { margin-bottom: var(--agile-basic-gap); }
 .item.show .item-viewer img, .item.show .item-viewer video, .item.show .item-viewer iframe { max-width: 100%; }
+/* The OHMS Embed viewer (an iframe to the module's ohms.js) keeps its own height */
+.item.show .item-viewer iframe[src*="ohmsjs"] { display: block; width: 100%; height: 800px; border: 0; }
 .item.show .media-embeds > * + * { margin-top: 1em; }
 
 .item-info.item-text .wayfinding { font-size: 0.85em; color: var(--agile-basic-muted); margin-bottom: 1em; }

@@ -11,7 +11,7 @@
     <?php if ($this->hasPages): ?>
     <div class="cards">
         <?php foreach($this->pages as $page): ?>
-            <?= $this->card($page, ['containerElement' => 'div']) ?>
+            <?= $this->card($page, ['containerElement' => 'div', 'label' => $this->cardLabel ?: null]) ?>
         <?php endforeach ?>
     </div>
     <?php endif; ?>

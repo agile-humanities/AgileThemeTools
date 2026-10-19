@@ -11,7 +11,7 @@ $options = ['hasVtt'=>$hasVtt];
 ?>
 <!-- TEMPLATE BEGIN common/resource-page-block-layout/item-media.phtml -->
 <?php if ($resourceMedia): ?>
-  <div class="item-viewer media-embeds <?= $usePrimary ? 'primary-media' : '' ?>  <?= $hasVtt ? 'has-vtt' : '' ?>">
+  <div class="item-viewer media-embeds <?= $usePrimary ? 'primary-media' : '' ?> <?= !empty($primaryOnly) ? 'primary-only' : '' ?> <?= $hasVtt ? 'has-vtt' : '' ?>">
 
     <?php
       if ($useMirador):
@@ -25,7 +25,7 @@ $options = ['hasVtt'=>$hasVtt];
       elseif ($usePrimary): ?>
         <?= $primaryMedia->render(); ?>
       <?php else: ?>
-        <?php foreach ($resourceMedia as $media): ?>
+        <?php foreach ($displayMedia ?? $resourceMedia as $media): ?>
           <?php if ($hasVtt) {
             $options['label'] = sprintf("Transcript (%s)",$media->extension());
           }

@@ -1,5 +1,7 @@
 <?php
 /**
+ * Link facet values (AgileThemeTools search page). See facet-checkboxes.phtml.
+ *
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var string $name
  * @var array $facetValues With value, count, active, label and url when needed.
@@ -9,33 +11,20 @@
 $plugins = $this->getHelperPluginManager();
 $escape = $plugins->get('escapeHtml');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
-$itemSetFacetHandler = $plugins->get('itemSetFacetHandler');
-$itemSetFacetHandler->getPublicItemSets();
 
 $displayCount = !empty($options['display_count']);
 ?>
-<!-- TEMPLATE BEGIN: /search/facet-links.phtml -->
+<!-- TEMPLATE BEGIN: /search/agile/facet-links.phtml -->
 <ul class="search-facet-items facet-links">
-    <?php foreach ($facetValues as $facetValue): ?>
-        <?php
-        // Solr item-set facets (indexed by title): "field" is supplied in facets-list.phtml so they can be identified here.
-        $isItemSet = array_key_exists('field',$facetValue) && ($facetValue['field'] === 'item_set_dcterms_title_ss' || $facetValue['field'] === 'item_set_title_alt_ss');
-        $facetClass = urlencode(strtolower(str_replace(' ','-',$facetValue['value'])));
-        ?>
-
-        <?php
-            // Hides private item sets from Solr item-set facets; everything else is shown.
-            if (!$isItemSet || ($itemSetFacetHandler->isPublicItemSet($facetValue['label']) && $isItemSet)):
-        ?>
-            <li class="<?= $facetClass ?> <?= $facetValue['active'] ? 'active selected' : 'inactive' ?>">
-            <span>
-                <a rel="nofollow" href="<?= $escapeAttr($facetValue['url']) ?>"><?= $escape($facetValue['label']) ?></a>
-                <?php if ($displayCount): ?>
-                    (<span class="count"><?= $facetValue['count'] ?></span>)
-                <?php endif; ?>
-            </span>
-            </li>
-        <?php endif; ?>
+    <?php foreach ($facetValues as $facetValue):
+        $facetClass = urlencode(strtolower(str_replace(' ', '-', (string) $facetValue['value'])));
+    ?>
+    <li class="facet-item <?= $facetClass ?> <?= $facetValue['active'] ? 'active selected' : 'inactive' ?>">
+        <span>
+            <a rel="nofollow" href="<?= $escapeAttr($facetValue['url']) ?>"><?= $escape($facetValue['label']) ?></a>
+            <?php if ($displayCount): ?>(<span class="count"><?= $facetValue['count'] ?></span>)<?php endif; ?>
+        </span>
+    </li>
     <?php endforeach; ?>
 </ul>
-<!-- TEMPLATE END: /search/facet-links.phtml -->
+<!-- TEMPLATE END: /search/agile/facet-links.phtml -->

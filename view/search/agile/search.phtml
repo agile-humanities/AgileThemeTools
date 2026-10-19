@@ -151,7 +151,7 @@ $this->headScript()
             <div class="item-set-items">
                 <h2><?= $translate('Items') ?></h2>
             </div>
-        <?php else: ?>
+        <?php elseif (empty($isPartial)): ?>
             <?php $this->htmlElement('body')->appendAttribute('class', 'search-page resource browse'); ?>
             <div class="title-block">
                 <div container>
@@ -182,7 +182,7 @@ $this->headScript()
             <div class="search-results">
 
                 <?php if ($displayPartsHeader): ?>
-                <header class="search-results-part search-results--header">
+                <header class="search-results-part search-results-header search-results--header">
                     <?= $partial('search/agile/results-header-footer', $variables + ['resultPart' => 'header']) ?>
                 </header>
                 <?php endif; ?>
@@ -197,20 +197,14 @@ $this->headScript()
                         <?php if (isset($displayParts['search_filters'])): ?>
                             <div class="search-filter-container">
                                 <?= $searchConfig->renderSearchFilters($query, ['template' => 'search/agile/search-filters-links']) ?>
-                                <?php if($activeFacets):
-                                    foreach($activeFacets as $facet => $facetValues):
-                                        $facets[$facet]['label'] =  $facets[$facet]['label'] == "Item Set" ? "Collection" : $facets[$facet]['label'];
-                                ?>
-                                        <div class="search-filters">
-                                            <span class="summary--text--label"><?= array_key_exists($facet,$facets) ? $facets[$facet]['label'] : $facet ?></span>
-                                            <?php
-                                                foreach($facetValues as $facetValue):
-                                                    printf("<span class='summary--text'>%s</span>",$facetValue);
-                                                endforeach;
-                                            ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                                <?php if ($activeFacets):
+                                    // The active facets as removable chips. Advanced Search's helper resolves the labels
+                                    // (field labels, item-set titles, value labels) and the removal urls; the module's
+                                    // partial draws them.
+                                    $facetActives = $plugins->get('facetActives');
+                                    $activeFacetsData = $facetActives(null, $activeFacets, ($searchConfig->setting('facet') ?: []) + ['facets_mode' => $searchConfig->subSetting('results', 'active_facets_mode', 'link_remove'), 'show_field_label' => true], true);
+                                    echo $this->partial('search/agile/facet-actives', ['activeFacets' => $activeFacetsData, 'options' => ($searchConfig->setting('facet') ?: []) + ['show_field_label' => true]]);
+                                endif; ?>
                             </div>
                         <?php endif; ?>
 
@@ -226,7 +220,7 @@ $this->headScript()
                     <?= $translate('This item set has no items.') ?>
                     <?php else: ?>
                     <?php if (in_array($searchConfig->subSetting('results', 'search_filters', 'header'), ['header', 'both'])): ?>
-                    <div class="search-results-part search-results-header">
+                    <div class="search-results-part search-results-header search-results--header">
                         <?= $searchConfig->renderSearchFilters($query, ['template' => 'search/agile/search-filters-links']) ?>
                     </div>
                     <?php endif; ?>

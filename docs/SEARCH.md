@@ -58,3 +58,14 @@ mobile-browse-controls}.phtml` and `asset/js/search-support.js`. The theme style
 end-case theme that must change one partial overrides that partial alone. The theme keeps its header search box
 (`common/search-form.phtml`) and its overrides of Omeka's core advanced search form (`common/advanced-search*`),
 which belong to Omeka's own item search page, not to Advanced Search.
+
+## Facets and chips (2026-10-13)
+
+The facet partials (`facet-checkboxes`, `facet-links`) draw exactly what Advanced Search prepares: value, label,
+count, active state, url. Which values appear, their order and their labels are Advanced Search configuration
+(facet `label`, `order`, `more`, `state`). A facet whose list comes back empty is hidden by `search-support.js`.
+Facet state `static` (the default) renders a heading with the values; `expand`/`collapse`/`collapse_unless_set`
+render a `<details>` accordion. Active facets and search filters render as pill chips (`.lozenge`): the sidebar's
+through `facet-actives.phtml`, the results area's through the same partial fed by AS's `facetActives` helper, the
+filter row through `search-filters-links.phtml`. Nothing is relabelled in the templates any more ("Item Set" →
+"Collection" is the facet's label in the configuration).

@@ -77,3 +77,11 @@ Without any of them the card uses the page's first text block, summarised, and t
 `DisplayMode\Summary::summarize($html, $max)`: tags removed, whitespace collapsed, cut to at most `$max`
 characters at the last sentence end that fits (a sentence must be at least 30% of the limit, so a fragment is
 not returned as a whole), failing that at a word boundary, with an ellipsis when something was cut.
+
+## The look (2026-10-13)
+
+The Advanced theme draws the card as Southern Foodways did: a white panel with a hairline border, a brand accent
+band across the top, a 4:3 image, then label, title, subtitle, summary, metadata and a "View" arrow link
+(`60_site_elements/cards/`). The list style puts the image as a full-height column on the left behind a brand rule.
+The module's own `common/display-mode/card.phtml` (other themes) carries the same elements, including the "View"
+link, styled by the basic CSS when that is on.

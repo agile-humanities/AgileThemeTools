@@ -188,6 +188,20 @@ class Module extends AbstractModule {
         'value' => (bool) $settings->get(\AgileThemeTools\Styling\BasicStyles::SETTING, false),
       ],
     ]);
+    $form->setOption('element_groups', ($form->getOption('element_groups') ?: []) + ['agilethemetools_items' => 'Item pages']); // @translate
+    $form->add([
+      'name' => \AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING,
+      'type' => \Laminas\Form\Element\Checkbox::class,
+      'options' => [
+        'element_group' => 'agilethemetools_items',
+        'label' => 'Show only the primary media', // @translate
+        'info' => 'In the "Agile: Item Media" block (item pages without the Advanced Media module): when an item has a designated primary media, show that media alone — its transcript stays with it; the other files are left to the Downloads block and the media pages. Off: every media renders in attachment order. Sites can override this in their settings.', // @translate
+      ],
+      'attributes' => [
+        'id' => \AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING,
+        'value' => (bool) $settings->get(\AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING, \AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_DEFAULT),
+      ],
+    ]);
     $form->add([
       'name' => \AgileThemeTools\ThemeBuild\BuildManager::NODE_PATH_SETTING,
       'type' => 'Text',
@@ -227,6 +241,7 @@ class Module extends AbstractModule {
    * The element has no input of its own; without one the form would not return, and so not save, its value.
    */
   public function addSettingFormInputFilters(\Laminas\EventManager\Event $event) {
+    $event->getParam('inputFilter')->add(['name' => \AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING, 'required' => false]);
     $event->getParam('inputFilter')->add([
       'name' => AgileSearchHelper::UNLINKED_TERMS_SETTING,
       'required' => false,
@@ -285,12 +300,38 @@ class Module extends AbstractModule {
 
     // Cards for this site: each value empty means the installation's setting.
     \AgileThemeTools\DisplayMode\CardSettingsForm::addElements($form, fn ($key) => $siteSettings->get($key), true);
+
+    $form->setOption('element_groups', ($form->getOption('element_groups') ?: []) + ['agilethemetools_items' => 'Item pages']); // @translate
+    $globalPrimaryOnly = (bool) $services->get('Omeka\Settings')->get(\AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING, \AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_DEFAULT);
+    $form->add([
+      'name' => \AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING,
+      'type' => \Laminas\Form\Element\Select::class,
+      'options' => [
+        'element_group' => 'agilethemetools_items',
+        'label' => 'Show only the primary media', // @translate
+        'info' => 'In the "Agile: Item Media" block: with a designated primary media, show that media alone (its transcript stays with it). Empty: the installation\'s setting.', // @translate
+        'value_options' => [
+          '' => sprintf('Use the installation setting (currently: %s)', $globalPrimaryOnly ? 'on' : 'off'), // @translate
+          '1' => 'On', // @translate
+          '0' => 'Off', // @translate
+        ],
+      ],
+      'attributes' => [
+        'id' => \AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING,
+        'value' => (string) $siteSettings->get(\AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING, ''),
+      ],
+    ]);
   }
 
   public function addSiteSettingFormInputFilters(\Laminas\EventManager\Event $event) {
     $event->getParam('inputFilter')->add([
       'name' => \AgileThemeTools\Styling\CustomCss::SITE_SETTING,
       'required' => false,
+    ]);
+    $event->getParam('inputFilter')->add([
+      'name' => \AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia::PRIMARY_ONLY_SETTING,
+      'required' => false,
+      'allow_empty' => true,
     ]);
     \AgileThemeTools\DisplayMode\CardSettingsForm::addInputFilters($event->getParam('inputFilter'));
   }

@@ -275,6 +275,22 @@ class Card implements DisplayModeInterface
     {
         $media = $resource instanceof MediaRepresentation ? $resource : $resource->primaryMedia();
         $mediaType = $media ? (string) $media->mediaType() : '';
+        // An OHMS interview (OHMS Embed module: an XML media the viewer plays) reads as the audio or video it
+        // carries — the item's own audio/video media when there is one, else audio.
+        if ($media && strtolower((string) $media->extension()) === 'xml' && class_exists('OhmsEmbed\\Media\\FileRenderer\\OhmsEmbedRenderer')) {
+            if ($resource instanceof ItemRepresentation) {
+                foreach ($resource->media() as $sibling) {
+                    $siblingType = (string) $sibling->mediaType();
+                    if (str_starts_with($siblingType, 'video/')) {
+                        return 'video';
+                    }
+                    if (str_starts_with($siblingType, 'audio/')) {
+                        return 'audio';
+                    }
+                }
+            }
+            return 'audio';
+        }
         if ($mediaType !== '') {
             foreach (['image/' => 'image', 'audio/' => 'audio', 'video/' => 'video', 'text/' => 'text', 'application/pdf' => 'text', 'application/epub' => 'text', 'application/msword' => 'text', 'application/vnd.openxmlformats-officedocument.wordprocessingml' => 'text', 'application/vnd.ms-excel' => 'dataset', 'application/vnd.openxmlformats-officedocument.spreadsheetml' => 'dataset', 'application/json' => 'dataset', 'application/xml' => 'dataset'] as $prefix => $name) {
                 if (str_starts_with($mediaType, $prefix)) {

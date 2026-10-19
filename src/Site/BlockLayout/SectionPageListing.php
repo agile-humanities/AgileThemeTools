@@ -168,21 +168,14 @@ class SectionPageListing extends AbstractBlockLayout
     $pages = $this->sectionManager->getPagesBySection($data['section'],!empty($data['itemCount']) ? $data['itemCount'] : null,$data['includeCurrentPage']);
     list($scope,$region) = explode(':',$data['region']);
 
+    // The listing templates render each page through the card display mode (DisplayMode\Card reads the page's
+    // Page summary block, else its older representative-image / excerpt / byline blocks). Pre-rendering every
+    // embedded block of every listed page (the pre-2.0 'embeddedBlocks' path) was dropped in the reconciliation.
     foreach ($pages as &$page) {
       $page['embeddedBlocks'] = [];
-      foreach ($page['o:blocks-by-layout'] as $layout => $embeddedBlocks) {
-        foreach ($embeddedBlocks as $id => $embeddedBlock) {
-          $blockView = clone $view;
-          $blockRepresentation = $embeddedBlock['o:blockRepresentation'];
-          // Not ideal. Doesn't fully simulate the build process as far as I can tell.
-          $render = $this->blockLayoutManager
-            ->get($layout)
-            ->render($blockView,$blockRepresentation);
-          $page['embeddedBlocks'][$layout][] = $render;
-        }
-      }
-      $page['hasEmbeddedBlocks'] = count($page['embeddedBlocks']) > 0;
+      $page['hasEmbeddedBlocks'] = false;
     }
+    unset($page);
 
     return $view->partial($data['template'], [
       'block' => $block,

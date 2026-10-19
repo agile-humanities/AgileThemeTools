@@ -109,8 +109,14 @@ if (!empty($itemSet)) {
                     <li id='facet_<?= $facetParams["field"] ?>' class="facet<?= empty($facetParams['attributes']['class']) ? '' : ' ' . $escapeAttr($facetParams['attributes']['class']) ?>" data-visible-options="<?= $escapeAttr(trim((string) ($facetParams['more'] ?? ''))) ?>">
                         <?php $stateExpand = $hasState && ($facetParams['state'] === 'expand' || ($facetParams['state'] === 'collapse_unless_set' && !empty($activeFacets[$name]))); ?>
 
-                        <details open="<?= $stateExpand ? 'true' : 'false' ?>" aria-label="<?= $translate($stateExpand ? 'Collapse' : 'Expand') ?>" >
+                        <?php // Advanced Search's facet "state": static (the default) is a plain heading with the values always shown; expand / collapse / collapse_unless_set are an accordion. The open attribute counts by presence only. ?>
+                        <?php if ($hasState): ?>
+                        <details<?= $stateExpand ? ' open' : '' ?> aria-label="<?= $translate($stateExpand ? 'Collapse' : 'Expand') ?>">
                         <summary><?= $escape($translate($facetParams['label'] ?? $name)) ?></summary>
+                        <?php else: ?>
+                        <div class="facet-static">
+                        <h3 class="facet-label"><?= $escape($translate($facetParams['label'] ?? $name)) ?></h3>
+                        <?php endif; ?>
                         <div class="facet-elements<?= $hasState ? ' collapsible' : '' ?>"<?= $hasState && $facetParams['state'] === 'collapse' ? ' hidden="hidden"' : '' ?>>
                             <?php
                             // Advanced Search's facet helpers render their own partials (search/facet-*); for the
@@ -137,7 +143,7 @@ if (!empty($itemSet)) {
                                 </div>
                             <?php endif; ?>
                         </div>
-                        </details>
+                        <?= $hasState ? '</details>' : '</div>' ?>
                     </li>
                 <?php endforeach; ?>
             </ul>

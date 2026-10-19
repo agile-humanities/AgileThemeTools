@@ -132,7 +132,7 @@ if (searchViewType === null) {
 
     // Open facet details if an item is checked.
 
-    $('.search-facet details').each(function() {
+    $('.facet details').each(function() {
       var open = false;
       $(this).find('input').each(function() {
         if ($(this).is(':checked')) {
@@ -151,6 +151,12 @@ if (searchViewType === null) {
       const facet = $(this);
       const visibleOptions = parseInt(facet.attr('data-visible-options'));
       const facetOptions = facet.find('.search-facet-items > *');
+
+      // A facet with no values (a list that came back empty) is hidden rather than shown as an empty heading.
+      if (facet.find('.search-facet-items').length > 0 && facetOptions.length === 0) {
+        facet.hide();
+        return;
+      }
 
       // All items are marked inactive by default
       // Show active options

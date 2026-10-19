@@ -52,7 +52,7 @@ $defaultThumbnail = $allThumbnail
     ? sprintf('<img loading="lazy" src="%1$s" title="%2$s"/>', $assetUrl('thumbnails/default.png', 'Omeka', true), $translate('No media'))
     : '';
 
-$thumbnailType = $searchConfig->subSetting('results', 'thumbnail_type', 'medium');
+$thumbnailType = $searchConfig->subSetting('results', 'thumbnail_type', '') ?: null; // null: the card settings decide (Settings > Cards)
 ?>
 <!-- RESULTS TEMPLATE BEGIN search/results.phtml -->
 
@@ -66,7 +66,7 @@ $thumbnailType = $searchConfig->subSetting('results', 'thumbnail_type', 'medium'
         $body = $bodyTerm ? $resource->value($bodyTerm, ['lang' => $langValue, 'default' => '']) : $resource->displayDescription(null, $langValue);
         ?>
         <?=
-        $this->card($resource, ['containerElement' => 'li', 'cardStyle' => 'item', 'thumbnailType' => $thumbnailType]) ?>
+        $this->card($resource, ['containerElement' => 'li', 'cardStyle' => 'item'] + ($thumbnailType ? ['thumbnailType' => $thumbnailType] : [])) ?>
     <?php endforeach; ?>
 </ul>
 <!-- RESULTS TEMPLATE BEGIN search/results.phtml dev -->
