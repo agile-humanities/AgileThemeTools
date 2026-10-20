@@ -4,11 +4,15 @@
  * Omeka's row vocabulary so one stylesheet covers core forms, the stock Advanced Search form and this one:
  *
  *   div.field.form-field.field-type-<type>.field-name-<name> [.required] [.field-has-error] #<id>_field
- *     div.field-meta  > label.field-label [+ div.field-description]        (absent when the element has no label)
- *     div.inputs      > the control (Laminas' element helper) [+ label after, for a single checkbox]
- *     ul.messages                                                          (only with errors)
+ *     div.field-meta       > label.field-label                              (absent when the element has no label)
+ *     div.inputs           > the control (Laminas' element helper) [+ label after, for a single checkbox]
+ *     div.field-description                                                (the element's info, after the control)
+ *     ul.messages.field-messages                                           (only with errors)
+ *   The four blocks are the four tracks of a composed row (theme 40_ui/10_components/_form_composition.sass).
  *
- * A group of controls (multi-checkbox, radio) is a fieldset.field with a legend instead of .field-meta.
+ * A group of controls (multi-checkbox, radio) is a div.field.field-group whose control track holds a fieldset
+ * (legend visually hidden, the visible label in .field-meta names it through aria-labelledby): a fieldset cannot be
+ * a subgrid cell itself, since its grid applies to its anonymous content box.
  * The .form-field / .field-type-* / .field-name-* classes are the layout hooks (View\Helper\FormLayout).
  *
  * @var \Laminas\Form\ElementInterface $element
@@ -35,26 +39,34 @@ $groupLabel = in_array($type, ['multi-checkbox', 'radio'], true); // a group of 
 $hasLabel = $label !== null && $label !== '';
 $classes = 'field ' . $classes . ($element->getAttribute('required') ? ' required' : '');
 $fieldId = ' id="' . $escape($id) . '_field"';
-$messages = $element->getMessages() ? $this->formElementErrors($element, ['class' => 'messages']) : '';
+$messages = $element->getMessages() ? $this->formElementErrors($element, ['class' => 'messages field-messages']) : '';
 $description = $info ? '<div class="field-description">' . $escape($translate($info)) . '</div>' : '';
 ?>
 <?php if ($groupLabel): ?>
-<fieldset class="<?= $escape($classes) ?> field-group"<?= $fieldId ?>>
-  <?php if ($hasLabel): ?><legend class="field-label"><?= $escape($translate($label)) ?></legend><?php endif; ?>
+<div class="<?= $escape($classes) ?> field-group"<?= $fieldId ?>>
+  <?php if ($hasLabel): ?>
+  <div class="field-meta">
+    <span class="field-label" id="<?= $escape($id) ?>_label"><?= $escape($translate($label)) ?></span>
+  </div>
+  <?php endif; ?>
+  <div class="inputs">
+    <fieldset class="field-group-options"<?= $hasLabel ? ' aria-labelledby="' . $escape($id) . '_label"' : '' ?>>
+      <?php if ($hasLabel): ?><legend class="screen-reader-text"><?= $escape($translate($label)) ?></legend><?php endif; ?>
+      <?= $this->formElement($element) ?>
+    </fieldset>
+  </div>
   <?= $description ?>
-  <div class="inputs"><?= $this->formElement($element) ?></div>
   <?= $messages ?>
-</fieldset>
+</div>
 <?php else: ?>
 <div class="<?= $escape($classes) ?>"<?= $fieldId ?>>
   <?php if ($hasLabel && !$labelAfter): ?>
   <div class="field-meta">
     <label class="field-label" for="<?= $escape($id) ?>"><?= $escape($translate($label)) ?></label>
-    <?= $description ?>
   </div>
   <?php endif; ?>
   <div class="inputs"><?= $this->formElement($element) ?><?php if ($labelAfter && $hasLabel): ?> <label class="field-label" for="<?= $escape($id) ?>"><?= $escape($translate($label)) ?></label><?php endif; ?></div>
-  <?php if ($labelAfter && $description): ?><?= $description ?><?php endif; ?>
+  <?= $description ?>
   <?= $messages ?>
 </div>
 <?php endif; ?>

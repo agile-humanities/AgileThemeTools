@@ -121,7 +121,6 @@ if (searchViewType === null) {
     // Modify browse collection search button to conform to design
     //$('#form-search').find('button.search-submit').attr('aria-describedby','Submit search request').html('');
 
-    $('#form-search').find('> .field').wrapAll('<div class="search-fields-wrapper">');
 
     // Reset button is not fully implemented. See advanced search module search.js
     $('#facets-reset, #search-reset').on('click', function () {

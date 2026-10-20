@@ -19,6 +19,19 @@ use Laminas\View\Helper\AbstractHelper;
  * so the dependency audit can report them (unknownTypes()).
  *
  * Wrapper classes: .form-field .field-type-<type> .field-name-<name> [.field-required] [.field-has-error]
+ *
+ * COMPOSITION (the stop14 form composition vocabulary, theme 40_ui/10_components/_form_composition.sass): a form
+ * rendered with ['compose' => true] (the default for a Form) is laid out in rows — `.form-row` of 1–6 `.field`
+ * cells, `.form-actions` for the buttons, `.form-messages` (the validation summary) above — by, in order:
+ *   1. an explicit spec: ['rows' => [['q'], ['item_set_id', 'resource_class_id'], 'actions', …]] (names; a row
+ *      may be ['names' => [...], 'fit' => ['name'], 'stack' => true]); elements not named are appended by the rules;
+ *   2. per-element hints in the element's options: 'form_layout' => ['cell' => 'fit'|'full'|'w4'…, 'row' => 'new'];
+ *   3. the packing rules: a full-width kind (search, textarea, multi-text, range-double, collection, fieldset,
+ *      unknown, a text with a size of 60 or more, a group with more than 4 options) takes a row of its own;
+ *      consecutive compact kinds (text, select, number, checkbox, range, a small group) fill rows of up to
+ *      'max_cells' (3).
+ * Hidden elements render after the rows. The writer sets --form-cells on each row and --form-row-columns on rows
+ * with fit cells, so the stylesheet never has to count.
  */
 class FormLayout extends AbstractHelper
 {
@@ -63,14 +76,199 @@ class FormLayout extends AbstractHelper
         return $this->render($formOrFieldset, $options);
     }
 
-    /** Renders every element of a form or fieldset, in order. */
+    /** Renders every element of a form or fieldset, in order; a Form is composed into rows unless 'compose' is false. */
     public function render($container, array $options = []): string
     {
+        $compose = $options['compose'] ?? ($container instanceof FormInterface);
+        if ($compose) {
+            return $this->renderComposed($container, $options);
+        }
         $out = '';
         foreach ($container->getIterator() as $element) {
             $out .= $this->element($element, $options);
         }
         return $out;
+    }
+
+    // ---- composition ---------------------------------------------------------------------------------------------
+
+    const COMPACT_TYPES = ['text', 'select', 'number', 'checkbox', 'range', 'button'];
+    const FULL_TYPES = ['search', 'textarea', 'multi-text', 'range-double', 'collection', 'fieldset', 'unknown'];
+    const GROUP_INLINE_MAX = 4;   // a radio / multi-checkbox with more options takes a full row
+    const LONG_TEXT_MIN = 60;     // a text input with a size above this takes a full row; other text fills a cell
+
+    /** The form in rows: the explicit spec, then the hints and the packing rules for the rest. */
+    public function renderComposed($container, array $options = []): string
+    {
+        $maxCells = max(1, (int) ($options['max_cells'] ?? 3));
+        $elements = [];     // name => element, in order
+        $hidden = [];
+        $actions = [];
+        foreach ($container->getIterator() as $element) {
+            $type = $this->typeOf($element);
+            $name = (string) $element->getName();
+            if ($type === 'hidden') {
+                $hidden[] = $element;
+            } elseif ($type === 'button') {
+                $actions[] = $element;
+            } else {
+                $elements[$name] = $element;
+            }
+        }
+
+        $rows = [];        // each: ['cells' => [[element, cellOptions]...], 'stack' => bool]
+        $placed = [];
+        foreach ($options['rows'] ?? [] as $spec) {
+            if ($spec === 'actions') {
+                $rows[] = 'actions';
+                continue;
+            }
+            $names = is_array($spec) && isset($spec['names']) ? $spec['names'] : (array) $spec;
+            $fit = is_array($spec) ? (array) ($spec['fit'] ?? []) : [];
+            $cells = [];
+            foreach ($names as $n) {
+                if (!isset($elements[$n])) {
+                    continue;
+                }
+                $cells[] = [$elements[$n], ['fit' => in_array($n, $fit, true)] + $this->hint($elements[$n])];
+                $placed[$n] = true;
+            }
+            if ($cells) {
+                $rows[] = ['cells' => $cells, 'stack' => !empty($spec['stack'])];
+            }
+        }
+
+        // The rest, packed.
+        $current = [];
+        $flush = function () use (&$current, &$rows) {
+            if ($current) {
+                $rows[] = ['cells' => $current, 'stack' => false];
+                $current = [];
+            }
+        };
+        foreach ($elements as $name => $element) {
+            if (isset($placed[$name])) {
+                continue;
+            }
+            $hint = $this->hint($element);
+            $full = ($hint['cell'] ?? null) === 'full' || (($hint['cell'] ?? null) !== 'compact' && $this->isFullWidth($element));
+            if (($hint['row'] ?? null) === 'new') {
+                $flush();
+            }
+            if ($full) {
+                $flush();
+                $rows[] = ['cells' => [[$element, $hint]], 'stack' => false];
+                continue;
+            }
+            $current[] = [$element, $hint];
+            if (count($current) >= $maxCells) {
+                $flush();
+            }
+        }
+        $flush();
+        if ($actions && !in_array('actions', $rows, true)) {
+            $rows[] = 'actions';
+        }
+
+        $view = $this->getView();
+        $escape = $view->plugin('escapeHtml');
+        $out = $this->renderMessages($container, $options);
+        foreach ($rows as $row) {
+            if ($row === 'actions') {
+                if ($actions && empty($options['actions_outside'])) {
+                    $out .= '<div class="form-actions">';
+                    foreach ($actions as $button) {
+                        $out .= $this->element($button, $options);
+                    }
+                    $out .= '</div>';
+                }
+                continue;
+            }
+            $count = count($row['cells']);
+            $classes = ['form-row', 'form-row--' . $count];
+            if ($row['stack']) {
+                $classes[] = 'form-row--stack';
+            }
+            $style = '--form-cells: ' . $count;
+            $tracks = [];
+            $hasFit = false;
+            foreach ($row['cells'] as [$element, $cellOptions]) {
+                $isFit = !empty($cellOptions['fit']) || ($cellOptions['cell'] ?? null) === 'fit';
+                $tracks[] = $isFit ? 'auto' : 'minmax(0, 1fr)';
+                $hasFit = $hasFit || $isFit;
+            }
+            if ($hasFit && $count > 1) {
+                $style .= '; --form-row-columns: ' . implode(' ', $tracks);
+            }
+            $out .= '<div class="' . $escape(implode(' ', $classes)) . '" style="' . $escape($style) . '">';
+            foreach ($row['cells'] as [$element, $cellOptions]) {
+                $cellClasses = [];
+                if (!empty($cellOptions['fit']) || ($cellOptions['cell'] ?? null) === 'fit') {
+                    $cellClasses[] = 'form-cell--fit';
+                } elseif (preg_match('/^w(\d+)$/', (string) ($cellOptions['cell'] ?? ''), $m)) {
+                    $cellClasses[] = 'form-cell--w' . $m[1];
+                }
+                if (!empty($cellOptions['options_stacked'])) {
+                    $cellClasses[] = 'form-cell--options-stacked';
+                }
+                $out .= $this->element($element, $options + ['cell_classes' => $cellClasses]);
+            }
+            $out .= '</div>';
+        }
+        foreach ($hidden as $element) {
+            $out .= $this->element($element, $options);
+        }
+        return $out;
+    }
+
+    /** The element's own layout hint: options 'form_layout' => ['cell' => 'fit'|'full'|'compact'|'w<N>', 'row' => 'new', 'options_stacked' => true]. */
+    protected function hint(ElementInterface $element): array
+    {
+        $hint = $element->getOption('form_layout');
+        return is_array($hint) ? $hint : [];
+    }
+
+    /** Does this element take a row of its own? */
+    protected function isFullWidth(ElementInterface $element): bool
+    {
+        $type = $this->typeOf($element);
+        if (in_array($type, self::FULL_TYPES, true)) {
+            return true;
+        }
+        if ($type === 'text') {
+            return (int) $element->getAttribute('size') >= self::LONG_TEXT_MIN;
+        }
+        if (in_array($type, ['multi-checkbox', 'radio'], true)) {
+            $count = method_exists($element, 'getValueOptions') ? count($element->getValueOptions()) : 0;
+            return $count > self::GROUP_INLINE_MAX;
+        }
+        return !in_array($type, self::COMPACT_TYPES, true);
+    }
+
+    /** The validation summary: one link per element with messages, above the rows. Empty when the form is clean. */
+    protected function renderMessages($container, array $options): string
+    {
+        if (!method_exists($container, 'getMessages')) {
+            return '';
+        }
+        $messages = $container->getMessages();
+        if (!$messages) {
+            return '';
+        }
+        $view = $this->getView();
+        $escape = $view->plugin('escapeHtml');
+        $translate = $view->plugin('translate');
+        $items = '';
+        foreach ($messages as $name => $elementMessages) {
+            $element = $container->has($name) ? $container->get($name) : null;
+            $id = $element ? ($element->getAttribute('id') ?: preg_replace('/[^a-zA-Z0-9_-]+/', '-', $name)) : null;
+            $label = $element && $element->getLabel() ? $translate($element->getLabel()) : $name;
+            foreach ((array) $elementMessages as $message) {
+                $text = is_array($message) ? implode(' ', $message) : (string) $message;
+                $items .= '<li>' . ($id ? '<a href="#' . $escape($id) . '_field">' : '') . $escape($label) . ($id ? '</a>' : '') . ': ' . $escape($text) . '</li>';
+            }
+        }
+        return '<div class="form-messages" role="alert"><p class="form-messages-title">' . $escape($translate('Please check the form')) . '</p><ul>' . $items . '</ul></div>';
     }
 
     /** One element, through the partial for its type. */
@@ -85,6 +283,9 @@ class FormLayout extends AbstractHelper
         }
         if ($element->getMessages()) {
             $classes[] = 'field-has-error';
+        }
+        foreach ($options['cell_classes'] ?? [] as $cellClass) {
+            $classes[] = $cellClass;
         }
         $vars = [
             'element' => $element,

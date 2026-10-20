@@ -1,5 +1,6 @@
 <?php /** Advanced Search's multi-text: its own helper; Omeka's row vocabulary around it (see field.phtml). @var \Laminas\Form\ElementInterface $element */ $escape = $this->plugin('escapeHtml'); $translate = $this->plugin('translate'); ?>
 <div class="field <?= $escape($classes) ?>">
-  <?php if ($label): ?><div class="field-meta"><label class="field-label"><?= $escape($translate($label)) ?></label><?php if ($info): ?><div class="field-description"><?= $escape($translate($info)) ?></div><?php endif; ?></div><?php endif; ?>
+  <?php if ($label): ?><div class="field-meta"><label class="field-label"><?= $escape($translate($label)) ?></label></div><?php endif; ?>
   <div class="inputs"><?= $this->formMultiText($element) ?></div>
+  <?php if ($info): ?><div class="field-description"><?= $escape($translate($info)) ?></div><?php endif; ?>
 </div>

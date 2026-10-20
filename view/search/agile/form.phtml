@@ -5,7 +5,8 @@
  *
  * Three parts, one <form>: the search bar (the "q" element with its own submit, outside the filter panel — the
  * Southern Foodways arrangement, design review I6), the filter panel (#advanced-search-form-wrapper: every other
- * element), and the buttons, which sit outside the collection so a theme can place them.
+ * element, inside a <details> disclosure that is closed unless the query carries a filter value), and the buttons,
+ * which sit outside the collection so a theme can place them (submit first, then reset).
  *
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \AdvancedSearch\Form\MainSearchForm $form
@@ -17,6 +18,8 @@ $params = $this->params()->fromQuery() ?: [];
 $form->setData($params)->prepare();
 $formId = $form->getAttribute('id') ?: 'form-search';
 $form->setAttribute('id', $formId);
+// The composed form (stop14 form composition: rows of cells, an actions row, a validation summary).
+$form->setAttribute('class', trim(($form->getAttribute('class') ?? '') . ' s14-form'));
 
 $q = null;
 if ($form->has('q')) {
@@ -41,7 +44,43 @@ if ($form->has('form-reset')) {
 if ($form->has('submit')) {
     $submit = $form->get('submit');
     $form->remove('submit');
-    $submit->setAttribute('class', trim(($submit->getAttribute('class') ?? '') . ' agile-button search'));
+    // The module's "search-submit button" classes are replaced: the theme library styles .search-submit as the
+    // search box's own ghost button; this is the form's submit, with the search icon.
+    $submit->setAttribute('class', 'agile-button submit-search');
+}
+
+// The disclosure opens when any filter element carries a value: a scalar other than the empty string, or, for the
+// filter rows, a row with a value (a blank row still carries its joiner and type).
+$hasValue = function ($value) use (&$hasValue): bool {
+    if (is_array($value)) {
+        foreach ($value as $v) {
+            if ($hasValue($v)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return $value !== null && $value !== '';
+};
+$filtersOpen = false;
+foreach ($form as $element) {
+    $name = $element->getName();
+    if (!isset($params[$name]) || in_array($name, ['csrf', 'submit', 'page', 'per_page', 'sort', 'sort_by', 'sort_order', 'limit', 'offset'], true)) {
+        continue;
+    }
+    if ($name === 'filter' && is_array($params[$name])) {
+        foreach ($params[$name] as $row) {
+            if (is_array($row) && $hasValue($row['val'] ?? $row['value'] ?? null)) {
+                $filtersOpen = true;
+                break;
+            }
+        }
+    } elseif ($hasValue($params[$name])) {
+        $filtersOpen = true;
+    }
+    if ($filtersOpen) {
+        break;
+    }
 }
 ?>
 <!-- BEGIN search/agile/form -->
@@ -53,18 +92,21 @@ if ($form->has('submit')) {
     <button type="submit" class="search-submit" aria-label="<?= $escape($translate('Submit search')) ?>"></button>
 </div>
 <?php endif; ?>
-<div id="advanced-search-form-wrapper">
-    <div id="advanced-search-form" class="advanced-search-form agile-search-form">
-        <?= $this->formLayout($form) ?>
-        <div class="search-form-buttons form-field field-type-buttons">
-            <?= $reset ? $this->formButton($reset) : '' ?>
-            <?php if ($submit): ?>
-                <?= $this->formButton($submit) ?>
-            <?php else: ?>
-                <button type="submit" name="submit" class="search-submit button agile-button search" value=""><?= $escape($translate('Submit')) ?></button>
-            <?php endif; ?>
+<details class="advanced-search-filters"<?= $filtersOpen ? ' open' : '' ?>>
+    <summary><?= $escape($translate('Advanced Search Filters')) ?></summary>
+    <div id="advanced-search-form-wrapper">
+        <div id="advanced-search-form" class="advanced-search-form agile-search-form">
+            <?= $this->formLayout($form, ['compose' => true, 'max_cells' => 3]) ?>
+            <div class="search-form-buttons form-actions">
+                <?php if ($submit): ?>
+                    <?= $this->formButton($submit) ?>
+                <?php else: ?>
+                    <button type="submit" name="submit" class="agile-button submit-search" value=""><?= $escape($translate('Submit')) ?></button>
+                <?php endif; ?>
+                <?= $reset ? $this->formButton($reset) : '' ?>
+            </div>
         </div>
     </div>
-</div>
+</details>
 <?= $this->form()->closeTag() ?>
 <!-- END search/agile/form -->
