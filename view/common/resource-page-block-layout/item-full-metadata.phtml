@@ -1,0 +1,37 @@
+<?php
+/**
+ * Item Full Metadata block (Site\ResourcePageBlockLayout\ItemFullMetadata): the item's record on a dark panel, the
+ * Southern Foodways look. .item-metadata-block.reversed > header h2 + .metadata-list, which the Agile themes style
+ * with their metadata-block mixin (60_site_elements/_item_show.sass); the module's basic stylesheet covers other
+ * themes.
+ *
+ * @var \Omeka\Api\Representation\ItemRepresentation $resource
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$propertyTerms = $this->plugin('propertyTerms');
+$item = $resource;
+$heading = $translate('Full Metadata');
+?>
+<!-- BEGIN common/resource-page-block-layout/item-full-metadata -->
+<div class="item-full-metadata item-metadata-block reversed">
+  <header>
+    <h2><?= $escape($heading) ?></h2>
+  </header>
+  <div class="metadata-list">
+    <?php // The site's Full Metadata Terms, in order; when none are set, every property alphabetically (see resource-values). ?>
+    <?= $item->displayValues(['orderTerms' => $propertyTerms->fromThemeSetting('full_metadata_terms')]) ?>
+    <?php $itemSets = array_filter($item->itemSets(), fn ($set) => $set->isPublic()); ?>
+    <?php if ($itemSets): ?>
+    <div class="property">
+      <div class="metadata-label"><?= $escape($translate('Collections')) ?></div>
+      <div class="values">
+        <?php foreach ($itemSets as $itemSet): ?>
+        <div class="value"><a class="item-set-link" href="<?= $escape($itemSet->url()) ?>"><?= $escape($itemSet->displayTitle()) ?></a></div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <?php endif; ?>
+  </div>
+</div>
+<!-- END common/resource-page-block-layout/item-full-metadata -->

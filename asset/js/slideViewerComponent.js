@@ -373,16 +373,25 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
   /**
    * Creates the base Shadow DOM
    * Supports a valueless attribute called “integratedcontrols”, which will nest the page controls
-   * within the sequential navigation, allowing for a greater range of design implementations
+   * within the sequential navigation, allowing for a greater range of design implementations.
+   *
+   * The page markers have a compact alternative, #slide-counter ("3 / 12"), which a host theme can show in
+   * place of the markers through --slide-counter-display / --slide-nav-display (e.g. by breakpoint). With more
+   * slides than the "counter-threshold" attribute allows (default 5; 0 = never), the component switches to
+   * the counter itself at every width, since a long row of markers wraps.
    *
    */
 
   attachShadowDom() {
 
+    // #slide-counter ("3 / 12") is the compact alternative to the page markers: hidden unless the host sets
+    // --slide-counter-display (and typically --slide-nav-display: none), so a theme can swap markers for the
+    // counter by breakpoint — any number of slides fits on a narrow screen.
     var controls = `
       <div id='slide-nav'></div>
       <div id='sequential-nav'>
         <a class="sequential-control previous" aria-label="Previous"></a>
+        <span id='slide-counter' aria-live='polite'></span>
         <a class="sequential-control next" aria-label="Next"></a>
       </div>`;
 
@@ -390,6 +399,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
       controls = `<div id='sequential-nav' class='integrated'>
         <div id='slide-nav'></div>
         <a class="sequential-control previous" aria-label="Previous"></a>
+        <span id='slide-counter' aria-live='polite'></span>
         <a class="sequential-control next" aria-label="Next"></a>
       </div>`;
 
@@ -443,7 +453,7 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
            height: var(--slide-nav-height,1.5rem);
            width: 100%;
            z-index: 3;
-           display: flex;
+           display: var(--slide-nav-display,flex);
            flex-direction: var(--slide-nav-flex-direction,row);
            flex-wrap: var(--slide-nav-flex-wrap,wrap);
            justify-content: var(--slide-nav-justify-content,center);
@@ -469,7 +479,8 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
           border: var(--sequential-nav-border,0);
           border-radius: var(--sequential-nav-border-radius,0);
           background: var(--sequential-nav-background,none);
-
+          padding: var(--sequential-nav-padding,0);
+          box-sizing: border-box;
         }
 
         /* Integrated Navigation (Sequential and page navigation in same container) */
@@ -484,6 +495,29 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
             top: initial;
             left: initial;
             right: initial;
+        }
+
+        /* Many slides (more than the counter-threshold attribute, default 5): the counter stands in for the
+           row of page markers at every width, whatever the host's --slide-nav-display / --slide-counter-display. */
+        #slide-nav.many-slides {
+          display: none;
+        }
+
+        #slide-counter.many-slides {
+          display: inline-flex;
+        }
+
+        #slide-counter {
+          display: var(--slide-counter-display,none);
+          align-items: center;
+          justify-content: center;
+          min-width: var(--slide-counter-min-width,3.5em);
+          margin: var(--slide-counter-margin,0 var(--sequential-control-spacing,0));
+          font: var(--slide-counter-font,600 0.875rem/1 sans-serif);
+          color: var(--slide-counter-color,#222222);
+          letter-spacing: var(--slide-counter-letter-spacing,0.02em);
+          white-space: nowrap;
+          pointer-events: none;
         }
 
         .page-marker {
@@ -1025,6 +1059,16 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
     this.slideCount = jQuery(slider).slick('getDotCount') + 1; // dot count is off by one after init (?).
     pagerElement.setAttribute('data-count',this.slideCount);
 
+    // More slides than fit as a row of markers: the counter takes over at every width (attribute
+    // counter-threshold, default 5; 0 = never).
+    const counterThreshold = this.hasAttribute('counter-threshold') ? parseInt(this.getAttribute('counter-threshold'), 10) : 5;
+    const manySlides = counterThreshold > 0 && this.slideCount > counterThreshold;
+    pagerElement.classList.toggle('many-slides', manySlides);
+    const counterForMany = this.shadowRoot.getElementById('slide-counter');
+    if (counterForMany) {
+      counterForMany.classList.toggle('many-slides', manySlides);
+    }
+
     if(this.slideCount < 2) {
       pagerElement.classList.add('nav-hide');
     }
@@ -1032,11 +1076,23 @@ class slideViewerSlick extends agileComponent { // Implements slideViewerInterfa
 
     // Slick Carousel boilerplate listener ( see https://stackoverflow.com/questions/25847297/slick-js-get-current-and-total-slides-ie-3-5 )
 
+    var counterElement = this.shadowRoot.getElementById('slide-counter');
+    var updateCounter = function() {
+      if (!counterElement) return;
+      var perPage = (_this.libraryConfiguration && _this.libraryConfiguration.options.slidesToShow) || 1;
+      var pages = Math.ceil(_this.slideCount / perPage);
+      var page = Math.floor(_this.currentSlide / perPage) + 1;
+      counterElement.textContent = page + ' / ' + pages;
+      counterElement.setAttribute('aria-label', 'Slide ' + page + ' of ' + pages);
+    };
+    updateCounter();
+
     jQuery(slider).on('init reInit afterChange', function(event, slick, currentSlide, nextSlide){
       //currentSlide is undefined on init -- set it to 0 in this case (currentSlide is 0 based)
       var i = (currentSlide ? currentSlide : 0);
       _this.currentSlide = i;
       _this.slideCount = slick.slideCount;
+      updateCounter();
       pagerElement.querySelectorAll('a').forEach(function(o,i){
         o.classList.remove('active');
       });

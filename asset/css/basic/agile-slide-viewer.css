@@ -31,3 +31,9 @@
 /* Audio slideshows */
 .slideviewer-container .audio-controls { margin-top: 0.5em; font-size: 0.9em; }
 .slideviewer-container .audio-caption { color: var(--agile-basic-muted); }
+
+/* Narrow screens: a "3 / 12" counter between the arrows instead of a row of page markers (any number of slides
+   fits). The component exposes both through custom properties; the Agile themes do the same in their SASS. */
+@media (max-width: 47.99em) {
+  .slideviewer-container slide-viewer { --slide-nav-display: none; --slide-counter-display: inline-flex; }
+}

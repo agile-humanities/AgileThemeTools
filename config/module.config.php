@@ -20,6 +20,7 @@
   use AgileThemeTools\Site\ResourcePageBlockLayout\ItemHeader;
   use AgileThemeTools\Site\ResourcePageBlockLayout\ItemHeading;
   use AgileThemeTools\Site\ResourcePageBlockLayout\ItemSummary;
+use AgileThemeTools\Site\ResourcePageBlockLayout\ItemFullMetadata;
   use AgileThemeTools\Site\ResourcePageBlockLayout\ItemMedia;
 
   return array(
@@ -65,6 +66,8 @@
       'block_layouts' => [
         'invokables' => [
         'pageTitle' => Site\BlockLayout\PageTitle::class,
+        // Replaces Omeka's IIIF presentation block: Mirador, else Universal Viewer, else the core viewer (D2).
+        'iiifPresentation' => Site\BlockLayout\IiifPresentation::class,
       ],
       'factories' => [
         // 'glossary' => Service\BlockLayout\GlossaryItemFactory::class,
@@ -76,7 +79,9 @@
         'contributorList' => Service\BlockLayout\ContributorListFactory::class,
         'representativeImage' => Service\BlockLayout\RepresentativeImageFactory::class,
         'slideshow' => Service\BlockLayout\SlideshowFactory::class,
-        'poster' => Service\BlockLayout\PosterFactory::class,
+        // Poster: withheld from the generic distribution pending a redesign (design review 2026-10-19, E4). The class
+        // and its factory stay; existing poster blocks render through Omeka's Fallback layout (nothing in public).
+        // 'poster' => Service\BlockLayout\PosterFactory::class,
         'itemListing' => Service\BlockLayout\ItemListingFactory::class,
         'linkCards' => Service\BlockLayout\LinkCardsFactory::class,
         'callout' => Service\BlockLayout\CalloutFactory::class,
@@ -144,6 +149,7 @@
           'itemMedia' => ItemMedia::class,
           'itemHeading' => ItemHeading::class,
           'itemSummary' => ItemSummary::class,
+          'itemFullMetadata' => ItemFullMetadata::class,
         ],
       ],
       'service_manager' => [
@@ -174,6 +180,9 @@
            ItemSetFacetHandler::class => ItemSetFacetHandlerFactory::class,
            AgileItemSetsTreeHandler::class => AgileItemSetsTreeHandlerFactory::class,
            'siteAssetUrl' => SiteAssetUrlFactory::class,
+           // Viewers for a manifest URL (the IIIF presentation block); ask only when the viewer module's class exists.
+           'miradorManifest' => Service\ViewHelper\ViewerManifestFactory::class,
+           'universalViewerManifest' => Service\ViewHelper\ViewerManifestFactory::class,
            'siteHelper' => SiteHelperFactory::class,
            'formPropertyList' => Service\Form\View\Helper\FormPropertyListFactory::class,
            'formCssTextarea' => Service\Form\View\Helper\FormCssTextareaFactory::class,

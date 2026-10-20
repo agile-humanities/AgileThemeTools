@@ -60,3 +60,10 @@
 .download-media a, .download-item a { display: inline-block; padding: 0.4em 0.8em; border: 1px solid var(--agile-basic-border); border-radius: var(--agile-basic-radius); text-decoration: none; }
 .media-container { margin-bottom: 1em; }
 .media-container.text { max-height: 24em; overflow: auto; padding: 1em; background: var(--agile-basic-surface); border-radius: var(--agile-basic-radius); }
+
+/* Item Full Metadata block: the record on a dark panel */
+.item-full-metadata { padding: var(--agile-basic-gap); background: #1d2a2c; color: #fff; margin: var(--agile-basic-gap) 0; }
+.item-full-metadata h2 { margin-top: 0; color: inherit; }
+.item-full-metadata a { color: inherit; }
+.item-full-metadata .metadata-list .property { border-top-color: rgba(255,255,255,0.2); }
+.item-full-metadata .metadata-list .metadata-label, .item-full-metadata .metadata-list .label { color: rgba(255,255,255,0.7); }

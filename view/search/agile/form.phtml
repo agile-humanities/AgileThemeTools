@@ -1,17 +1,35 @@
 <?php
 /**
  * The Agile Theme Tools search form (Search\AgileFormAdapter): Advanced Search's form object, laid out element by
- * element through the form-layout helper (View\Helper\FormLayout) instead of printed whole. The buttons sit
- * outside the collection so a theme can place them; the submit stays in the form.
+ * element through the form-layout helper (View\Helper\FormLayout) instead of printed whole.
+ *
+ * Three parts, one <form>: the search bar (the "q" element with its own submit, outside the filter panel — the
+ * Southern Foodways arrangement, design review I6), the filter panel (#advanced-search-form-wrapper: every other
+ * element), and the buttons, which sit outside the collection so a theme can place them.
  *
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \AdvancedSearch\Form\MainSearchForm $form
  * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $searchConfig
  */
+$escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
 $params = $this->params()->fromQuery() ?: [];
 $form->setData($params)->prepare();
 $formId = $form->getAttribute('id') ?: 'form-search';
 $form->setAttribute('id', $formId);
+
+$q = null;
+if ($form->has('q')) {
+    $q = $form->get('q');
+    $form->remove('q');
+    $q->setAttribute('class', trim(($q->getAttribute('class') ?? '') . ' search-bar-input'));
+    if (!$q->getAttribute('placeholder')) {
+        $q->setAttribute('placeholder', $translate('Search the collection'));
+    }
+    if (!$q->getAttribute('aria-label')) {
+        $q->setAttribute('aria-label', $q->getAttribute('placeholder'));
+    }
+}
 
 $reset = null;
 $submit = null;
@@ -27,20 +45,26 @@ if ($form->has('submit')) {
 }
 ?>
 <!-- BEGIN search/agile/form -->
+<?= $this->form()->openTag($form) ?>
+<?php $form->removeAttribute('id'); // formLayout keeps element ids; the form's own id is on the tag ?>
+<?php if ($q): ?>
+<div class="search-bar agile-search-bar">
+    <?= $this->formElement($q) ?>
+    <button type="submit" class="search-submit" aria-label="<?= $escape($translate('Submit search')) ?>"></button>
+</div>
+<?php endif; ?>
 <div id="advanced-search-form-wrapper">
     <div id="advanced-search-form" class="advanced-search-form agile-search-form">
-        <?= $this->form()->openTag($form) ?>
-        <?php $form->removeAttribute('id'); // formLayout keeps element ids; the form's own id is on the tag ?>
         <?= $this->formLayout($form) ?>
         <div class="search-form-buttons form-field field-type-buttons">
             <?= $reset ? $this->formButton($reset) : '' ?>
             <?php if ($submit): ?>
                 <?= $this->formButton($submit) ?>
             <?php else: ?>
-                <button type="submit" name="submit" class="search-submit button agile-button search" value=""><?= $this->escapeHtml($this->translate('Submit')) ?></button>
+                <button type="submit" name="submit" class="search-submit button agile-button search" value=""><?= $escape($translate('Submit')) ?></button>
             <?php endif; ?>
         </div>
-        <?= $this->form()->closeTag() ?>
     </div>
 </div>
+<?= $this->form()->closeTag() ?>
 <!-- END search/agile/form -->

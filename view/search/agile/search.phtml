@@ -140,16 +140,15 @@ $this->headScript()
             $vars->offsetSet('resourceType', 'item_sets'); // TODO Check if really needed.
             $this->htmlElement('body')->appendAttribute('class', 'search-page item-set resource browse');
             ?>
-            <div class="content-label"><?= $translate('Item set') ?></div>
-            <?= $this->pageTitle($itemSet->displayTitle(), 1) ?>
-            <div class="item-metadata-block">
-                <header><h2>Full Metadata</h2></header>
-                <div class="metadata-list reversed">
-                    <?= $itemSet->displayValues() ?>
+            <?php // An item set's page: its title and description, then the browse interface in list view (design review H1). ?>
+            <div class="title-block item-set-title">
+                <div container>
+                    <div class="content-label"><?= $translate('Collection') ?></div>
+                    <?= $this->pageTitle($itemSet->displayTitle(), 1) ?>
+                    <?php if ($description = $itemSet->displayDescription()): ?>
+                    <div class="deck item-set-description"><?= $escape($description) ?></div>
+                    <?php endif; ?>
                 </div>
-            </div>
-            <div class="item-set-items">
-                <h2><?= $translate('Items') ?></h2>
             </div>
         <?php elseif (empty($isPartial)): ?>
             <?php $this->htmlElement('body')->appendAttribute('class', 'search-page resource browse'); ?>
