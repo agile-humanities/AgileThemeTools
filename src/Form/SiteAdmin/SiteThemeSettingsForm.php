@@ -341,7 +341,7 @@
             'basefont' => ['label' => 'Main text font', 'font' => true, 'description' => 'Body text and most of the site. Choose a Google font (loaded automatically), a font bundled with the theme, or a system font. Changing a font needs a theme build.'],
             'headingfont' => ['label' => 'Heading font', 'font' => true, 'description' => 'Headings and titles.'],
             'altfont' => ['label' => 'Alternative font', 'font' => true, 'description' => 'Special-use text such as quotations and decks. Often the same as the heading font.'],
-            'labelfont' => ['label' => 'Label and interface font', 'font' => true, 'description' => 'Labels, buttons, menus and other interface text; the most used font on the site.'],
+            'compactfont' => ['label' => 'Compact font', 'font' => true, 'description' => 'Labels, buttons, menus and other interface text set small; a face that reads well at small sizes. Follows the main text font unless set.'],
             'sizefactors' => ['label' => 'Size factors', 'description' => 'Advanced value in SASS:map format. Changes the proportion of headings as determined by the modular scale. ']
           ]
         ],

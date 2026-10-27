@@ -35,7 +35,7 @@ class PaletteCss
         'basefont' => '--font-base',
         'headingfont' => '--font-heading',
         'altfont' => '--font-alt',
-        'labelfont' => '--font-label',
+        'compactfont' => '--font-compact',
         'listfont' => '--font-list',
         'codefont' => '--font-code',
     ];

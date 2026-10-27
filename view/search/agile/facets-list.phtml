@@ -59,7 +59,7 @@ if (!empty($itemSet)) {
         <?= $facetActives(null, $activeFacets, $searchConfig->setting('facet')) ?>
     <?php endif; ?>
 
-    <form id="form-facets">
+    <form id="form-facets" class="s14-form">
 
         <?php if ($displayFacetButton): ?>
             <?= $this->hiddenInputsFromFilteredQuery(null, ['facet', 'refine', 'page', 'limit', 'offset', 'per_page']) ?>
@@ -68,7 +68,7 @@ if (!empty($itemSet)) {
         <?php $displayButtonReset = $displayReset === 'above' || $displayReset === 'both'; ?>
         <?php $displayButtonSubmit = $displayFacetButton && ($displaySubmit === 'above' || $displaySubmit === 'both'); ?>
         <?php if ($displayButtonReset || $displayButtonSubmit): ?>
-            <div class="facets-actions facets-actions-top">
+            <div class="facets-actions facets-actions-top form-actions">
                 <?php if ($displayButtonSubmit): ?>
                     <button id="facets-apply" class="facets-apply" type="submit"><?= $escape($labelSubmit) ?></button>
                 <?php endif; ?>
@@ -152,7 +152,7 @@ if (!empty($itemSet)) {
         <?php $displayButtonReset = $displayReset === 'below' || $displayReset === 'both'; ?>
         <?php $displayButtonSubmit = $displayFacetButton && ($displaySubmit === 'below' || $displaySubmit === 'both'); ?>
         <?php if ($displayButtonReset || $displayButtonSubmit): ?>
-            <div class="facets-actions facets-actions-bottom">
+            <div class="facets-actions facets-actions-bottom form-actions">
                 <?php if ($displayButtonSubmit): ?>
                     <button id="facets-apply" class="facets-apply" type="submit"><?= $escape($labelSubmit) ?></button>
                 <?php endif; ?>

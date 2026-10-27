@@ -10,9 +10,9 @@ use Omeka\Settings\Settings;
 use Omeka\Site\Theme\Theme;
 
 /**
- * Fonts for the theme's font roles (main text, headings, alternative, labels).
+ * Fonts for the theme's font roles (main text, headings, alternative, compact).
  *
- * Each role's styling setting (basefont, headingfont, altfont, labelfont) stays the CSS font-family declaration the
+ * Each role's styling setting (basefont, headingfont, altfont, compactfont) stays the CSS font-family declaration the
  * SASS build expects, e.g. `"Open Sans", sans-serif` or `$headingfont`. A companion setting (<role>_source) records
  * where the family comes from: `google` (loaded from Google Fonts by this class), `bundled` (shipped with the theme
  * and declared in source/sass/00_configuration/_04_typography_fonts.sass), `system` (a system font or one loaded
@@ -42,7 +42,7 @@ class ThemeFonts
         'basefont' => ['label' => 'Main text font', 'description' => 'Body text and most of the site.'], // @translate
         'headingfont' => ['label' => 'Heading font', 'description' => 'Headings and titles.'], // @translate
         'altfont' => ['label' => 'Alternative font', 'description' => 'Special-use text such as quotations and decks.'], // @translate
-        'labelfont' => ['label' => 'Label and interface font', 'description' => 'Labels, buttons, menus and other interface text.'], // @translate
+        'compactfont' => ['label' => 'Compact font', 'description' => 'Labels, buttons, menus and other interface text set small; a face that reads well at small sizes. Follows the main text font unless set.'], // @translate
     ];
 
     const GENERICS = ['sans-serif', 'serif', 'monospace', 'system-ui', 'cursive'];

@@ -39,7 +39,7 @@ class ColoursAndFontsForm extends Form
         'headingfont' => ['Heading font', 'Headings and titles.'],
         'altfont' => ['Alternative font', 'Special-use text such as quotations and decks.'],
         'codefont' => ['Code font', 'Code and other fixed-width text.'],
-        'labelfont' => ['Label and interface font', 'Labels, buttons and menus.'],
+        'compactfont' => ['Compact font', 'Labels, buttons, menus and other small interface text.'],
         'listfont' => ['List font', 'Lists.'],
     ];
 

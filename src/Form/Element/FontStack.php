@@ -10,7 +10,7 @@ use Laminas\Form\Element\Text;
  * loads the font (see FormFontStack, asset/js/font-stack.js). The chosen source is posted in a companion hidden
  * field named <role>_source, which the form must also carry.
  *
- * Options: role (basefont|headingfont|altfont|labelfont).
+ * Options: role (basefont|headingfont|altfont|compactfont).
  */
 class FontStack extends Text
 {
