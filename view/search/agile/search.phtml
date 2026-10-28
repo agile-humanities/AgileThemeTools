@@ -164,7 +164,7 @@ $this->headScript()
             <?php // echo $this->partial('common/search-form'); ?>
             <?php
                 // Advanced search uses:
-                echo $searchConfig->renderForm(['template' => null, 'skip_form_action' => $skipFormAction])
+                echo $searchConfig->renderForm(['template' => null, 'skip_form_action' => $skipFormAction, 'form_action' => $formAction ?? null])
             ?>
         </div>
 
@@ -192,11 +192,12 @@ $this->headScript()
                     <?php foreach (array_filter($response->getResourceTotalResults()) as $resourceType => $count): ?>
                         <div class="search--resource-total-results"><?= sprintf($translate('<span class="summary--text--label">%1$d</span> <span class="summary--text">%2$s</span>'), $count, $easyMeta->resourceLabelCount($resourceType, $count)) ?></div>
                     <?php endforeach; ?>
-                    <?php // Search filters. ?>
-                        <?php if (isset($displayParts['search_filters'])): ?>
+                    <?php // The query and the active facets as chips. "Search filters: none" hides the row; the facet chips
+                          // are left out when the configuration shows the active facets in the header or footer instead. ?>
+                        <?php if (($displayParts['search_filters'] ?? 'header') !== 'none'): ?>
                             <div class="search-filter-container">
                                 <?= $searchConfig->renderSearchFilters($query, ['template' => 'search/agile/search-filters-links']) ?>
-                                <?php if ($activeFacets):
+                                <?php if ($activeFacets && ($displayParts['active_facets'] ?? 'none') === 'none'):
                                     // The active facets as removable chips. Advanced Search's helper resolves the labels
                                     // (field labels, item-set titles, value labels) and the removal urls; the module's
                                     // partial draws them.

@@ -59,7 +59,7 @@ $thumbnailType = $searchConfig->subSetting('results', 'thumbnail_type', '') ?: n
 ?>
 <!-- RESULTS TEMPLATE BEGIN search/results.phtml -->
 
-<ul id='collection-list' class="resource-list search-results-list<?= $masonry ? ' masonry-grid' : ''?><?= in_array($gridListMode, ['list_only', 'list']) ? ' list' : (in_array($gridListMode, ['grid_only', 'grid']) ? ' grid' : '') ?>">
+<ul id='collection-list' data-gridlistmode="<?= $this->escapeHtmlAttr($gridListMode) ?>" class="resource-list search-results-list<?= $masonry ? ' masonry-grid' : ''?><?= in_array($gridListMode, ['list_only', 'list']) ? ' list' : (in_array($gridListMode, ['grid_only', 'grid']) ? ' grid' : '') ?>">
 
     <?php /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
     foreach ($resources as $resource):

@@ -10,11 +10,8 @@
  */
 
 
-const searchViewType = localStorage.getItem('search_view_type')
-
-if (searchViewType === null) {
-  localStorage.setItem('search_view_type', 'grid');
-}
+// The view (grid or list) is the visitor's stored choice, else the configuration's default: Advanced Search's own
+// script reads the stored value, or the view-type button the template marks active. Nothing is stored here.
 
 
 (function($) {
@@ -81,9 +78,10 @@ if (searchViewType === null) {
     let browseViewMode = localStorage.getItem('search_view_type');
 
 
-    // theme templates now supply the user-configured default mode as a data attribute
+    // The results list (ul#collection-list, search/agile/results.phtml) carries the configured default mode as a
+    // data attribute. Its wrapper shares the search-results-list class, so the list is addressed by id.
 
-    const itemBrowser =$('.item-browser');
+    const itemBrowser = $('#collection-list');
 
 
     if (browseViewMode === null && itemBrowser.length > 0) {
@@ -225,8 +223,11 @@ if (searchViewType === null) {
       if (!(element instanceof HTMLSelectElement)) { return; }
       const select = $(element);
       if (select.data('select2') || select.is('.no-select2, .chosen-select')) { return; }
+      // The container takes its cell's width and follows it when the window is resized or the phone rotated. A
+      // pixel width ('element'), measured at init, spills out of the cell as soon as the cell gets narrower.
+      // Fit cells (the filter rows, the sort selector) set the container's width in the stylesheet instead.
       select.select2({
-        width: 'element',
+        width: '100%',
         minimumResultsForSearch: 40
       });
     }

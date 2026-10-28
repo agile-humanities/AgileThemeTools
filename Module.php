@@ -138,6 +138,14 @@ class Module extends AbstractModule {
       $sharedEventManager->attach(\EasyAdmin\Form\CheckAndFixForm::class, 'form.add_input_filters', fn ($event) => $tasks()->addInputFilters($event));
       $sharedEventManager->attach(\EasyAdmin\Controller\Admin\CheckAndFixController::class, 'easyadmin.job', fn ($event) => $tasks()->handleJob($event));
     }
+
+    // Easy Admin > Check and fix: an "Agile site setup" group, the site presets (see Setup\EasyAdminTasks).
+    if (class_exists(\EasyAdmin\Form\CheckAndFixForm::class)) {
+      $setupTasks = fn () => new \AgileThemeTools\Setup\EasyAdminTasks($this->getServiceLocator()->get('Omeka\ApiManager'));
+      $sharedEventManager->attach(\EasyAdmin\Form\CheckAndFixForm::class, 'form.add_elements', fn ($event) => $setupTasks()->addFormElements($event));
+      $sharedEventManager->attach(\EasyAdmin\Form\CheckAndFixForm::class, 'form.add_input_filters', fn ($event) => $setupTasks()->addInputFilters($event));
+      $sharedEventManager->attach(\EasyAdmin\Controller\Admin\CheckAndFixController::class, 'easyadmin.job', fn ($event) => $setupTasks()->handleJob($event));
+    }
   }
 
   /** view.layout on public pages: append the basic stylesheets unless the theme styles the module's templates itself. */

@@ -46,6 +46,8 @@ class AgileSearchHelper extends AbstractHelper
   protected $siteSettings;
   protected $settings;
   protected $api;
+  /** The service manager, for SearchSolr\Stdlib\SolrCore (see solrMaps()). */
+  protected $services;
   protected $search_inclusion_list = [];
 
   /** @var string[]|null Facet fields on the site's main search config. */
@@ -58,11 +60,26 @@ class AgileSearchHelper extends AbstractHelper
   protected $unlinkedTerms;
 
 
-  public function __construct($agileSearchHandler,$settings,$siteSettings,$api,$mapController=null) {
+  public function __construct($agileSearchHandler,$settings,$siteSettings,$api,$mapController=null,$services=null) {
     $this->agileSearchHandler = $agileSearchHandler;
     $this->settings = $settings;
     $this->siteSettings = $siteSettings;
     $this->api = $api;
+    $this->services = $services;
+  }
+
+  /**
+   * The Solr maps of a search engine for a resource type. SearchSolr 3.5.7x dropped the "solr_cores" API resource
+   * (a core is now the engine itself, wrapped by SearchSolr\Stdlib\SolrCore), so maps are read through that wrapper.
+   * Defaults to the engine of the site's main search config; $engineId selects another (the old core id).
+   *
+   * @return \SearchSolr\Api\Representation\SolrMapRepresentation[]
+   */
+  protected function solrMaps($resourceName, $engineId = null): array {
+    $engine = $engineId
+      ? $this->api->read('search_engines', $engineId)->getContent()
+      : $this->getAdvancedSearchConfig()->searchEngine();
+    return (new \SearchSolr\Stdlib\SolrCore($engine, $this->services))->mapsByResourceName($resourceName);
   }
 
   public function __invoke() {
@@ -181,9 +198,7 @@ class AgileSearchHelper extends AbstractHelper
     if (!isset($this->solrFieldsByTerm[$resourceName])) {
       $fields = [];
       if ($this->isSolrSearch()) {
-        $searchEngineSettings = $this->getAdvancedSearchConfig()->searchEngine()->settings();
-        $solrCore = $this->api->read('solr_cores', $searchEngineSettings['engine_adapter']['solr_core_id'])->getContent();
-        foreach ($solrCore->mapsByResourceName($resourceName) as $map) {
+        foreach ($this->solrMaps($resourceName) as $map) {
           $fields[$map->source()][] = $map->fieldName();
         }
       }
@@ -294,22 +309,8 @@ class AgileSearchHelper extends AbstractHelper
       return [];
     }
 
-    $advancedSearchConfig = $this->getAdvancedSearchConfig();
-    $searchEngine = $advancedSearchConfig->searchEngine();
-    $view = $this->view;
-    $plugins = $view->getHelperPluginManager();
-
-    /** @var Api $api */
-    $api = $plugins->get('api');
-
-
-    $searchEngineSettings = $searchEngine->settings();
-    $solrCoreId = $solrCoreId ?? $searchEngineSettings['engine_adapter']['solr_core_id'];
-
-    $solrCore = $api->read('solr_cores', $solrCoreId)->getContent();
-
     /** @var \SearchSolr\Api\Representation\SolrMapRepresentation[] $maps */
-    $maps = $solrCore->mapsByResourceName($resourceName);
+    $maps = $this->solrMaps($resourceName, $solrCoreId);
 
     $solrMappings = [];
 

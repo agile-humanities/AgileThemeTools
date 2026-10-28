@@ -123,14 +123,8 @@ class ItemSetFacetHandler extends AbstractHelper
       ],
     ]);*/
 
-    $itemSets = $api->search('item_sets')->getContent();
-
-    /** @var ItemSetRepresentation $itemSet */
-    foreach($itemSets as $itemSet) {
-      if ($itemSet->id() == $value) {
-        return $itemSet;
-      }
-    }
+    // A search, not a read: it honours visibility, and an unknown id (a stale facet link) gives null, not an error.
+    return $api->search('item_sets', ['id' => (int) $value, 'limit' => 1])->getContent()[0] ?? null;
   }
 
   /**

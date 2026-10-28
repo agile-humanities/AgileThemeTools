@@ -49,7 +49,7 @@ return [
     'Common' => [
         'label' => 'Common',
         'level' => 'required',
-        'pinned' => '3.4.91',
+        'pinned' => '3.4.94',
         'minimum' => '3.4.91',
         'volatile' => true,
         'for' => 'Shared code required by Advanced Search and the other modules by the same author.',
@@ -58,7 +58,7 @@ return [
     'AdvancedSearch' => [
         'label' => 'Advanced Search',
         'level' => 'required',
-        'pinned' => '3.4.64',
+        'pinned' => '3.4.66',
         'minimum' => '3.4.64',
         'volatile' => true,
         'for' => 'Search pages, filters and facets. Versions before 3.4.64 fail on the internal search engine and store search settings differently.',
@@ -93,12 +93,12 @@ return [
     'Mirador' => [
         'label' => 'Mirador',
         'level' => 'required',
-        'pinned' => '3.4.9',
+        'pinned' => '3.4.17',
+        'minimum' => '3.4.9',
         'volatile' => true,
-        'known_bad' => [
-            '3.4.17' => 'The viewer bundled with 3.4.17 does not start: item pages show an empty viewer.',
-        ],
-        'for' => 'The default image and document viewer.',
+        // 3.4.17 made Mirador 4 the default and moved Mirador 3's settings to "_3" keys; its Mirador 3 bundle does
+        // not draw images, so the Agile Mirador preset uses Mirador 4 from 3.4.17 (Setup\MiradorPreset).
+        'for' => 'The default image and document viewer (Mirador 4 from 3.4.17, Mirador 3 before).',
     ] + $danielKm('Mirador'),
 
     'Log' => [
@@ -138,7 +138,7 @@ return [
     'SearchSolr' => [
         'label' => 'Search Solr',
         'level' => 'recommended',
-        'pinned' => '3.5.72',
+        'pinned' => '3.5.75',
         'minimum' => '3.5.70',
         'volatile' => true,
         'for' => 'Solr as the search engine, for larger collections. Advanced Search 3.4.64 needs 3.5.70 or later.',

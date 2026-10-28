@@ -13,6 +13,6 @@ class AgileSearchHelperFactory implements FactoryInterface
       $siteSettings = $services->get('Omeka\Settings\Site');
       $api = $services->get('Omeka\ApiManager');
 
-      return new AgileSearchHelper($services->get('AgileSearchHandler'),$settings,$siteSettings,$api);
+      return new AgileSearchHelper($services->get('AgileSearchHandler'),$settings,$siteSettings,$api,null,$services);
     }
 }

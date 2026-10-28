@@ -16,7 +16,7 @@ class MiradorManifest extends \Mirador\View\Helper\Mirador
         $view = $this->getView();
         $this->isSite = $view->status()->isSiteRequest();
         $setting = $this->isSite ? $view->plugin('siteSetting') : $view->plugin('setting');
-        $this->version = (string) $setting('mirador_version', '3');
+        $this->version = (string) $setting('mirador_version', \AgileThemeTools\Setup\MiradorPreset::miradorVersion());
         return $this->render($urlManifest, $options, 'multiple');
     }
 }

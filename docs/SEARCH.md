@@ -15,7 +15,14 @@ Two settings on the Advanced Search configuration (Admin > Search manager > the 
    facets, results header and footer, results as cards, mobile controls — shipped in the module under
    `view/search/agile/`.
 
-The setup presets set both. On the generic stack, `dev-tools/search-config-agile.php` does the same.
+The setup presets set both on the configurations they create.
+
+**On the Advanced theme neither setting is needed.** That theme overrides Advanced Search's own templates
+(`view/search/` in the theme: `search/search`, the stock form adapter's `search/search-form-main` and its headers,
+`results`, `results-header-footer`, `facets-list` and the facet partials), each a one-line forward to the Agile
+partial, so every configuration on a site using that theme renders as the Agile page: the one Advanced Search
+creates at install (`find`), one an administrator adds with the stock form, and the Agile ones alike. The two
+settings above matter on other themes, which have no such overrides. See the theme's `docs/SEARCH.md`.
 
 ## The form layout (G1)
 

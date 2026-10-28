@@ -8,7 +8,8 @@ use Laminas\ServiceManager\ServiceLocatorInterface;
  * to the installation's Mirador settings and to every site's — the Mirador helper reads the SITE settings on site
  * pages, with no fallback to the global ones, so both must carry it.
  *
- *   - Mirador 3, dark theme.
+ *   - Mirador 4 with Mirador module 3.4.17 and later (its Mirador 3 bundle does not draw images), Mirador 3 before;
+ *     dark theme.
  *   - The image-tools plugin on (brightness/contrast/rotate controls, collapsed until the visitor opens them).
  *     The plugin must be in `mirador_plugins`, or the module loads the vanilla bundle that has no such code.
  *   - The workspace control panel (add window, workspace type) off: the viewer is embedded in an item page.
@@ -43,6 +44,12 @@ class MiradorPreset
 JSON;
     }
 
+    /** The Mirador major version the preset uses: 4 when the installed module offers it (3.4.17 and later). */
+    public static function miradorVersion(): string
+    {
+        return method_exists(\Mirador\View\Helper\Mirador::class, 'renderMirador4') ? '4' : '3';
+    }
+
     /**
      * Writes the preset. Returns one line per settings scope touched, for the job log.
      *
@@ -54,8 +61,10 @@ JSON;
         if (!$module || $module->getState() !== \Omeka\Module\Manager::STATE_ACTIVE) {
             return ['Mirador is not active: nothing written.'];
         }
+        // From 3.4.17 the module defaults to Mirador 4 and keeps Mirador 3's settings under "_3" keys; the
+        // unsuffixed keys are Mirador 4's. Before, the unsuffixed keys are Mirador 3's.
         $values = [
-            'mirador_version' => '3',
+            'mirador_version' => self::miradorVersion(),
             'mirador_plugins' => self::PLUGINS,
             'mirador_config_item' => self::config(),
             'mirador_config_collection' => self::config(),
@@ -66,7 +75,7 @@ JSON;
         foreach ($values as $key => $value) {
             $settings->set($key, $value);
         }
-        $lines[] = 'Installation settings: Mirador preset written (dark theme, image tools, no workspace panel).';
+        $lines[] = sprintf('Installation settings: Mirador preset written (Mirador %s, dark theme, image tools, no workspace panel).', $values['mirador_version']);
 
         $siteSettings = $services->get('Omeka\Settings\Site');
         $api = $services->get('Omeka\ApiManager');

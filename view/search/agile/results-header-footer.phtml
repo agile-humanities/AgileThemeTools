@@ -63,8 +63,10 @@ $hasControls = isset($displayParts['total_results']) || count($paginationPerPage
 
     <?php if ($multiMode): ?>
     <div class="search-results-display">
-        <a class="search-view-type search-view-type-list<?= $gridListMode === 'list' ? ' active' : '' ?>" href="#"><?= $translate('List') ?></a>
-        <a class="search-view-type search-view-type-grid<?= $gridListMode === 'grid' ? ' active' : '' ?>" href="#"><?= $translate('Grid') ?></a>
+        <?php // The active button is the configured default view ("auto" is grid, as in Advanced Search); its script
+              // opens that view unless the visitor has chosen one before (localStorage). ?>
+        <a class="search-view-type search-view-type-list<?= in_array($gridListMode, ['list', 'list_only']) ? ' active' : '' ?>" href="#" role="button" aria-pressed="<?= in_array($gridListMode, ['list', 'list_only']) ? 'true' : 'false' ?>"><?= $translate('List') ?></a>
+        <a class="search-view-type search-view-type-grid<?= in_array($gridListMode, ['grid', 'grid_only', 'auto']) ? ' active' : '' ?>" href="#" role="button" aria-pressed="<?= in_array($gridListMode, ['grid', 'grid_only', 'auto']) ? 'true' : 'false' ?>"><?= $translate('Grid') ?></a>
     </div>
     <?php endif; ?>
 </div>
