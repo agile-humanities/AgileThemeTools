@@ -1,4 +1,7 @@
-# What is this module for?
+# Agile Theme Tools v2
+
+## What is this module for?
+
 The Agile Theme Tools is intended to support Agile Omeka-S build system, which includes a suite of third-party modules alongside the Agile Advanced Base Theme. It also supports the Agile Simplified Base Theme. 
 
 It offers a number of customized blocks to expand content editing capabilities, including a Slide Viewer,  Sectional Nagigation, Callouts, and Introductory Sections. The module offers administrators a series of Easy Admin Tasks to perform basic site setup.
@@ -6,7 +9,7 @@ It offers a number of customized blocks to expand content editing capabilities, 
 It should be noted that the Agile Advanced Theme and build system is targeted at experienced administrators and front-end developers. The Agile Simplified Theme provides a clean base theme with similar styling for all Omeka S administrators with no third-party module dependencies.
 
 
-# Who is this module for and what does it do?
+## Who is this module for and what does it do?
 | Audience | Gets |
 |---|---|
 | **Administrator** | Dependency audit (module config page, dashboard, Modules page, Easy Admin); global settings (custom CSS, basic styles, Node path, cards, item media, unlinked terms); Easy Admin tasks (dependency check, Mirador preset, theme builds, site setup presets); site Theme page additions (identity panel, build panel, logo check, Colours and fonts, Configure theme styles); `build-site-themes.php` CLI. |
@@ -32,6 +35,84 @@ This module was made by Bill Kennedy at Agile Humanities Agency. Some of the fun
 
 ## Note on Advanced Search
 * The Advanced Search module has been in a fairly rapid release cycle, which can cause some instability as features are added and critical templates are changed. The Agile Suite (Agile Theme Tools + Agile Base Theme) is currently tested for Version 3.4.66.
+
+# Quickstart: The Standard Agile Install
+
+## What you need
+
+| | Tested with | Notes |
+|---|---|---|
+| Omeka S | 4.2.1 | 4.2.0 or later |
+| PHP | 8.3 | ImageMagick with PDF reading allowed (Debian's policy.xml blocks it; without it PDFs get no thumbnail) |
+| Node.js + npm *(Advanced only)* | 16.20 (builds with a warning) | 18 or later recommended; the web server user must be able to run them |
+| Solr *(optional)* | 9 | For the "Agile filters with Solr" search page; the other two search pages work without it |
+
+Modules, at the versions the release was tested with (newer minor versions are reported as "ahead of the pinned
+version", not blocked):
+
+| Module | Version | Role |
+|---|---|---|
+| Common | 3.4.94 | Shared library for the Daniel-KM modules; install first |
+| Easy Admin | 3.4.50 | Installs the other modules, runs tasks and cron jobs |
+| Log | 3.4.42 | Job logs in the admin |
+| Reference | 3.4.64 | Facet counts |
+| Advanced Search | 3.4.66 | Search pages, facets, the main search form |
+| Search Solr *(optional)* | 3.5.75 | Solr engine for Advanced Search (Daniel-KM's: three catalogue entries share the folder name) |
+| IIIF Server | 3.6.34 | Manifests for the viewers |
+| Image Server | 3.6.26 | Tiles for deep zoom |
+| Mirador | 3.4.17 | The item viewer (Mirador 4) |
+| Advanced Media | 1.0.0 | Media display blocks, PDF/ePub/audio/transcripts, page links in Mirador, optional media proxy |
+| Static Sitemaps | 1.0.0 | Sitemaps as static files |
+| Agile Theme Tools | 2.0.0 | Page blocks, item page blocks, cards, search pages, theme styling and builds, site presets |
+| Advanced Agile Base Theme / Simplified Agile Base Theme | 2.0.0 | The two themes |
+
+Optional, supported when present: Amazon S3 (file store; activating it makes it the file store), Numeric Data
+Types, Item Sets Tree, Mapping, Universal Viewer.
+
+## Steps
+
+1. **Install Omeka S.** Unzip the Omeka S release, point `config/database.ini` at the database, open the site and
+   complete the web installer (an administrator account and the installation title).
+2. **Common and Easy Admin by hand.** Unzip the two release zips into `modules/`, then on Admin > Modules install
+   Common, then Easy Admin. This is the only manual module install.
+3. **The rest through Easy Admin.** Easy Admin > Modules lists the omeka.org and Daniel-KM catalogues: install Log,
+   Reference, IIIF Server, Image Server, Mirador, Advanced Search, and (for Solr) Search Solr — pick the entry from
+   `github.com/Daniel-KM/Omeka-S-module-SearchSolr`. Install Advanced Media, Static Sitemaps and Agile Theme Tools the
+   same way once they are listed; until then unzip their release zips into `modules/`. Then on Admin > Modules install
+   each, in the order above (Agile Theme Tools last: it checks the others and shows the result on the Modules page).
+4. **Themes.** Unzip the Advanced and Simplified theme zips into `themes/` (or use Easy Admin > Themes).
+5. **Sites.** Create a site for each theme (Sites > Add site, then its Theme page). Site settings worth setting now:
+   the file allowlist, if transcripts are used (Settings > Security: add the `vtt` extension and the `text/vtt`
+   media type); the site's logo (Theme page > Edit theme settings).
+6. **Solr** *(optional)*: create a core (the rehearsal uses `omeka`), reachable from the web server, e.g.
+   `http://localhost:8983/solr/omeka`.
+7. **The standard pages.** Easy Admin > Checks and fixes > **Agile site setup**: choose the site, tick the presets
+   — *Item pages* (the item page blocks and the Mirador preset), *Homepage* (slide viewer, introduction, three recent
+   items), *Search pages* (three search pages with the same facets; with a Solr core URL the Solr page becomes the
+   site's main search and is indexed), *Block test pages* (every block, and a section with three child pages) — and run.
+   Presets replace pages by slug, so they can be rerun. Add a few items with images to the site first: the homepage
+   slides and recent items come from them.
+8. **Build the Advanced theme** *(Advanced only)*. Settings > Theme styling and builds: the Node.js executable, if it
+   is not on the web server's PATH. Then on the site's Theme page: **Install theme dependencies (npm install)**,
+   then **Build this site** (both run as jobs; the page shows the checks, the progress and the result). The built
+   stylesheet is served from `files/theme-assets/<theme>/<site>/`; nothing is written inside the theme folder.
+   Easy Admin > Checks and fixes > **Theme builds** does the same for every site at once.
+9. **Colours and fonts.** Advanced: Theme page > **Configure theme styles** (palette, fonts, type scale, layout),
+   save, then **Build this site** again. Simplified: Theme page > **Colours and fonts**; saved colours apply at once,
+   no build. Both themes: **Configure resource pages** for the item page blocks, and the site's custom CSS field on
+   the Theme page for anything else.
+10. **Sitemaps.** Static Sitemaps settings (which sites and resources to include), then generate: Easy Admin >
+    Regular tasks, or the cron line from the Static Sitemaps README. Add the sitemap to `robots.txt`.
+11. **Check.** Browse the homepage, the three search pages, an item page (Mirador with page links for a multi-page
+    item), the block test pages and the sitemap. Admin > Modules shows the dependency audit; the site's Theme page
+    shows the build state.
+
+## Optional
+
+- **Amazon S3**: install, configure, run a test upload; Advanced Media's media proxy serves S3 media through the site.
+- **Long menus**: the Advanced theme wraps a long top menu into right-aligned rows; test with ten or more pages.
+- **Site-specific templates**: copy any template the theme renders through `sitePartial` as `<name>-<site-slug>.phtml`
+  to specialise it for one site.
 
 # Additional Details
 
@@ -77,7 +158,7 @@ Agile Theme Tools supports the idea of site “sections” based on the Omeka-S 
 | List - Tabs | `…/section-list-tabs` | tab-style sub-menu |
 | List - Vertical | `…/section-list-vertical` | vertical list |
 
-## Resource page blocks and item pages
+### Resource page blocks and item pages
 
 `resource_page_block_layouts` (all items only; classes in `src/Site/ResourcePageBlockLayout/`, templates in `view/common/resource-page-block-layout/`):
 
@@ -108,5 +189,6 @@ In some instances sites may want alternative templates and styles. The Agile The
 
 To use it, place a copy named [template]-[site-slug].phtml beside the original in the theme (or in the module’s view folder) and that site renders it; every other site keeps the original. The Advanced theme routes its resource page blocks, homepage and listing blocks, cards and search results through this helper.”
 
+## Licence
 
-
+CeCILL v2.1 — see `LICENSE.txt`.
