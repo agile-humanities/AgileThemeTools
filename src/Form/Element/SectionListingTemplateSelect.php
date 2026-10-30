@@ -14,7 +14,10 @@ class SectionListingTemplateSelect extends Select {
     }
 
     public function getTemplateValueOptions() {
+        // The first entry is the block's default (SectionPageListing::form sets it on a new block), so a block saved
+        // without a choice keeps it.
         return([
+          'common/block-layout/item-list' => 'List - Simple',
           'common/block-layout/section-list-capsules' => 'Capsules',
           'common/block-layout/section-list-cards' => 'Cards',
           'common/block-layout/section-list-feature' => 'Feature',

@@ -226,7 +226,7 @@ class HomepageSplash extends AbstractBlockLayout
             'audioAttachment' => $audio_attachment,
             'optionSlidesPerRow' => array_key_exists('slidesperrow',$data) ? (int)$data['slidesperrow'] : 1,
             'optionSlidesToShow' => array_key_exists('slidestoshow',$data) ? (int)$data['slidestoshow'] : 1,
-            'optionAutoPlay' => array_key_exists('autoplay',$data) ? "true" : "false",
+            'optionAutoPlay' => !empty($data['autoplay']) ? "true" : "false", // an unticked box saves "0"
             'optionFade' => !array_key_exists('fade', $data) || $data['fade'] ? "true" : "false", // cross-fade unless switched off
             'hasAttachments' => $hasAttachments,
             'compositionClass' => array_key_exists('composition',$data) ? $data['composition'] : ''

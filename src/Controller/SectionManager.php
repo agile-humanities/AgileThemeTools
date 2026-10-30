@@ -100,89 +100,76 @@ class SectionManager extends AbstractActionController {
     }
   }
 
-  /*
-   * @method getPagesBySection
-   * @param $sectionSlug string. The page slug of the parent page.
-   * @param $count int|null. The number of items to return, if any.
-   * @param $includeCurrentPage bool. Include the parent page alongside its children.
+  /**
+   * The pages of a section, for the listing templates: the section's child pages in navigation order, the section's
+   * own page first when asked for, the first $count of them when a count is given.
    *
-   * Identifies and returns an array of page representation objects suitable for rendering. Method is provided
-   * a page slug representing a section and returns child pages if they exist.
+   * Each entry is what the templates and the card display mode read: 'o:id', 'o:slug', 'o:title', 'o:url',
+   * 'o:active' and 'o:pageRepresentation' (the SitePageRepresentation, for $this->card($page)). Nothing of the
+   * page's blocks is loaded here: the card mode reads the one block it needs from the representation, and the
+   * list templates need none. The site's pages are fetched once per request, in one query, however many listing
+   * blocks a page carries.
+   *
+   * @param string $sectionSlug The page slug of the parent page.
+   * @param int|string|null $count The number of pages to return, if any (the first N, in navigation order).
+   * @param bool $includeCurrentPage Include the parent page ahead of its children.
+   * @return array[] Keyed by page slug.
    */
-
-  public function getPagesBySection($sectionSlug,$count=null,$includeCurrentPage=false){
-    $sectionPages = [];
-
-    // Check to see if section has indexed pages, otherwise return an empty array.
-    if (!key_exists($sectionSlug,$this->pageIndex)) {
+  public function getPagesBySection($sectionSlug, $count = null, $includeCurrentPage = false) {
+    if (!$this->site || !key_exists($sectionSlug, $this->pageIndex)) {
       return [];
     }
 
-    $pages = $this->pageIndex[$sectionSlug];
-
-    if($includeCurrentPage) {
-      $currentPage['params']['page-slug'] = $sectionSlug;
-      array_unshift($pages,$currentPage);
+    $slugs = [];
+    if ($includeCurrentPage) {
+      $slugs[] = $sectionSlug;
     }
-
-    foreach($pages as $childPage) {
-      if (array_key_exists('params',$childPage) && array_key_exists('page-slug',$childPage['params'])) {
-
-        $childPageRepresentation = $this->api->read('site_pages',[
-          'slug' => $childPage['params']['page-slug'],
-          'site' => $this->site->id()
-        ])->getContent();
-
-        $childPageData = $childPageRepresentation->getJsonLd();
-        $childPageData['o:url'] = $childPageRepresentation->siteUrl();
-        $childPageData['o:active'] = $childPage['params']['page-slug'] == $this->getActivePageSlug();
-
-        // Block Objects
-
-        $childPageData['o:blocks'] = [];
-        $childPageData['o:blocks-by-layout'] = [];
-
-        foreach($childPageRepresentation->blocks() as $block) {
-          //$block->page_title = $childPageData['o:title'];
-          //$block->page_url = $childPageData['o:url'];
-
-          $serializedBlockInfo = $block->jsonSerialize();
-          $serializedBlockInfo['page_title'] = $childPageData['o:title'];
-          $serializedBlockInfo['page_url'] = $childPageData['o:url'];
-
-          $serializedBlockInfo['o:blockRepresentation'] = $block;
-          $childPageData['o:blocks'][$block->id()] = $serializedBlockInfo;
-
-          // Ensure that a layout is set and that the Section Listing blocks are removed to prevent recursion.
-
-          $blockLayout = empty($serializedBlockInfo['o:layout']) || $serializedBlockInfo['o:layout'] == 'sectionPageListing' ? null : $serializedBlockInfo['o:layout'];
-
-          if ($blockLayout) {
-            if (!array_key_exists($blockLayout,$childPageData['o:blocks-by-layout'])) {
-              $childPageData['o:blocks-by-layout'][$blockLayout][$block->id()] = $serializedBlockInfo;
-            }
-          }
-        }
-
-        $childPageData['o:pageRepresentation'] = $childPageRepresentation;
-        $sectionPages[$childPage['params']['page-slug']] = $childPageData;
+    foreach ($this->pageIndex[$sectionSlug] as $childPage) {
+      if (array_key_exists('params', $childPage) && array_key_exists('page-slug', $childPage['params'])) {
+        $slugs[] = $childPage['params']['page-slug'];
       }
     }
+    $slugs = array_values(array_unique($slugs));
+    $count = (int) $count;
+    if ($count > 0) {
+      $slugs = array_slice($slugs, 0, $count);
+    }
 
-    if ($count && count($sectionPages) > 0) {
-      $randomized = [];
-      $randIndex = array_rand($sectionPages,$count <= count($sectionPages) ? $count : count($sectionPages));
-
-      foreach ((array)$randIndex as $key) {
-        $randomized[$key] = $sectionPages[$key];
+    $pagesBySlug = $this->getSitePages();
+    $activeSlug = $this->getActivePageSlug();
+    $sectionPages = [];
+    foreach ($slugs as $slug) {
+      if (!isset($pagesBySlug[$slug])) {
+        continue; // In the navigation but not readable here (a private page, or one removed since the menu was built).
       }
-
-      $sectionPages = $randomized;
-
+      $page = $pagesBySlug[$slug];
+      $sectionPages[$slug] = [
+        'o:id' => $page->id(),
+        'o:slug' => $slug,
+        'o:title' => $page->title(),
+        'o:url' => $page->siteUrl(),
+        'o:active' => $slug === $activeSlug,
+        'o:pageRepresentation' => $page,
+      ];
     }
 
     return $sectionPages;
+  }
 
+  /** @var SitePageRepresentation[]|null The site's pages keyed by slug, read once per request. */
+  protected $sitePages = null;
+
+  /** @return SitePageRepresentation[] Keyed by slug. */
+  protected function getSitePages(): array {
+    if ($this->sitePages === null) {
+      $this->sitePages = [];
+      if ($this->site) {
+        foreach ($this->api->search('site_pages', ['site_id' => $this->site->id()])->getContent() as $page) {
+          $this->sitePages[$page->slug()] = $page;
+        }
+      }
+    }
+    return $this->sitePages;
   }
 
   public function getActivePageSlug() {
