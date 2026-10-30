@@ -21,7 +21,7 @@
                 <h3><a href='<?= $escape($card['url'] ?? $page['o:url']) ?>'><?= $escape($card['title'] ?? $page['o:title']) ?></a></h3>
                 <?php if (!empty($card['byline'])): ?><div class="byline"><?= $escape($card['byline']) ?></div><?php endif; ?>
                 <?php if (!empty($card['summary'])): ?><div class="excerpt"><p><?= $card['summary'] ?></p></div><?php endif; ?>
-                <a class='btn' href='<?= $escape($card['url'] ?? $page['o:url']) ?>'>View this item</a>
+                <a class='more' href='<?= $escape($card['url'] ?? $page['o:url']) ?>'>View this item</a>
             </div>
         <?php endforeach ?>
     </div>

@@ -279,6 +279,19 @@ use AgileThemeTools\Site\ResourcePageBlockLayout\ItemFullMetadata;
                     ],
                   ],
                 ],
+                'install-dependencies' => [
+                  'type' => \Laminas\Router\Http\Literal::class,
+                  'priority' => 10,
+                  'options' => [
+                    'route' => '/install-dependencies',
+                    'defaults' => [
+                      '__NAMESPACE__' => 'AgileThemeTools\Controller\SiteAdmin',
+                      '__ADMIN__' => true,
+                      'controller' => 'SiteTheming',
+                      'action' => 'install-dependencies',
+                    ],
+                  ],
+                ],
                 'status' => [
                   'type' => \Laminas\Router\Http\Literal::class,
                   'priority' => 10,

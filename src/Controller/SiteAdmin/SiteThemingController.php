@@ -4,6 +4,7 @@ namespace AgileThemeTools\Controller\SiteAdmin;
 
 use AgileThemeTools\Form\View\Helper\AgileFormCollectionElementGroups;
 use AgileThemeTools\Job\BuildSiteTheme;
+use AgileThemeTools\Job\InstallThemeDependencies;
 use AgileThemeTools\ThemeBuild\BuildManager;
 use Laminas\Form\Form;
 use Laminas\Mvc\Controller\AbstractActionController;
@@ -310,6 +311,35 @@ class SiteThemingController extends AbstractActionController {
     $theme = $this->getCurrentTheme();
     $sites = $theme ? $this->builder->getConfigurableSites($theme) : [];
     return $this->dispatchBuild(array_map(fn ($site) => $site->id(), $sites));
+  }
+
+  /**
+   * Queues an npm install of the theme's build dependencies (node_modules), so a build can run on a server where
+   * the theme was installed from a release zip.
+   */
+  public function installDependenciesAction() {
+    $redirect = $this->redirect()->toRoute('admin/site/slug/action', ['site-slug' => $this->currentSite()->slug(), 'action' => 'theme']);
+    if (!$this->getRequest()->isPost()) {
+      return $redirect;
+    }
+    $form = $this->getForm(Form::class);
+    $form->setData($this->params()->fromPost());
+    if (!$form->isValid()) {
+      $this->messenger()->addFormErrors($form);
+      return $redirect;
+    }
+    $theme = $this->getCurrentTheme();
+    if (!$theme) {
+      $this->messenger()->addWarning('The site\'s theme is not installed.'); // @translate
+      return $redirect;
+    }
+    if ($this->builder->findActiveJob($this->currentSite())) {
+      $this->messenger()->addWarning('A build or install of this theme is already running.'); // @translate
+      return $redirect;
+    }
+    $job = $this->jobDispatcher()->dispatch(InstallThemeDependencies::class, ['theme' => $theme->getId(), 'site_ids' => [$this->currentSite()->id()]]);
+    $this->messenger()->addSuccess(sprintf($this->translate('Installing the theme\'s build dependencies (job #%d). The Theme page shows progress.'), $job->getId()));
+    return $redirect;
   }
 
   /**

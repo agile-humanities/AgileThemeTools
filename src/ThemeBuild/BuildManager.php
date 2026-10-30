@@ -58,6 +58,9 @@ class BuildManager
     /** Seconds a build may run before it is killed. Image optimisation of a large theme takes about a minute. */
     const BUILD_TIMEOUT = 900;
 
+    /** The Node.js major version the theme's build tools expect (gulp-postcss 10, postcss-load-config 5). */
+    const NODE_MIN_MAJOR = 18;
+
     /** Bytes of free space below which preflight fails. */
     const MIN_FREE_BYTES = 300 * 1024 * 1024;
 
@@ -180,6 +183,20 @@ class BuildManager
     }
 
     /**
+     * Whether per-site styling is on in a site's theme settings. The theme.ini checkbox is on by default, so a site
+     * whose theme settings were never saved, or were written without the key, counts as on; only an explicit off
+     * (an unticked box saves "0") turns it off. The admin Theme page, the build manager and the siteAssetUrl helper
+     * all use this rule, so a build offered on the Theme page is also the build the site serves.
+     */
+    public static function stylingEnabled(?array $themeSettings): bool
+    {
+        if (!is_array($themeSettings) || !array_key_exists(self::CONFIGURABLE_SETTING, $themeSettings)) {
+            return true;
+        }
+        return !empty($themeSettings[self::CONFIGURABLE_SETTING]);
+    }
+
+    /**
      * Whether the site has per-site theme styling turned on in its theme settings. Read straight from the table:
      * the shared site settings service is bound to the current site, and re-targeting it here would make later
      * reads in the same request see another site's settings.
@@ -195,7 +212,7 @@ class BuildManager
             [$site->id(), $theme->getSettingsKey()]
         );
         $themeSettings = $value ? json_decode((string) $value, true) : null;
-        return is_array($themeSettings) && !empty($themeSettings[self::CONFIGURABLE_SETTING]);
+        return self::stylingEnabled($themeSettings);
     }
 
     /**
@@ -481,7 +498,7 @@ class BuildManager
     public function findActiveJob(SiteRepresentation $site): ?Job
     {
         $jobs = $this->entityManager->getRepository(Job::class)->findBy(
-            ['class' => \AgileThemeTools\Job\BuildSiteTheme::class, 'status' => [Job::STATUS_STARTING, Job::STATUS_IN_PROGRESS]],
+            ['class' => [\AgileThemeTools\Job\BuildSiteTheme::class, \AgileThemeTools\Job\InstallThemeDependencies::class], 'status' => [Job::STATUS_STARTING, Job::STATUS_IN_PROGRESS]],
             ['id' => 'DESC'],
             20
         );
@@ -535,7 +552,24 @@ class BuildManager
         $gulp = "$themePath/node_modules/gulp/bin/gulp.js";
         $checks[] = $this->check('node_modules', 'Theme dependencies (node_modules)', is_file($gulp), // @translate
             is_file($gulp) ? "gulp found at $gulp." : "The theme's node_modules directory is missing or incomplete ($gulp not found).",
-            "Run `npm install` in $themePath, as a user who can write there, then rebuild.");
+            'Use "Install theme dependencies" below (it runs npm install as a background job), or run `npm install` in ' . $themePath . ' as a user who can write there, then rebuild.');
+
+        // npm: needed to install the theme's dependencies from the admin; not needed for a build once they are there.
+        $npm = $this->findNpm();
+        if ($npm === null) {
+            $checks[] = $this->check('npm', 'npm', is_file($gulp) ? null : false, // @translate
+                sprintf('No npm executable was found beside node or on the PATH of %s.', $user),
+                'Install Node.js with npm where the web server can run it (the node path in Settings > Theme build is used to find npm too).');
+        } else {
+            $npmVersion = $this->runQuick([$npm, '--version'], $themePath);
+            $checks[] = $this->check('npm', 'npm', $npmVersion['exitCode'] === 0 ? true : (is_file($gulp) ? null : false), // @translate
+                $npmVersion['exitCode'] === 0 ? sprintf('%s (%s)', trim($npmVersion['output']), $npm) : sprintf('%s could not be run: %s', $npm, trim($npmVersion['output'])),
+                'Check that npm runs as ' . $user . '.');
+        }
+        $themeWritable = is_writable($themePath) && (!is_dir("$themePath/node_modules") || is_writable("$themePath/node_modules"));
+        $checks[] = $this->check('theme_writable', 'Theme folder writable (for npm install)', $themeWritable ? true : (is_file($gulp) ? null : false), // @translate
+            $themeWritable ? sprintf('%s is writable by %s.', $themePath, $user) : sprintf('%s is not writable by %s, so npm install cannot run from the admin.', $themePath, $user),
+            sprintf('Make the theme folder writable by %s (chown or group write), or run npm install there yourself.', $user));
 
         $node = $this->findNode();
         $nodeSetting = trim((string) $this->settings->get(self::NODE_PATH_SETTING));
@@ -549,8 +583,11 @@ class BuildManager
                 'Install Node.js where the web server can run it, or set its path in Settings > Theme build.');
         } else {
             $version = $this->runQuick([$node, '--version'], $themePath);
-            $checks[] = $this->check('node', 'Node.js', $version['exitCode'] === 0, // @translate
-                $version['exitCode'] === 0 ? sprintf('%s (%s)', trim($version['output']), $node) : sprintf('%s could not be run: %s', $node, trim($version['output'])),
+            // The theme's build tools want Node 18 or later (gulp-postcss, postcss-load-config); older runs with warnings.
+            $major = (int) ltrim(trim($version['output']), 'v');
+            $nodeOk = $version['exitCode'] !== 0 ? false : ($major >= self::NODE_MIN_MAJOR ? true : null);
+            $checks[] = $this->check('node', 'Node.js', $nodeOk, // @translate
+                $version['exitCode'] === 0 ? sprintf('%s (%s)%s', trim($version['output']), $node, $major < self::NODE_MIN_MAJOR ? sprintf(' — older than Node %d, which the theme\'s build tools expect; builds may fail.', self::NODE_MIN_MAJOR) : '') : sprintf('%s could not be run: %s', $node, trim($version['output'])),
                 'Check the Node.js path in Settings > Theme build, and that the web server user may execute it.');
         }
 
@@ -983,6 +1020,74 @@ class BuildManager
             }
         }
         return null;
+    }
+
+    /**
+     * The npm executable: beside the node in use, else the first npm on PATH, else common install locations.
+     */
+    public function findNpm(): ?string
+    {
+        $node = $this->findNode();
+        if ($node !== null && is_executable(dirname($node) . '/npm')) {
+            return dirname($node) . '/npm';
+        }
+        $found = $this->cli->getCommandPath('npm');
+        if ($found) {
+            return $found;
+        }
+        foreach (['/usr/local/bin/npm', '/usr/bin/npm', '/opt/homebrew/bin/npm'] as $candidate) {
+            if (is_executable($candidate)) {
+                return $candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Installs the theme's build dependencies (node_modules) with npm, under the theme's build lock: `npm ci` when
+     * the theme ships a package-lock.json (the exact versions it was built with), else `npm install`. Output streams
+     * to $onOutput. Returns ['exitCode' => int, 'output' => string, 'timedOut' => bool].
+     */
+    public function installDependencies(Theme $theme, ?callable $onOutput = null): array
+    {
+        $themePath = $theme->getPath();
+        $npm = $this->findNpm();
+        if ($npm === null) {
+            return ['exitCode' => 1, 'output' => 'npm was not found (see the preflight checks on the Theme page).', 'timedOut' => false];
+        }
+        if (!is_writable($themePath)) {
+            return ['exitCode' => 1, 'output' => sprintf('%s is not writable by %s.', $themePath, $this->getProcessUser()), 'timedOut' => false];
+        }
+        $lock = $this->acquireLock($theme);
+        if ($lock === null) {
+            return ['exitCode' => 1, 'output' => 'Another build or install of this theme is running.', 'timedOut' => false];
+        }
+        try {
+            $announce = function (array $command) use ($onOutput, $themePath): void {
+                if ($onOutput) {
+                    $onOutput('$ ' . implode(' ', $command) . "\n(in $themePath, as " . $this->getProcessUser() . ")\n");
+                }
+            };
+            $install = [$npm, 'install', '--no-audit', '--no-fund', '--no-progress'];
+            if (!is_file("$themePath/package-lock.json")) {
+                $announce($install);
+                return $this->run($install, $themePath, self::BUILD_TIMEOUT * 2, $onOutput);
+            }
+            $ci = [$npm, 'ci', '--no-audit', '--no-fund', '--no-progress'];
+            $announce($ci);
+            $result = $this->run($ci, $themePath, self::BUILD_TIMEOUT * 2, $onOutput);
+            // A lock file out of step with package.json (a theme edited after its release): resolve it instead.
+            if ($result['exitCode'] !== 0 && !$result['timedOut'] && stripos($result['output'], 'in sync') !== false) {
+                if ($onOutput) {
+                    $onOutput("\npackage-lock.json does not match package.json; running npm install instead.\n");
+                }
+                $announce($install);
+                return $this->run($install, $themePath, self::BUILD_TIMEOUT * 2, $onOutput);
+            }
+            return $result;
+        } finally {
+            $this->releaseLock($lock);
+        }
     }
 
     // ------------------------------------------------------------------ locking and filesystem

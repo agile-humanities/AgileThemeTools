@@ -20,6 +20,7 @@ class EasyAdminTasks
     const PROCESS_CHECK = 'theme_build_check';
     const PROCESS_SITE = 'theme_build_site';
     const PROCESS_ALL = 'theme_build_all';
+    const PROCESS_INSTALL = 'theme_build_install';
 
     protected BuildManager $builder;
 
@@ -65,6 +66,7 @@ class EasyAdminTasks
                     self::PROCESS_CHECK => 'Check that site themes can be built (prerequisites and permissions for every site with per-site styling; builds nothing)', // @translate
                     self::PROCESS_SITE => 'Build the theme of one site', // @translate
                     self::PROCESS_ALL => sprintf('Build the themes of all sites with per-site styling (%d)', $siteCount), // @translate
+                    self::PROCESS_INSTALL => 'Install the build dependencies (npm install) of the theme of one site, so it can be built on this server', // @translate
                 ],
             ],
             'attributes' => [
@@ -123,10 +125,27 @@ class EasyAdminTasks
     public function handleJob(Event $event): void
     {
         $process = $event->getParam('process');
-        if (!in_array($process, [self::PROCESS_CHECK, self::PROCESS_SITE, self::PROCESS_ALL], true)) {
+        if (!in_array($process, [self::PROCESS_CHECK, self::PROCESS_SITE, self::PROCESS_ALL, self::PROCESS_INSTALL], true)) {
             return;
         }
         $params = $event->getParam('params');
+
+        if ($process === self::PROCESS_INSTALL) {
+            // The theme of the site chosen in the "Site to build" selector.
+            $siteId = (int) ($params[self::FIELDSET][self::PROCESS_SITE]['site_id'] ?? 0);
+            $theme = null;
+            foreach ($this->builder->getAllConfigurableSites() as $candidate) {
+                if ($candidate->id() === $siteId) {
+                    $theme = $this->builder->getSiteTheme($candidate);
+                }
+            }
+            if (!$theme) {
+                return; // No site chosen: Easy Admin reports the process as unknown.
+            }
+            $event->setParam('job', \AgileThemeTools\Job\InstallThemeDependencies::class);
+            $event->setParam('args', ['theme' => $theme->getId(), 'site_ids' => [$siteId]]);
+            return;
+        }
 
         if ($process === self::PROCESS_SITE) {
             $siteId = (int) ($params[self::FIELDSET][self::PROCESS_SITE]['site_id'] ?? 0);

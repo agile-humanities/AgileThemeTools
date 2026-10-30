@@ -23,23 +23,38 @@
     const facetSidebar = $('#browser-sidebar');
     const searchResultsHeader = $('.search-results-header');
 
-    // Mobile browse controls
+    // Mobile browse controls: below the desktop breakpoint the toolbar (#mobile-browse-controls) is visible and the
+    // facets sidebar is a full-screen panel opened by its Filter button. The results header (count, per page, sort)
+    // moves into that panel so every control is in one scrolling column; it goes back to the results when the
+    // viewport grows past the breakpoint. "Mobile" is decided by the toolbar's visibility, which the stylesheet owns.
 
-    mobileFilterButton.on('click',_toggleFilterOverlay);
-    mobileCloseButton.on('click',_toggleFilterOverlay)
-    // @todo: allow users to click off of filter overlay. To do this you must prevent propagation if a user selects a control element via event.stopPropagation()
-    /*
-    $('aside.search-facets').on('click',function(){
-        if (window.outerWidth <= breakpoint_desktop) {
-            _toggleFilterOverlay()
-        }
-    })
-    */
+    const isMobile = () => mobileBrowseControls.length > 0 && mobileBrowseControls.is(':visible');
+    const headerHome = $('<!-- results header -->');
 
+    function placeResultsHeader() {
+      if (searchResultsHeader.length === 0 || facetSidebar.length === 0) { return; }
+      const inPanel = searchResultsHeader.parent().is(facetSidebar);
+      if (isMobile() && !inPanel) {
+        searchResultsHeader.replaceWith(headerHome);
+        mobileCloseButton.after(searchResultsHeader);
+      } else if (!isMobile() && inPanel) {
+        headerHome.replaceWith(searchResultsHeader);
+      }
+    }
 
-    // Hide filter button if filter sidebar doesn’t exist
+    function setFilterOverlay(open) {
+      if (facetSidebar.length === 0) { return; }
+      facetSidebar.toggleClass('open', open);
+      mobileFilterButton.attr('aria-expanded', open ? 'true' : 'false').toggleClass('active', open);
+      $('body').toggleClass('filter-overlay-open', open);
+    }
 
-    if(facetSidebar.length === 0) {
+    mobileFilterButton.on('click', e => { e.preventDefault(); setFilterOverlay(!facetSidebar.hasClass('open')); });
+    mobileCloseButton.on('click', e => { e.preventDefault(); setFilterOverlay(false); });
+    $(document).on('keydown', e => { if (e.key === 'Escape' && facetSidebar.hasClass('open')) { setFilterOverlay(false); } });
+
+    // No facets: nothing to open.
+    if (facetSidebar.length === 0) {
       mobileFilterButton.hide();
     }
 
@@ -48,30 +63,11 @@
       $('.pagination--mobile').appendTo(mobileBrowseControls);
     }
 
-    // Resets the sidebar display status when the window is resized
-
-    $(window).on('resize',() => {
-        facetSidebar.attr('style', null)
-        mobileCloseButton.attr('style', null)
-      });
-
-    function _toggleFilterOverlay() {
-      // Set a delay to avoid animation race conditions
-      const delay = () => {
-        setTimeout(()=>{},window.heartbeat)
-      }
-
-      if (facetSidebar.length > 0) {
-        facetSidebar.is(':hidden') ?
-          facetSidebar.fadeIn(window.heartbeat,delay) :
-          facetSidebar.fadeOut(window.heartbeat,delay);
-      }
-      if (searchResultsHeader.length > 0) {
-        searchResultsHeader.is(':hidden') ?
-          searchResultsHeader.fadeIn(window.heartbeat,function() { $(this).css('display','flex'); delay()}) :
-          searchResultsHeader.fadeOut(window.heartbeat,delay);
-      }
-    }
+    placeResultsHeader();
+    $(window).on('resize', () => {
+      placeResultsHeader();
+      if (!isMobile()) { setFilterOverlay(false); }
+    });
 
     // Collection browser support
 
@@ -89,7 +85,7 @@
     }
 
     if (browseViewMode !== null) {
-      const browserUIbuttons =  $('.search-results-header .search-view-type');
+      const browserUIbuttons = $('.search-results-header .search-view-type, #mobile-browse-controls .search-view-type');
       browserUIbuttons.each(function(){
         // Manage active state classes and icons.
         $(this).removeClass('active');

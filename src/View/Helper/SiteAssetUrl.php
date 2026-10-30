@@ -110,7 +110,7 @@ class SiteAssetUrl extends AbstractHelper
           return $uri . ($versioned ? '?v=' . rawurlencode($this->siteBuild['version']) : '');
         }
 
-        if ($this->site && null === $module && $this->currentTheme && array_key_exists('configurable_site_theme',$this->themeSettings) && $this->themeSettings['configurable_site_theme']) {
+        if ($this->site && null === $module && $this->currentTheme && \AgileThemeTools\ThemeBuild\BuildManager::stylingEnabled($this->themeSettings)) {
           $versionQuery = $versioned ? '?v=' . $this->currentTheme->getIni('version') : '';
 
           $path = sprintf(self::THEME_SITE_ASSETS_PATH, $basePath, $this->currentTheme->getId(),$this->site->slug(), $file, $versionQuery);

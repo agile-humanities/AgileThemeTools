@@ -249,7 +249,12 @@ $this->headScript()
 
         <?php if (empty($isPartial)): ?>
     </div>
-    <?= $partial('search/agile/mobile-browse-controls'); ?>
+    <?php $gridListMode = $searchConfig->subSetting('results', 'grid_list_mode', 'auto'); ?>
+    <?= $partial('search/agile/mobile-browse-controls', [
+        'searchConfig' => $searchConfig,
+        'multiMode' => isset($displayParts['grid_list']) && !in_array($gridListMode, ['list_only', 'grid_only']),
+        'gridListMode' => $gridListMode,
+    ]); ?>
 </div>
 <?php endif; ?>
 <!-- SEARCH TEMPLATE END search/search.phtml -->

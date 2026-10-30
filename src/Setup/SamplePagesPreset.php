@@ -85,11 +85,12 @@ class SamplePagesPreset
         $i = $this->items;
         $blocks = [
             W::block('pageTitle'),
+            W::block('representativeImage', ['region' => 'region:default'], W::attachments([$i[1]])), // shown by link cards and listings
             W::block('html', ['html' => '<h2>Omeka core blocks</h2>' . self::LOREM . self::LIST . self::LOREM2]),
             W::block('lineBreak', ['break_type' => 'transparent']),
             W::block('media', ['thumbnail_type' => 'large', 'show_title_option' => 'item_title', 'layout' => 'horizontal', 'media_display' => 'thumbnail'], W::attachments([$i[0], $i[1]], 'A caption for the media embed'), ['alignment_block' => 'center', 'alignment_text' => 'center']),
             W::block('html', ['html' => '<h3>Composed with the media embed above</h3>' . self::LOREM]),
-            W::block('browsePreview', ['resource_type' => 'items', 'query' => 'sort_by=created&sort_order=desc', 'limit' => '4', 'components' => ['resource-heading', 'resource-body', 'thumbnail'], 'heading' => 'Browse preview: recent items', 'link-text' => 'Browse all']),
+            W::block('browsePreview', ['resource_type' => 'items', 'query' => 'sort_by=created&sort_order=desc', 'limit' => '3', 'components' => ['resource-heading', 'resource-body', 'thumbnail'], 'heading' => 'Browse preview: recent items', 'link-text' => 'Browse all']),
             W::block('lineBreak', ['break_type' => 'opaque']),
             W::block('html', ['html' => '<h3>More core blocks</h3><p>Item with metadata, table of contents, list of pages, list of sites, page date/time, a block group of two HTML blocks, a IIIF presentation, a IIIF image and an oEmbed.</p>']),
             W::block('itemWithMetadata', [], W::attachments([$i[3]])),
@@ -117,15 +118,20 @@ class SamplePagesPreset
     {
         $i = $this->items;
         $slug = $this->site->slug();
-        $cards = ['title' => 'Site link cards', 'introduction' => '<p>Three link cards.</p>', 'buttonText' => '', 'buttonPath' => '', 'classes' => '', 'thumbnail_type' => 'large', 'region' => 'region:default'];
-        foreach ([['Agile Humanities', 'https://agilehumanities.ca/'], ['Omeka S', 'https://omeka.org/s/'], ['IIIF', 'https://iiif.io/']] as $n => [$title, $url]) {
-            $cards += ["itemLabel_$n" => 'LINK', "itemTitle_$n" => $title, "itemSubTitle_$n" => 'A subtitle', "itemThumbnailUrl_$n" => '', "itemDescription_$n" => '<p>A short description of the linked site.</p>', "itemUrl_$n" => $url];
+        // Three cards linking to this site's own pages: each card's image is the linked page's representative image
+        // (its Page summary or Representative image block), the way the block is meant to be used.
+        $cards = ['title' => 'Site link cards', 'introduction' => '<p>Three link cards to pages of this site. Each card shows the representative image of the page it links to.</p>', 'buttonText' => '', 'buttonPath' => '', 'classes' => '', 'thumbnail_type' => 'large', 'region' => 'region:default'];
+        foreach ([['Omeka core blocks', 'sample-core-blocks'], ['Third-party module blocks', 'sample-module-blocks'], ['A section of pages', 'sample-section']] as $n => [$title, $pageSlug]) {
+            $cards += ["itemLabel_$n" => 'PAGE', "itemTitle_$n" => $title, "itemSubTitle_$n" => 'A subtitle', "itemThumbnailUrl_$n" => '', "itemDescription_$n" => '<p>A short description of the linked page.</p>', "itemUrl_$n" => "/s/$slug/page/$pageSlug"];
         }
-        $slideshow = fn (string $title, string $intro, array $pairs) => W::block('slideshow', ['title' => $title, 'introduction' => $intro, 'region' => 'region:default', 'show_title_option' => 'item_title', 'labelText' => 'LABEL', 'subtitle' => 'A subtitle', 'buttonText' => '', 'slidesperrow' => '1', 'autoplay' => '0', 'fade' => '0', 'hastitle' => '1'], W::attachments($pairs));
+        $slideshow = fn (string $title, string $intro, array $pairs) => W::block('slideshow', ['title' => $title, 'introduction' => $intro, 'region' => 'region:default', 'show_title_option' => 'item_title', 'labelText' => 'LABEL', 'subtitle' => 'A subtitle', 'buttonText' => '', 'slidesperrow' => '1', 'autoplay' => '0', 'fade' => '1', 'hastitle' => '1'], W::attachments($pairs));
         $heading = fn (string $text) => W::block('html', ['html' => "<h3>$text</h3>"]);
 
         $blocks = [
+            // The splash region, above the page title; the regional title opens the main stack.
+            W::block('sectionIntroSplash', ['title' => 'Section introduction', 'introduction' => '<p>Introduction text for the section splash, in the splash region above the page.</p>', 'alignment' => 'right', 'region' => 'region:splash', 'show_title_option' => 'item_title'], W::attachments([$i[0]])),
             W::block('pageTitle'),
+            W::block('regionalTitle', ['title' => 'Regional title', 'html' => '<p>Text under the regional title, first in the main content stack.</p>', 'region' => 'region:default']),
             W::block('html', ['html' => '<p><strong>These are the Agile Theme Tools blocks</strong> (all except the Homepage Introduction, which belongs on the homepage), in alphabetical order of their labels, each introduced by an HTML block.</p>' . self::LOREM]),
             // How this page presents itself in listings (read by the card display mode; hidden on the page itself).
             W::block('pageSummary', ['summary' => '<p>A hand-written summary for this sample page. It is what listings show instead of the page\'s first paragraph. A third sentence makes it long enough to be cut by a short limit.</p>', 'byline' => 'Curated by A. Sample Curator', 'label' => 'Sample', 'show' => '0'], W::attachments([$i[2]])),
@@ -145,12 +151,8 @@ class SamplePagesPreset
             W::block('quotation', ['quotation' => '<p>&ldquo;The quotation block sets a quotation with its attribution.&rdquo;</p>', 'attribution' => 'An Attributed Author (Title of Work)']),
             $heading('Regional HTML'),
             W::block('regionalHtml', ['html' => '<p>Regional HTML placed in the primary content tier.</p>', 'region' => 'region:default']),
-            $heading('Regional title'),
-            W::block('regionalTitle', ['title' => 'Regional title', 'html' => '<p>Text under the regional title.</p>', 'region' => 'region:default']),
             $heading('Representative image'),
             W::block('representativeImage', ['region' => 'region:default'], W::attachments([$i[1]])),
-            $heading('Section introduction splash'),
-            W::block('sectionIntroSplash', ['title' => 'Section introduction', 'introduction' => '<p>Introduction text for the section splash.</p>', 'alignment' => 'right', 'region' => 'region:default', 'show_title_option' => 'item_title'], W::attachments([$i[0]])),
         ];
         // Section listing: one block per template, each listing the pages beneath "Sample: section".
         foreach (self::SECTION_LISTING_TEMPLATES as $template => $label) {
@@ -172,6 +174,7 @@ class SamplePagesPreset
         $heading = fn (string $text) => W::block('html', ['html' => "<h3>$text</h3>"]);
         $blocks = [
             W::block('pageTitle'),
+            W::block('representativeImage', ['region' => 'region:default'], W::attachments([$i[2]])), // shown by link cards and listings
             W::block('html', ['html' => '<p><strong>Blocks supplied by third-party modules</strong> the Agile stack uses: Advanced Search (search form), Reference (reference list and reference tree) and Mirador (viewer). Each is introduced by an HTML block; blocks of modules that are not installed are left out.</p>' . self::LOREM]),
         ];
         $siteSettings = $this->services->get('Omeka\Settings\Site');
@@ -206,6 +209,7 @@ class SamplePagesPreset
             'parent' => ['title' => 'Sample: section', 'slug' => 'sample-section', 'blocks' => [
                 W::block('pageTitle'),
                 $menu,
+                W::block('representativeImage', ['region' => 'region:default'], W::attachments([$this->items[3]])), // shown by link cards and listings
                 W::block('html', ['html' => '<p><strong>A section parent page.</strong> Three second-level pages sit beneath it in the navigation, for the dropdown menu and the Section Listing block (the tabs above).</p>' . self::LOREM]),
             ]],
             'children' => [$child(1, 'Section page one'), $child(2, 'Section page two'), $child(3, 'Section page three')],
@@ -227,7 +231,11 @@ class SamplePagesPreset
             if ($this->items[0][1]) {
                 $info = $helpers->get('iiifMediaUrl')($api->read('media', $this->items[0][1])->getContent(), 'imageserver/info');
             }
-            return [$manifest ?: null, $info ?: null];
+            // In a job there may be no server URL to build an absolute URL from ("http:///iiif/…"): keep the path,
+            // which Mirador and OpenSeadragon resolve against the page.
+            // ("http:///iiif/…" is not a URL parse_url() accepts, hence the pattern.)
+            $usable = fn ($url) => $url ? (preg_match('#^https?://(/.*)$#', $url, $m) ? $m[1] : $url) : null;
+            return [$usable($manifest), $usable($info)];
         } catch (\Throwable $e) {
             return [null, null];
         }

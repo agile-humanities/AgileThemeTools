@@ -37,7 +37,7 @@ return [
     'omeka' => [
         'label' => 'Omeka S',
         'level' => 'required',
-        'pinned' => '4.2.0',
+        'pinned' => '4.2.1',
         'minimum' => '4.1.0',
         'for' => 'Resource page blocks and block templates.',
         'source' => 'https://omeka.org/s/',
@@ -68,7 +68,7 @@ return [
         'label' => 'Reference',
         'level' => 'required',
         'when' => 'internal-search',
-        'pinned' => '3.4.63',
+        'pinned' => '3.4.64',
         'minimum' => '3.4.58',
         'volatile' => true,
         'for' => 'Facets on Advanced Search’s internal engine. Not needed when every search page uses Solr.',
@@ -77,7 +77,7 @@ return [
     'IiifServer' => [
         'label' => 'IIIF Server',
         'level' => 'required',
-        'pinned' => '3.6.32',
+        'pinned' => '3.6.34',
         'volatile' => true,
         'for' => 'IIIF manifests for the image and document viewers.',
     ] + $danielKm('IiifServer'),
@@ -85,7 +85,7 @@ return [
     'ImageServer' => [
         'label' => 'Image Server',
         'level' => 'required',
-        'pinned' => '3.6.25',
+        'pinned' => '3.6.26',
         'volatile' => true,
         'for' => 'IIIF image delivery (deep zoom).',
     ] + $danielKm('ImageServer'),
@@ -104,21 +104,21 @@ return [
     'Log' => [
         'label' => 'Log',
         'level' => 'required',
-        'pinned' => '3.4.38',
+        'pinned' => '3.4.42',
         'for' => 'Job and build logs readable in the admin.',
     ] + $danielKm('Log'),
 
     'EasyAdmin' => [
         'label' => 'Easy Admin',
         'level' => 'required',
-        'pinned' => '3.4.45',
+        'pinned' => '3.4.50',
         'for' => 'Installing the stack, and the Check and fix page where builds, checks and setup tasks are run.',
     ] + $danielKm('EasyAdmin'),
 
     'AdvancedMedia' => [
         'label' => 'Advanced Media',
         'level' => 'required',
-        'pinned' => '0.1.0',
+        'pinned' => '1.0.0',
         'for' => 'Media viewers, compound objects and downloads on item pages.',
         'source' => 'https://github.com/agile-humanities/AdvancedMedia',
         'download' => null,
@@ -129,7 +129,7 @@ return [
     'StaticSitemaps' => [
         'label' => 'Static Sitemaps',
         'level' => 'recommended',
-        'pinned' => '0.1.0',
+        'pinned' => '1.0.0',
         'for' => 'Sitemap files for search engines.',
         'source' => 'https://github.com/agile-humanities/StaticSitemaps',
         'download' => null,

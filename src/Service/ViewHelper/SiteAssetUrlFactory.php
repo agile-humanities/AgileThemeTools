@@ -43,7 +43,7 @@ class SiteAssetUrlFactory implements FactoryInterface
 
         // The site's build in the files directory, when per-site styling is on and a build exists there.
         $siteBuild = null;
-        if ($site && $currentTheme && !empty($themeSettings['configurable_site_theme'])) {
+        if ($site && $currentTheme && \AgileThemeTools\ThemeBuild\BuildManager::stylingEnabled($themeSettings)) {
             /** @var \AgileThemeTools\ThemeBuild\BuildManager $builder */
             $builder = $container->get(\AgileThemeTools\ThemeBuild\BuildManager::class);
             $dir = $builder->getBuildDir($currentTheme, $site);

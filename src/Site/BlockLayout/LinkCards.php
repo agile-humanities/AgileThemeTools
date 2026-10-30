@@ -191,6 +191,41 @@ class LinkCards extends AbstractBlockLayout
         $thumbnailType = $block->dataValue('thumbnail_type', 'square');
         list($scope,$region) = explode(':',$data['region']);
 
+        // A card with neither an image URL nor an attachment, linking to a page of this site, shows that page's
+        // representative image: the first attachment of its Page summary or Representative image block, as the
+        // card display mode does for page listings.
+        $site = $block->page()->site();
+        $pagesBySlug = null;
+        foreach ($data['itemFields'] as $i => $fields) {
+            $data['itemFields'][$i]['representativeMedia'] = null;
+            if (!empty($fields['thumbnailUrl']) || isset($attachments[$i]) || empty($fields['url'])) {
+                continue;
+            }
+            if (!preg_match('#/s/' . preg_quote($site->slug(), '#') . '/page/([^/?\#]+)#', $fields['url'], $m)) {
+                continue;
+            }
+            if ($pagesBySlug === null) {
+                $pagesBySlug = [];
+                foreach ($site->pages() as $sitePage) {
+                    $pagesBySlug[$sitePage->slug()] = $sitePage;
+                }
+            }
+            $linkedPage = $pagesBySlug[$m[1]] ?? null;
+            if (!$linkedPage) {
+                continue;
+            }
+            foreach ($linkedPage->blocks() as $pageBlock) {
+                if (in_array($pageBlock->layout(), ['pageSummary', 'representativeImage'], true)) {
+                    $attachment = $pageBlock->attachments()[0] ?? null;
+                    $media = $attachment ? ($attachment->media() ?: ($attachment->item() ? $attachment->item()->primaryMedia() : null)) : null;
+                    if ($media) {
+                        $data['itemFields'][$i]['representativeMedia'] = $media;
+                        break;
+                    }
+                }
+            }
+        }
+
         return $view->partial('common/block-layout/link-cards', [
             'block' => $block,
             'attachments' => $attachments,

@@ -23,6 +23,12 @@ $job = $status['activeJob'];
 $routeParams = ['site-slug' => $site->slug()];
 $buildUrl = $this->url('admin/site/slug/theme-styling/build', $routeParams);
 $buildAllUrl = $this->url('admin/site/slug/theme-styling/build-all', $routeParams);
+$installUrl = $this->url('admin/site/slug/theme-styling/install-dependencies', $routeParams);
+// The install button: offered when the theme's node_modules are missing or built for another platform; usable
+// when npm runs and the theme folder is writable (the preflight checks by id).
+$checksById = $preflight ? array_column($preflight['checks'], null, 'id') : [];
+$needsInstall = $preflight && ((($checksById['node_modules']['ok'] ?? true) !== true) || (($checksById['image_tools']['ok'] ?? true) !== true));
+$canInstall = $preflight && (($checksById['npm']['ok'] ?? false) === true) && (($checksById['theme_writable']['ok'] ?? false) === true);
 $statusUrl = $this->url('admin/site/slug/theme-styling/status', $routeParams);
 $stylingUrl = $this->url('admin/site/slug/theme-styling', $routeParams);
 
@@ -107,6 +113,12 @@ if ($job) {
             <?= $csrfHtml ?>
             <button type="submit" class="theme-build-button"<?= $canBuild ? '' : ' disabled title="' . $escape($translate('Fix the problems listed above first.')) . '"' ?>><?= $escape($state === 'current' ? $translate('Rebuild this site') : $translate('Build this site')) ?></button>
         </form>
+        <?php if ($needsInstall): ?>
+        <form method="post" action="<?= $escape($installUrl) ?>" class="theme-build-form">
+            <?= $csrfHtml ?>
+            <button type="submit" class="theme-build-button-secondary"<?= $canInstall ? '' : ' disabled title="' . $escape($translate('npm must run as the web server user and the theme folder must be writable; see the problems above.')) . '"' ?>><?= $escape($translate('Install theme dependencies (npm install)')) ?></button>
+        </form>
+        <?php endif; ?>
         <?php if (count($configurableSites) > 1): ?>
         <form method="post" action="<?= $escape($buildAllUrl) ?>" class="theme-build-form">
             <?= $csrfHtml ?>
@@ -118,7 +130,7 @@ if ($job) {
         <?php endif; ?>
     </div>
     <?php else: ?>
-    <p class="theme-build-progress"><?= $escape($translate('The build runs in the background; this panel updates itself. You can leave the page.')) ?></p>
+    <p class="theme-build-progress"><?= $escape($translate('The job runs in the background; this panel updates itself. You can leave the page.')) ?></p>
     <?php endif; ?>
 
     <?php if ($log !== ''): ?>

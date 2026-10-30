@@ -95,7 +95,7 @@ class Slideshow extends AbstractBlockLayout
         $fade = new Checkbox("o:block[__blockIndex__][o:data][fade]");
         $fade->setAttribute('class', 'block-slider-config-fade');
         $fade->setLabel('Use cross-fade effect');
-        $fade->setAttribute('value',false);
+        $fade->setAttribute('value', true); // cross-fade by default
 
         $region = new RegionMenuSelect();
 
@@ -109,7 +109,7 @@ class Slideshow extends AbstractBlockLayout
             $subtitle->setAttribute('value',$block->dataValue('subtitle'));
             $slidesperRow->setAttribute('value',!empty($block->dataValue('slidesperrow')) ? $block->dataValue('slidesperrow') : 1);
             $autoPlay->setAttribute('value',!empty($block->dataValue('autoplay')) ? $block->dataValue('autoplay') : false);
-            $fade->setAttribute('value',!empty($block->dataValue('fade')) ? $block->dataValue('fade') : false);
+            $fade->setAttribute('value', $block->dataValue('fade') === null ? true : !empty($block->dataValue('fade')));
         }
 
         $html = $view->formRow($title);
@@ -207,7 +207,7 @@ class Slideshow extends AbstractBlockLayout
             'audioAttachment' => $audio_attachment,
             'optionSlidesPerRow' => array_key_exists('slidesperrow',$data) ? $data['slidesperrow'] ?? 1 : 1,
             'optionAutoPlay' => array_key_exists('autoplay',$data) && $data['autoplay'] ? "true" : "false",
-            'optionFade' => array_key_exists('fade',$data) && $data['fade'] ? "true" : "false"
+            'optionFade' => !array_key_exists('fade', $data) || $data['fade'] ? "true" : "false" // cross-fade unless switched off
         ];
 
 

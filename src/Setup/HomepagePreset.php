@@ -9,7 +9,7 @@ use Omeka\Api\Representation\SiteRepresentation;
  *
  *   Homepage introduction (homepageSplash): the site title over a slide viewer of up to five items with images.
  *   An about paragraph (regionalHtml), to be rewritten by the site's editors.
- *   Item listing: the four most recent items, with a link to browse them all.
+ *   Item listing: the three most recent items, with a link to browse them all.
  *
  * Rerunning replaces the page (it is found by its slug). Any previous homepage is kept as an ordinary page.
  */
@@ -22,7 +22,7 @@ class HomepagePreset
     {
         $writer = new PageWriter($services, $site);
         $slides = $writer->itemsWithImages(5);
-        $recent = $writer->itemsWithImages(4);
+        $recent = $writer->itemsWithImages(3); // a row of three: a fourth would dangle
         $browse = sprintf('/s/%s/item', $site->slug());
 
         $blocks = [

@@ -1,5 +1,18 @@
-# agile-theme-tools-omeka
-Agile Theme Tools module that extends Omeka S’s standard theming capabilities. These extensions include the ability to designate content to pre-defined content regions, and a series of additional block types for a broader range of content layouts. Intended to support the [Agile Base Theme]( https://github.com/agile-humanities/AgileBaseOmekaTheme), which contains the principal styling for the additional blocks.
+# Agile Theme Tools v2
+The Agile Theme Tools is intended to support Agile Omeka-S build system, which includes a suite of third-party modules alongside the Agile Advanced Base Theme. It also supports the Agile Simplified Base Theme. 
+
+It offers a number of customized blocks to expand content editing capabilities, including a Slide Viewer,  Sectional Nagigation, Callouts, and Introductory Sections. The module offers administrators a series of Easy Admin Tasks to perform basic site setup.
+
+It should be noted that the Agile Advanced Theme and build system is targeted at experienced administrators and front-end developers. The Agile Simplified Theme provides a clean base theme with similar styling for all Omeka S administrators with no third-party module dependencies.
+
+
+# Who is this module for?
+| Audience | Gets |
+|---|---|
+| **Administrator** | Dependency audit (module config page, dashboard, Modules page, Easy Admin); global settings (custom CSS, basic styles, Node path, cards, item media, unlinked terms); Easy Admin tasks (dependency check, Mirador preset, theme builds, site setup presets); site Theme page additions (identity panel, build panel, logo check, Colours and fonts, Configure theme styles); `build-site-themes.php` CLI. |
+| **Site editor** | 18 page block layouts (section 2) plus the card display used by listings; item-page composition from resource page blocks; per-site settings (custom CSS, card overrides, primary-media switch); item-page region choice. |
+| **Themer** | Region system for blocks; template overrides for blocks, cards, search, item pages; `theme.ini` declaration keys; `siteAssetUrl`, `themeFonts()->inject()`, `customCss()->inject()`; palette via CSS variables; build system (gulp) contract; helpers and settings keys. |
+| **Developer** | Display-mode registry; Advanced Search form adapter; form elements and `formLayout`; BuildManager, ThemeProfile, DependencyAudit; presets; scripts in `data/scripts`. |
 
 ## Dependencies
 * Omeka 4.1+

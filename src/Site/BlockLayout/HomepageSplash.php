@@ -104,7 +104,7 @@ class HomepageSplash extends AbstractBlockLayout
         $fade = new Checkbox("o:block[__blockIndex__][o:data][fade]");
         $fade->setAttribute('class', 'block-slider-config-fade');
         $fade->setLabel('Use cross-fade effect');
-        $fade->setAttribute('value',false);
+        $fade->setAttribute('value', true); // cross-fade by default
 
         $region = new RegionMenuSelect();
 
@@ -122,7 +122,7 @@ class HomepageSplash extends AbstractBlockLayout
             $slidesperRow->setAttribute('value',!empty($block->dataValue('slidesperrow')) ? $block->dataValue('slidesperrow') : 1);
             $slidesToShow->setAttribute('value',!empty($block->dataValue('slidestoshow')) ? $block->dataValue('slidestoshow') : 1);
             $autoPlay->setAttribute('value',!empty($block->dataValue('autoplay')) ? $block->dataValue('autoplay') : false);
-            $fade->setAttribute('value',!empty($block->dataValue('fade')) ? $block->dataValue('fade') : false);
+            $fade->setAttribute('value', $block->dataValue('fade') === null ? true : !empty($block->dataValue('fade')));
         }
         $html = '<p style="font-size: 12px">This block provides common introductory fields and an accompanying slide viewer to display images. If you do not need a persistent introduction consider using the Slide Viewer block instead.</p>';
         $html .= '<hr />';
@@ -227,7 +227,7 @@ class HomepageSplash extends AbstractBlockLayout
             'optionSlidesPerRow' => array_key_exists('slidesperrow',$data) ? (int)$data['slidesperrow'] : 1,
             'optionSlidesToShow' => array_key_exists('slidestoshow',$data) ? (int)$data['slidestoshow'] : 1,
             'optionAutoPlay' => array_key_exists('autoplay',$data) ? "true" : "false",
-            'optionFade' => array_key_exists('fade',$data) ? "true" : "false",
+            'optionFade' => !array_key_exists('fade', $data) || $data['fade'] ? "true" : "false", // cross-fade unless switched off
             'hasAttachments' => $hasAttachments,
             'compositionClass' => array_key_exists('composition',$data) ? $data['composition'] : ''
         ]);

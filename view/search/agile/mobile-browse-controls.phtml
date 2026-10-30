@@ -1,5 +1,28 @@
+<?php
+/**
+ * The mobile toolbar of the Agile search page (fixed to the bottom of the viewport below the desktop breakpoint,
+ * hidden above it): the button that opens the filter panel (the facets sidebar, with the sort and per-page controls
+ * moved into it by search-support.js), and the list / grid buttons, which Advanced Search's own script binds like
+ * the ones in the results header.
+ *
+ * @var \AdvancedSearch\Api\Representation\SearchConfigRepresentation $searchConfig
+ * @var bool $multiMode The configuration lets the visitor switch between list and grid.
+ * @var string $gridListMode The configured default view.
+ */
+$translate = $this->plugin('translate');
+$escapeAttr = $this->plugin('escapeHtmlAttr');
+$multiMode = $multiMode ?? false;
+$gridListMode = $gridListMode ?? 'auto';
+$isList = in_array($gridListMode, ['list', 'list_only'], true);
+?>
 <!-- BEGIN search/mobile-browse-controls -->
 <div id="mobile-browse-controls">
-  <a id="mobile-filter-button" class="filter-btn" title="Show menu">Filter and sort results</a>
+  <a id="mobile-filter-button" class="filter-btn" href="#browser-sidebar" role="button" aria-controls="browser-sidebar" aria-expanded="false"><?= $translate('Filter and sort results') ?></a>
+  <?php if ($multiMode): ?>
+  <div class="mobile-view-types" role="group" aria-label="<?= $escapeAttr($translate('View')) ?>">
+    <a class="search-view-type search-view-type-list<?= $isList ? ' active' : '' ?>" href="#" role="button" aria-pressed="<?= $isList ? 'true' : 'false' ?>"><?= $translate('List') ?></a>
+    <a class="search-view-type search-view-type-grid<?= $isList ? '' : ' active' ?>" href="#" role="button" aria-pressed="<?= $isList ? 'false' : 'true' ?>"><?= $translate('Grid') ?></a>
+  </div>
+  <?php endif; ?>
 </div>
 <!-- END search/mobile-browse-controls -->

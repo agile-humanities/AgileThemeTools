@@ -25,7 +25,9 @@ files/theme-assets/
 ```
 
 Builds are staged in `<slug>.building` and only swapped into place after verification, so a failed build never
-leaves a site without assets. The `siteAssetUrl` view helper serves a file from `assets/` when it exists there,
+leaves a site without assets. Per-site styling (the theme setting "Use theme configuration") is on unless the site's
+theme settings explicitly turn it off; a site whose theme settings were never saved counts as on, which is also what
+the Theme page assumes. The `siteAssetUrl` view helper serves a file from `assets/` when it exists there,
 otherwise from an old `asset-<slug>` folder inside the theme (builds made before this system), otherwise from the
 theme's own `asset/` folder. Site asset URLs carry a version string derived from the manifest, so browsers refetch
 them after every rebuild.
@@ -175,6 +177,11 @@ A hand-edited `alt-config/<slug>.yml` is a developer's file and is not touched b
 
 ## Deployment notes
 
+- `npm install` can be run from the admin: the Theme page's build panel offers **Install theme dependencies** when
+  the theme's `node_modules` are missing or were installed on another platform, and Easy Admin > Check and fix >
+  Theme builds has the same task. It runs `npm ci` (the theme's `package-lock.json`) as the web server user, as a
+  background job, under the theme's build lock; the theme folder must be writable by that user and npm must be
+  found beside node or on the PATH (both are preflight checks).
 - Node.js must be installed where the web server can run it, and `npm install` must have been run in the theme
   directory **on the server** (native binaries such as `optipng` are platform-specific).
 - `files/theme-assets/` is created on first build; the whole `files/` directory must be writable by the PHP user.
