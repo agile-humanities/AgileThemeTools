@@ -1,0 +1,6 @@
+# Left out of release zips built with `git archive` (Omeka's add-on registry builds on this).
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.tx/ export-ignore
+/language/*.pot export-ignore
+/language/*.po export-ignore
