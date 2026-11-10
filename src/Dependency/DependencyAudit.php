@@ -217,9 +217,31 @@ class DependencyAudit
     protected function conditionHolds(string $when): bool
     {
         if (!isset($this->conditions[$when])) {
-            $this->conditions[$when] = $when === 'internal-search' ? $this->usesInternalSearch() : true;
+            switch ($when) {
+                case 'internal-search':
+                    $this->conditions[$when] = $this->usesInternalSearch();
+                    break;
+                case 'solr-search':
+                    $this->conditions[$when] = $this->usesSolrSearch();
+                    break;
+                default:
+                    $this->conditions[$when] = true;
+            }
         }
         return $this->conditions[$when];
+    }
+
+    /**
+     * Whether any search engine runs on Solr (SearchSolr's "solarium" adapter). False when it cannot be told (no
+     * Advanced Search tables yet): nothing uses Solr before an engine is created.
+     */
+    protected function usesSolrSearch(): bool
+    {
+        try {
+            return (bool) $this->connection->fetchOne('SELECT 1 FROM search_engine WHERE adapter = ? LIMIT 1', ['solarium']);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /**

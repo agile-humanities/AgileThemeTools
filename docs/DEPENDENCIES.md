@@ -44,9 +44,9 @@ dependencies are missing. So Agile Theme Tools does the checking:
 | [Mirador](https://github.com/Daniel-KM/Omeka-S-module-Mirador) | Required | 3.4.17 | 3.4.9 | The default image and document viewer (Mirador 4 from 3.4.17, Mirador 3 before). |
 | [Log](https://github.com/Daniel-KM/Omeka-S-module-Log) | Required | 3.4.42 | — | Job and build logs readable in the admin. |
 | [Easy Admin](https://github.com/Daniel-KM/Omeka-S-module-EasyAdmin) | Required | 3.4.50 | — | Installing the stack, and the Check and fix page where builds, checks and setup tasks are run. |
-| [Advanced Media](https://github.com/agile-humanities/AdvancedMedia) | Required | 1.0.0 | — | Media viewers, compound objects and downloads on item pages. |
+| [Advanced Media](https://github.com/agile-humanities/AdvancedMedia) | Required | 1.0.1 | — | Media viewers, compound objects and downloads on item pages. |
 | [Static Sitemaps](https://github.com/agile-humanities/StaticSitemaps) | Recommended | 1.0.0 | — | Sitemap files for search engines. |
-| [Search Solr](https://github.com/Daniel-KM/Omeka-S-module-SearchSolr) | Recommended | 3.5.75 | 3.5.70 | Solr as the search engine, for larger collections. Advanced Search 3.4.64 needs 3.5.70 or later. |
+| [Search Solr](https://github.com/Daniel-KM/Omeka-S-module-SearchSolr) | Required | 3.5.75 | 3.5.70 | Solr as the search engine, for larger collections. Required once a search engine uses Solr: item pages read its field maps. Advanced Search 3.4.64 needs 3.5.70 or later. |
 | [Numeric Data Types](https://github.com/omeka-s-modules/NumericDataTypes) | Optional | 1.14.3 | — | Dates stored as timestamps or intervals are formatted for display. |
 | [Item Sets Tree](https://github.com/biblibre/omeka-s-module-ItemSetsTree) | Optional | 0.7.5 | — | Collections shown as a tree in facets. |
 | [Mapping](https://github.com/omeka-s-modules/Mapping) | Optional | — | — | A themed map browse page. Not tested with a specific version yet. |

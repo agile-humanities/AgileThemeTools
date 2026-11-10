@@ -4,6 +4,29 @@ All notable changes to Agile Theme Tools are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.1] — unreleased
+
+Fixes found by aligning the Pitts installation with the 2.0.0 release (characterization tests, 2026-11-10).
+
+### Fixed
+
+- Item pages failed with a fatal error ("Class SearchSolr\Stdlib\SolrCore not found") on installations with
+  Search Solr older than 3.5.70: Solr field maps are now read through the old `solr_cores` API when the new class
+  is missing.
+- The search pages preset skips the Solr page, with a message, when Search Solr is older than 3.5.70, instead of
+  failing half-way.
+
+### Changed
+
+- Search Solr is listed as required whenever a search engine uses Solr (condition `solr-search`), instead of
+  recommended.
+- Advanced Media 1.0.1 is the tested version.
+
+### Removed
+
+- The controller override for BibLibre's Search module (`Search\Controller\IndexController`) and
+  `AgileSearchIndexController`: search is Advanced Search's, and nothing routed to them.
+
 ## [2.0.0] — 2026-10-30
 
 First public release of the 2.x line, alongside the Advanced Agile Base Theme 2.0.0, the Simplified Agile Base

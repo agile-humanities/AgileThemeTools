@@ -71,15 +71,26 @@ class AgileSearchHelper extends AbstractHelper
   /**
    * The Solr maps of a search engine for a resource type. SearchSolr 3.5.7x dropped the "solr_cores" API resource
    * (a core is now the engine itself, wrapped by SearchSolr\Stdlib\SolrCore), so maps are read through that wrapper.
-   * Defaults to the engine of the site's main search config; $engineId selects another (the old core id).
+   * Earlier SearchSolr (3.5.69 and before) has no wrapper: the core is its own API resource, named by the engine's
+   * adapter settings. Both are supported, because a missing class here is a fatal error on every item page.
+   * Defaults to the engine of the site's main search config; $engineId selects another (with SearchSolr before
+   * 3.5.7x, the old core id, as callers passed before).
    *
    * @return \SearchSolr\Api\Representation\SolrMapRepresentation[]
    */
   protected function solrMaps($resourceName, $engineId = null): array {
-    $engine = $engineId
-      ? $this->api->read('search_engines', $engineId)->getContent()
-      : $this->getAdvancedSearchConfig()->searchEngine();
-    return (new \SearchSolr\Stdlib\SolrCore($engine, $this->services))->mapsByResourceName($resourceName);
+    if (class_exists(\SearchSolr\Stdlib\SolrCore::class)) {
+      $engine = $engineId
+        ? $this->api->read('search_engines', $engineId)->getContent()
+        : $this->getAdvancedSearchConfig()->searchEngine();
+      return (new \SearchSolr\Stdlib\SolrCore($engine, $this->services))->mapsByResourceName($resourceName);
+    }
+
+    $coreId = $engineId
+      ?? ($this->getAdvancedSearchConfig()->searchEngine()->settings()['engine_adapter']['solr_core_id'] ?? null);
+    return $coreId
+      ? $this->api->read('solr_cores', $coreId)->getContent()->mapsByResourceName($resourceName)
+      : [];
   }
 
   public function __invoke() {

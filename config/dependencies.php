@@ -118,7 +118,7 @@ return [
     'AdvancedMedia' => [
         'label' => 'Advanced Media',
         'level' => 'required',
-        'pinned' => '1.0.0',
+        'pinned' => '1.0.1',
         'for' => 'Media viewers, compound objects and downloads on item pages.',
         'source' => 'https://github.com/agile-humanities/AdvancedMedia',
         'download' => null,
@@ -137,11 +137,12 @@ return [
 
     'SearchSolr' => [
         'label' => 'Search Solr',
-        'level' => 'recommended',
+        'level' => 'required',
+        'when' => 'solr-search',
         'pinned' => '3.5.75',
         'minimum' => '3.5.70',
         'volatile' => true,
-        'for' => 'Solr as the search engine, for larger collections. Advanced Search 3.4.64 needs 3.5.70 or later.',
+        'for' => 'Solr as the search engine, for larger collections. Required once a search engine uses Solr: item pages read its field maps. Advanced Search 3.4.64 needs 3.5.70 or later.',
     ] + $danielKm('SearchSolr'),
 
     // ------------------------------------------------------------------ optional integrations

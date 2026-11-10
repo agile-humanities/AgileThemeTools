@@ -99,7 +99,6 @@ class Module extends AbstractModule {
   public function onMergeConfig(ModuleEvent $e) {
     $configListener = $e->getConfigListener();
     $config = $configListener->getMergedConfig(false);
-    $config['controllers']['invokables']['Search\Controller\IndexController'] = "AgileThemeTools\Controller\AgileSearchIndexController";
     $config['controllers']['invokables']['Omeka\Controller\Site\Item'] = "AgileThemeTools\Controller\AgileItemController";
 
     $configListener->setMergedConfig($config);

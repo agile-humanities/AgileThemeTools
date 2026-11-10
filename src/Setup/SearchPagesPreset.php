@@ -79,6 +79,10 @@ class SearchPagesPreset
             $lines[] = 'No Solr core URL given: the Solr search page is skipped.';
         } elseif (!$active('SearchSolr')) {
             $lines[] = 'SearchSolr is not active: the Solr search page is skipped.';
+        } elseif (!class_exists(\SearchSolr\Stdlib\SolrCore::class)) {
+            // The engine is configured the SearchSolr 3.5.70+ way (the engine is the core); older versions keep cores
+            // as their own resource, and the preset would fail half-way.
+            $lines[] = 'SearchSolr is older than 3.5.70: the Solr search page is skipped. Update SearchSolr, then rerun the preset.';
         } else {
             [$solr, $message] = self::solrEngine($services, $solrUrl);
             $lines[] = $message;
