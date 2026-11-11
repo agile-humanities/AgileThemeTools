@@ -75,10 +75,8 @@ $documentCount = $response->getResourceTotalResults('items');
 $displayParts = $searchConfig->setting('results', []);
 $displayPartsHeader = array_filter($displayParts, fn ($v) => in_array($v, ['header', 'both']));
 $displayPartsFooter = array_filter($displayParts, fn ($v) => in_array($v, ['footer', 'both']));
-// Forward-compatible: AdvancedSearch 3.4.64 moves the facet position from "results.facets"
-// to "facet.position" on upgrade. Drop the fallback once the module is updated.
-$displayFacets = $searchConfig->subSetting('facet', 'position')
-    ?: ($displayParts ? $displayParts['facets'] ?? 'before' : 'none');
+// AdvancedSearch 3.4.64+ (the minimum) stores the facet position in "facet.position" (was "results.facets").
+$displayFacets = $searchConfig->subSetting('facet', 'position') ?: 'before';
 $activeFacets = $query->getActiveFacets();
 
 $facets = $searchConfig->engineAdapter()->getAvailableFacetFields();
@@ -88,7 +86,7 @@ $searchFacets = $searchConfig->subSetting('facet', 'facets', []);
 $hasFacets = count($searchFacets) > 0;
 
 if ($itemSet && $site) {
-    // Forward-compatible: AdvancedSearch 3.4.64 deletes the legacy alias "advancedsearch_redirect_itemsets".
+    // AdvancedSearch 3.4.64+ keeps the item set redirects in this one setting (the legacy aliases are gone).
     $redirectItemSets = $this->siteSetting('advancedsearch_item_sets_redirects', ['default' => 'browse']);
     $redirectItemSet = $redirectItemSets[$itemSetId] ?? $redirectItemSets['default'] ?? 'browse';
     $displayItemSet = $redirectItemSet === 'all' || ($redirectItemSet === 'first' && $response->getCurrentPage() === 1);

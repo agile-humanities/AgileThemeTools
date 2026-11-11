@@ -90,7 +90,7 @@ $hasControls = isset($displayParts['total_results']) || count($paginationPerPage
 <div class="search-results-count <?= isset($displayParts['total_results']) ? 'no-total-results' : '' ?>">
     <?php
     if ($itemSet && $site):
-        // Forward-compatible: AdvancedSearch 3.4.64 deletes the legacy alias "advancedsearch_redirect_itemsets".
+        // AdvancedSearch 3.4.64+ keeps the item set redirects in this one setting (the legacy aliases are gone).
         $redirectItemSets = $this->siteSetting('advancedsearch_item_sets_redirects', ['default' => 'browse']);
         $redirectItemSet = $redirectItemSets[$itemSet->id()] ?? $redirectItemSets['default'] ?? 'browse';
         echo $redirectItemSet === 'all'
