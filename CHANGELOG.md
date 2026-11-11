@@ -4,7 +4,26 @@ All notable changes to Agile Theme Tools are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [2.0.1] — unreleased
+## [2.1.0] — unreleased
+
+### Added
+
+- Agile patches (docs/PATCHES.md): 13 exact fixes to IIIF Server, Image Server, Search Solr, Advanced Search, Vips and
+  Amazon S3, mostly for media on Amazon S3, shipped in `data/patches/` with variants for every supported module
+  version (from the `minimum` of `config/dependencies.php`), each verified against the stock releases.
+- The patch audit: the dashboard and Modules page panel lists the required patches not in place; the configuration
+  page has a "Patches to third-party modules" table; the Easy Admin check logs every patch.
+- Easy Admin > Check and fix > Agile modules > "Apply the Agile patches" (job `ApplyPatches`): permission preflight,
+  lint, backup of the originals in `files/agile-patches/backups`, atomic writes, check after writing.
+- `data/scripts/patches.php`: `status`, `apply [--dry-run] [--allow-unverified]`, `verify <stock-dir>`, with no
+  Omeka bootstrap, for deployments and for maintaining the patches.
+
+### Changed
+
+- IIIF Server and Image Server have a minimum version (3.6.32, 3.6.25): the oldest versions the patches were
+  verified on. Advanced Media 1.1.0 is the tested version.
+
+## [2.0.1] — 2026-11-10
 
 Fixes found by aligning the Pitts installation with the 2.0.0 release (characterization tests, 2026-11-10).
 

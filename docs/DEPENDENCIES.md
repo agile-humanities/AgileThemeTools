@@ -39,12 +39,12 @@ dependencies are missing. So Agile Theme Tools does the checking:
 | [Common](https://github.com/Daniel-KM/Omeka-S-module-Common) | Required | 3.4.94 | 3.4.91 | Shared code required by Advanced Search and the other modules by the same author. |
 | [Advanced Search](https://github.com/Daniel-KM/Omeka-S-module-AdvancedSearch) | Required | 3.4.66 | 3.4.64 | Search pages, filters and facets. Versions before 3.4.64 fail on the internal search engine and store search settings differently. |
 | [Reference](https://github.com/Daniel-KM/Omeka-S-module-Reference) | Required with the internal search engine | 3.4.64 | 3.4.58 | Facets on Advanced Search’s internal engine. Not needed when every search page uses Solr. |
-| [IIIF Server](https://github.com/Daniel-KM/Omeka-S-module-IiifServer) | Required | 3.6.34 | — | IIIF manifests for the image and document viewers. |
-| [Image Server](https://github.com/Daniel-KM/Omeka-S-module-ImageServer) | Required | 3.6.26 | — | IIIF image delivery (deep zoom). |
+| [IIIF Server](https://github.com/Daniel-KM/Omeka-S-module-IiifServer) | Required | 3.6.34 | 3.6.32 | IIIF manifests for the image and document viewers. The oldest version the Agile patches were verified on is 3.6.32. |
+| [Image Server](https://github.com/Daniel-KM/Omeka-S-module-ImageServer) | Required | 3.6.26 | 3.6.25 | IIIF image delivery (deep zoom). The oldest version the Agile patches were verified on is 3.6.25. |
 | [Mirador](https://github.com/Daniel-KM/Omeka-S-module-Mirador) | Required | 3.4.17 | 3.4.9 | The default image and document viewer (Mirador 4 from 3.4.17, Mirador 3 before). |
 | [Log](https://github.com/Daniel-KM/Omeka-S-module-Log) | Required | 3.4.42 | — | Job and build logs readable in the admin. |
 | [Easy Admin](https://github.com/Daniel-KM/Omeka-S-module-EasyAdmin) | Required | 3.4.50 | — | Installing the stack, and the Check and fix page where builds, checks and setup tasks are run. |
-| [Advanced Media](https://github.com/agile-humanities/AdvancedMedia) | Required | 1.0.1 | — | Media viewers, compound objects and downloads on item pages. |
+| [Advanced Media](https://github.com/agile-humanities/AdvancedMedia) | Required | 1.1.0 | — | Media viewers, compound objects and downloads on item pages. |
 | [Static Sitemaps](https://github.com/agile-humanities/StaticSitemaps) | Recommended | 1.0.0 | — | Sitemap files for search engines. |
 | [Search Solr](https://github.com/Daniel-KM/Omeka-S-module-SearchSolr) | Required | 3.5.75 | 3.5.70 | Solr as the search engine, for larger collections. Required once a search engine uses Solr: item pages read its field maps. Advanced Search 3.4.64 needs 3.5.70 or later. |
 | [Numeric Data Types](https://github.com/omeka-s-modules/NumericDataTypes) | Optional | 1.14.3 | — | Dates stored as timestamps or intervals are formatted for display. |

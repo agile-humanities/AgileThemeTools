@@ -1,0 +1,63 @@
+<?php
+/**
+ * The Agile patches and their state on this installation (View\Helper\AgileDependencies), on this module's
+ * configuration page, after the dependency table.
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var array[] $rows See AgileDependencies::patchRows().
+ */
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$badges = ['error' => $translate('Problem'), 'warning' => $translate('Warning'), 'note' => $translate('Note'), 'ok' => $translate('OK')];
+$states = [
+    'applied' => $translate('Applied'),
+    'missing' => $translate('Not applied'),
+    'partial' => $translate('Partly applied'),
+    'conflict' => $translate('Modified locally'),
+    'legacy' => $translate('Older form applied'),
+    'unverified' => $translate('Not verified on this version'),
+    'unsupported' => $translate('No variant for this version'),
+    'not_needed' => $translate('Not needed'),
+];
+$counts = array_count_values(array_column($rows, 'severity'));
+?>
+<div class="dependency-audit patch-audit">
+    <h3><?= $escape($translate('Patches to third-party modules')) ?></h3>
+    <p class="dependency-audit-lead">
+        <?php if (!empty($counts['error'])): ?>
+            <strong class="dependency-audit-error"><?= $escape(sprintf($translate('%d required patch(es) are not in place.'), $counts['error'])) ?></strong>
+        <?php elseif (!empty($counts['warning'])): ?>
+            <strong class="dependency-audit-warning"><?= $escape(sprintf($translate('%d patch(es) need a look.'), $counts['warning'])) ?></strong>
+        <?php else: ?>
+            <strong class="dependency-audit-ok"><?= $escape($translate('Every patch the installed modules need is in place.')) ?></strong>
+        <?php endif; ?>
+        <?= $escape($translate('Agile Theme Tools ships small fixes to some third-party modules, mostly for media stored on Amazon S3. Updating one of these modules replaces its files, and its patches with them: apply the patches again after an update (Easy Admin > Check and fix > Agile modules), before running the module upgrade. See docs/PATCHES.md.')) ?>
+    </p>
+    <table class="tablesaw">
+        <thead>
+            <tr>
+                <th><?= $escape($translate('Patch')) ?></th>
+                <th><?= $escape($translate('Module')) ?></th>
+                <th><?= $escape($translate('Status')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($rows as $row): ?>
+            <tr class="dependency-audit-row-<?= $escape($row['severity']) ?>">
+                <td>
+                    <strong><?= $escape($translate($row['title'])) ?></strong>
+                    <div class="dependency-audit-for"><?= $escape($translate($row['definition']['why'] ?? '')) ?></div>
+                    <div class="dependency-audit-for"><code><?= $escape($row['id']) ?></code><?= ($row['definition']['level'] ?? 'required') === 'required' ? '' : ' · ' . $escape($translate('recommended')) ?></div>
+                </td>
+                <td><?= $escape($row['module'] . ' ' . $row['version']) ?></td>
+                <td>
+                    <span class="dependency-audit-badge dependency-audit-<?= $escape($row['severity']) ?>"><?= $escape($badges[$row['severity']] ?? '') ?></span>
+                    <?= $escape($states[$row['status']] ?? $row['status']) ?>.
+                    <?php if ($row['status'] !== 'applied'): ?><?= $escape($translate($row['message'])) ?><?php endif; ?>
+                    <?php if ($row['fix'] !== '' && in_array($row['severity'], ['error', 'warning'], true)): ?><em><?= $escape($translate($row['fix'])) ?></em><?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>

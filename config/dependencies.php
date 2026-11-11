@@ -78,16 +78,18 @@ return [
         'label' => 'IIIF Server',
         'level' => 'required',
         'pinned' => '3.6.34',
+        'minimum' => '3.6.32',
         'volatile' => true,
-        'for' => 'IIIF manifests for the image and document viewers.',
+        'for' => 'IIIF manifests for the image and document viewers. The oldest version the Agile patches were verified on is 3.6.32.',
     ] + $danielKm('IiifServer'),
 
     'ImageServer' => [
         'label' => 'Image Server',
         'level' => 'required',
         'pinned' => '3.6.26',
+        'minimum' => '3.6.25',
         'volatile' => true,
-        'for' => 'IIIF image delivery (deep zoom).',
+        'for' => 'IIIF image delivery (deep zoom). The oldest version the Agile patches were verified on is 3.6.25.',
     ] + $danielKm('ImageServer'),
 
     'Mirador' => [
@@ -118,7 +120,7 @@ return [
     'AdvancedMedia' => [
         'label' => 'Advanced Media',
         'level' => 'required',
-        'pinned' => '1.0.1',
+        'pinned' => '1.1.0',
         'for' => 'Media viewers, compound objects and downloads on item pages.',
         'source' => 'https://github.com/agile-humanities/AdvancedMedia',
         'download' => null,

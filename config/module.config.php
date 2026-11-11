@@ -159,6 +159,7 @@ use AgileThemeTools\Site\ResourcePageBlockLayout\ItemFullMetadata;
                   'AgileThemeTools\Settings\SiteThemeSettings' => SiteThemeSettingsFactory::class,
                   ThemeBuild\BuildManager::class => Service\ThemeBuild\BuildManagerFactory::class,
                   Dependency\DependencyAudit::class => Service\Dependency\DependencyAuditFactory::class,
+                  Patch\PatchManager::class => Service\Patch\PatchManagerFactory::class,
                   Styling\PaletteCss::class => Service\Styling\PaletteCssFactory::class,
                   Styling\BasicStyles::class => Service\Styling\BasicStylesFactory::class,
                   DisplayMode\Manager::class => Service\DisplayModeManagerFactory::class,

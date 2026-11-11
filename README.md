@@ -176,6 +176,9 @@ Cards are a common design structure that typically represent content with a thum
 ## Dependency Support
 The Agile Build system requires several third-party modules, including Advanced Media, Advanced Search, Mirador, IIIF Server, Image Server, and others. Agile Theme Tools often “pins” support to various module releases to ensure compatibility and support. The module offers an audit tool that will automatically inpect the currently installed modules for compatibility. Running a newer version of a module may not have any unexpected effects, but the dependency support shows admins which key module versions have been tested. 
 
+### Patches to third-party modules
+Some of these modules fail in ways that matter to an Agile site, mostly when media are stored on Amazon S3. Agile Theme Tools ships small, exact fixes for them, the Agile patches, verified on every supported version of each module, and shows on the dashboard when one is not in place. **After updating IIIF Server, Image Server, Search Solr, Advanced Search, Vips or Amazon S3, apply the patches again before running the module upgrade**: Easy Admin > Check and fix > Agile modules > "Apply the Agile patches", or `php modules/AgileThemeTools/data/scripts/patches.php apply` on the server. See [docs/PATCHES.md](docs/PATCHES.md).
+
 ## Item Browser / Advanced Search Support
 The Agile Build system uses the Advanced Search module as its search interface. It supports its own Advanced Search form that provides recommended filters. It also supplies a pagintated faceted browsing interface for Advanced Search.
 
