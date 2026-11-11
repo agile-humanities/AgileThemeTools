@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 /**
- * Agile patch iiifserver-no-synthetic-tiles (IiifServer): No synthesised tile grid for untiled images (IIIF Image API 2).
+ * Agile patch iiifserver-no-synthetic-tiles (IiifServer): No synthesised tile grid for untiled images.
  *
  * Each variant lists the module versions it was verified on, and exact-text edits: "search" must occur once
  * in the stock file; it is replaced by "replace", which carries the marker "AGILE-PATCH iiifserver-no-synthetic-tiles".
@@ -12,8 +12,8 @@ return [
     'id' => 'iiifserver-no-synthetic-tiles',
     'module' => 'IiifServer',
     'level' => 'recommended',
-    'title' => 'No synthesised tile grid for untiled images (IIIF Image API 2)',
-    'why' => 'For an image without a tile pyramid, IiifServer advertises a 512px tile grid in info.json. With media on an external store, each tile request makes ImageServer download and process the whole original.',
+    'title' => 'No synthesised tile grid for untiled images',
+    'why' => 'For an image without a tile pyramid, IiifServer advertises a 512px tile grid in info.json (IIIF Image API 2 and 3). With media on an external store, each tile request makes ImageServer download and process the whole original.',
     'impact' => 'Without it, deep zoom of untiled images on S3 is very slow and costly (dozens of full-original downloads per view), and edge tiles fail with 400.',
     'applies_from' => null,
     'fixed_in' => null,
@@ -52,6 +52,21 @@ AGILEPATCH,
             }
 AGILEPATCH,
                 ],
+                [
+                    'file' => 'src/Iiif/ImageService3.php',
+                    'search' => <<<'AGILEPATCH'
+        // Provide default tiles info when no pre-tiled data, so viewers like
+        // Diva/OSD can compute tile requests. The server is level2, so
+        // arbitrary region requests are supported.
+        if (!$tiles) {
+AGILEPATCH,
+                    'replace' => <<<'AGILEPATCH'
+        // AGILE-PATCH iiifserver-no-synthetic-tiles: no synthesised tile grid for untiled images (IIIF Image API 3),
+        // as in IiifInfo2: with an external store each tile makes ImageServer download
+        // the whole original. Without "tiles", viewers use "sizes". See AgileThemeTools docs/PATCHES.md.
+        if (false) {
+AGILEPATCH,
+                ],
             ],
         ],
         [
@@ -86,6 +101,21 @@ AGILEPATCH,
             if ($tiles) {
                 $info['tiles'] = $tiles;
             }
+AGILEPATCH,
+                ],
+                [
+                    'file' => 'src/Iiif/ImageService3.php',
+                    'search' => <<<'AGILEPATCH'
+        // Provide default tiles info when no pre-tiled data, so viewers like
+        // Diva/OSD can compute tile requests. The server is level2, so
+        // arbitrary region requests are supported.
+        if (!$tiles) {
+AGILEPATCH,
+                    'replace' => <<<'AGILEPATCH'
+        // AGILE-PATCH iiifserver-no-synthetic-tiles: no synthesised tile grid for untiled images (IIIF Image API 3),
+        // as in IiifInfo2: with an external store each tile makes ImageServer download
+        // the whole original. Without "tiles", viewers use "sizes". See AgileThemeTools docs/PATCHES.md.
+        if (false) {
 AGILEPATCH,
                 ],
             ],

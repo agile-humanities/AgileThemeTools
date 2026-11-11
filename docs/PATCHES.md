@@ -14,7 +14,7 @@ exists: after any update of a patched module, **apply the patches again, before 
 | `iiifserver-portable-manifest-cache` | IIIF Server | required | A manifest cache copied between environments points viewers at the wrong host. |
 | `iiifserver-keep-media-identifier` | IIIF Server | required | IIIF image urls can silently become file paths with `%2F`, which Apache refuses: every viewer breaks. |
 | `iiifserver-media-dimension-null-id` | IIIF Server | required | Creating items with media from a url (CSV Import) fails. |
-| `iiifserver-no-synthetic-tiles` | IIIF Server | recommended | Deep zoom of untiled images on S3 downloads the whole original for every tile. |
+| `iiifserver-no-synthetic-tiles` | IIIF Server | recommended | Deep zoom of untiled images on S3 downloads the whole original for every tile (Image API 2 and 3: Mirador and Universal Viewer). |
 | `iiifserver-free-variant-without-access` | IIIF Server (from 3.6.34) | required | No manifest is cacheable by a CDN or a browser, and the cache job deletes the cache the site reads. |
 | `imageserver-remote-source-readable` | Image Server | required | With S3, every IIIF image that needs processing fails. |
 | `imageserver-tiler-s3-upload` | Image Server | required | Tiles are built but never uploaded to S3. |

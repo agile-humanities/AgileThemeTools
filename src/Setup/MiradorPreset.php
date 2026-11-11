@@ -10,18 +10,20 @@ use Laminas\ServiceManager\ServiceLocatorInterface;
  *
  *   - Mirador 4 with Mirador module 3.4.17 and later (its Mirador 3 bundle does not draw images), Mirador 3 before;
  *     dark theme.
- *   - The image-tools plugin on (brightness/contrast/rotate controls, collapsed until the visitor opens them).
+ *   - The image-tools plugin on (brightness/contrast/rotate controls, collapsed until the visitor opens them), and the
+ *     download plugin (dl).
  *     The plugin must be in `mirador_plugins`, or the module loads the vanilla bundle that has no such code.
  *   - The workspace control panel (add window, workspace type) off: the viewer is embedded in an item page.
  *
  * Applied from Easy Admin > Check and fix > Agile modules, or programmatically. Overwrites the Mirador config keys
  * (version, plugins, item config, collection config); the other Mirador settings are left alone.
  *
- * @todo Reconcile with the live Pitts configuration (osdConfig, window flags) when that stack is at hand.
+ * The configuration is the live Pitts one (reconciled 2026-11-11): its dark palette ("type" for Mirador 3's MUI 4,
+ * "mode" for Mirador 4's MUI 5), osdConfig, thumbnail strip and workspace settings, plus the preset's own flags.
  */
 class MiradorPreset
 {
-    const PLUGINS = ['image-tools'];
+    const PLUGINS = ['dl', 'image-tools'];
 
     /** The viewer configuration, emitted verbatim into the page as JavaScript by the Mirador helper. */
     public static function config(): string
@@ -29,13 +31,41 @@ class MiradorPreset
         return <<<'JSON'
 {
     "selectedTheme": "dark",
+    "themes": {
+        "dark": {
+            "palette": {
+                "type": "dark",
+                "mode": "dark",
+                "primary": { "main": "#4db6ac" },
+                "secondary": { "main": "#4db6ac" },
+                "shades": { "dark": "#101820", "main": "#3e4034", "light": "#616161" }
+            }
+        }
+    },
+    "osdConfig": {
+        "maxZoomPixelRatio": 10
+    },
     "window": {
         "imageToolsEnabled": true,
         "imageToolsOpen": false,
         "allowClose": false,
         "allowMaximize": false,
         "allowFullscreen": true,
+        "allowTopMenuButton": false,
         "sideBarOpenByDefault": false
+    },
+    "thumbnailNavigation": {
+        "defaultPosition": "far-bottom",
+        "displaySettings": false,
+        "height": 130,
+        "width": 100
+    },
+    "workspace": {
+        "type": "mosaic",
+        "draggingEnabled": false,
+        "allowNewWindows": false,
+        "isWorkspaceAddVisible": false,
+        "showZoomControls": true
     },
     "workspaceControlPanel": {
         "enabled": false
