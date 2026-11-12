@@ -8,17 +8,24 @@ All notable changes to Agile Theme Tools are recorded here. The format follows
 
 ### Added
 
-- Agile patches (docs/PATCHES.md): 13 exact fixes to IIIF Server, Image Server, Search Solr, Advanced Search, Vips and
+- Agile patches (docs/PATCHES.md): 14 exact fixes to IIIF Server, Image Server, Search Solr, Advanced Search, Vips and
   Amazon S3, mostly for media on Amazon S3, shipped in `data/patches/` with variants for every supported module
   version (from the `minimum` of `config/dependencies.php`), each verified against the stock releases.
   `iiifserver-no-synthetic-tiles` covers the IIIF Image API 3 info.json too (Universal Viewer reads it; with a tile
-  grid on an untiled S3 image each 1024px tile timed out after 30 s).
+  grid on an untiled S3 image each 1024px tile timed out after 30 s). `imageserver-portable-base-url` computes the
+  tile urls of a local store for each request (stored ones had no host after a command-line install).
 - The patch audit: the dashboard and Modules page panel lists the required patches not in place; the configuration
   page has a "Patches to third-party modules" table; the Easy Admin check logs every patch.
 - Easy Admin > Check and fix > Agile modules > "Apply the Agile patches" (job `ApplyPatches`): permission preflight,
   lint, backup of the originals in `files/agile-patches/backups`, atomic writes, check after writing.
 - `data/scripts/patches.php`: `status`, `apply [--dry-run] [--allow-unverified]`, `verify <stock-dir>`, with no
   Omeka bootstrap, for deployments and for maintaining the patches.
+
+### Fixed
+
+- Legacy support for BibLibre's Search module no longer breaks once that module is uninstalled: the site search path
+  (`AgileSearchHandler::siteSearchPath()`) uses Advanced Search's main search config of the site, the legacy
+  `search_page` lookup is guarded, and the item browse redirects to a legacy search page only while its route exists.
 
 ### Changed
 

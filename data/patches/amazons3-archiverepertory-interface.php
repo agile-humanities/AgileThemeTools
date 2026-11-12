@@ -16,9 +16,9 @@ return [
     'why' => 'The adapters Amazon S3 provides for the Archive Repertory module do not match the interface of Archive Repertory 3.15.17 and later.',
     'impact' => 'Without it, with Archive Repertory, media file management on S3 fails (the file manager cannot be created).',
     'applies_from' => null,
-    'fixed_in' => null,
+    'fixed_in' => '3.4.5',
     'when_module' => 'ArchiveRepertory',
-    'upstream' => 'Re-check with 3.4.5 (step 6 of the convergence).',
+    'upstream' => 'Fixed upstream in 3.4.5, for Archive Repertory 3.15.18 (whose constructor adds a logger): update Amazon S3 and Archive Repertory together. This variant is for Amazon S3 3.4.4 with Archive Repertory 3.15.17.',
     'legacy' => ['//$this->getFileWriter();'],
     'variants' => [
         [

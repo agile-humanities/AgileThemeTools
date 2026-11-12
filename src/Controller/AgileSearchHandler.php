@@ -25,32 +25,45 @@ class AgileSearchHandler extends AbstractActionController {
         $this->conn = $conn;
     }
 
+    /**
+     * The url of the site's main search page: Advanced Search's main search config of the site, else the legacy
+     * search page of BibLibre's Search module (setting "search_main_page", table "search_page"), else the item browse.
+     * The legacy lookup is guarded: once that module is uninstalled, its table is gone and the query would fail on
+     * every page that asks for the search path.
+     */
     public function siteSearchPath() {
-
-        $qb = $this->conn->createQueryBuilder();
-        $qb->select('s.value')
-            ->from('site_setting','s')
-            ->where('s.site_id='. $this->site->id())
-            ->andwhere('s.id="search_main_page"');
-        $stmt = $this->conn->executeQuery($qb, $qb->getParameters());
-        $site_page_id = $stmt->fetch(\PDO::FETCH_COLUMN);
-
-        if ($site_page_id) {
-            $qb = $this->conn->createQueryBuilder();
-            $qb->select('sp.path')
-                ->from('search_page', 'sp')
-                ->where('sp.id=' . (int)json_decode($site_page_id));
-
-            $stmt = $this->conn->executeQuery($qb, $qb->getParameters());
-            $path = $stmt->fetch(\PDO::FETCH_COLUMN);
-
-            if ($path) {
-                // Form action parameter to pass to search field (see common/search-form)
-                return $this->site->siteUrl() . "/" . $path;
+        try {
+            $configId = $this->siteSettingValue('advancedsearch_main_config');
+            if ($configId) {
+                $config = $this->api->read('search_configs', (int) $configId)->getContent();
+                // Null or empty when the route of the search page is not registered here.
+                $url = (string) $config->siteUrl($this->site->slug());
+                if ($url !== '') {
+                    return $url;
+                }
             }
+        } catch (\Throwable $e) {
+            // No Advanced Search, or a deleted config: try the legacy page.
         }
 
-        return $this->site->siteUrl() . "/item"; // Default site browse path
+        try {
+            $searchPageId = $this->siteSettingValue('search_main_page');
+            if ($searchPageId) {
+                $path = $this->conn->fetchOne('SELECT path FROM search_page WHERE id = ?', [(int) $searchPageId]);
+                if ($path) {
+                    return $this->site->siteUrl() . '/' . $path;
+                }
+            }
+        } catch (\Throwable $e) {
+            // BibLibre's Search module is not installed.
+        }
 
+        return $this->site->siteUrl() . '/item'; // Default site browse path
+    }
+
+    /** A site setting of this site, json-decoded (site settings are stored as json). */
+    protected function siteSettingValue(string $id) {
+        $value = $this->conn->fetchOne('SELECT value FROM site_setting WHERE site_id = ? AND id = ?', [$this->site->id(), $id]);
+        return $value === false ? null : json_decode((string) $value, true);
     }
 }

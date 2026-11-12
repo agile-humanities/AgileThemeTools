@@ -17,13 +17,14 @@ exists: after any update of a patched module, **apply the patches again, before 
 | `iiifserver-no-synthetic-tiles` | IIIF Server | recommended | Deep zoom of untiled images on S3 downloads the whole original for every tile (Image API 2 and 3: Mirador and Universal Viewer). |
 | `iiifserver-free-variant-without-access` | IIIF Server (from 3.6.34) | required | No manifest is cacheable by a CDN or a browser, and the cache job deletes the cache the site reads. |
 | `imageserver-remote-source-readable` | Image Server | required | With S3, every IIIF image that needs processing fails. |
+| `imageserver-portable-base-url` | Image Server | required | On a local file store, deep zoom of tiled images fails when Image Server was installed or upgraded from the command line, or after a database copy (tile urls stored without host, or with another host). |
 | `imageserver-tiler-s3-upload` | Image Server | required | Tiles are built but never uploaded to S3. |
 | `imageserver-no-fast-tile-on-remote-store` | Image Server | required | With S3, opening the Image Server config page breaks every IIIF image. |
 | `imageserver-config-form-optional-url` | Image Server (before 3.6.26) | required | The Image Server config form silently does not save. |
 | `searchsolr-s3-text-extraction` | Search Solr | required | With S3, transcripts and other text files are not indexed. |
 | `advancedsearch-property-value-array` | Advanced Search (before 3.4.65) | required | A property search from the item search page fails. |
 | `vips-pdf-no-dpi` | Vips | recommended | PDF thumbnails fail with the vips command line tool of the Agile container. |
-| `amazons3-archiverepertory-interface` | Amazon S3 (with Archive Repertory) | required | Media file management on S3 fails with Archive Repertory 3.15.17+. |
+| `amazons3-archiverepertory-interface` | Amazon S3 3.4.4 (with Archive Repertory 3.15.17) | required | Media file management on S3 fails with Archive Repertory 3.15.17+. |
 
 Each patch is a file in `data/patches/<id>.php`: why it exists, what breaks without it, the version that fixed it
 upstream if any, and its **variants**. A variant lists the module versions it was verified on, from the oldest
