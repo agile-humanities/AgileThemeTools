@@ -34,7 +34,7 @@ This module was made by Bill Kennedy at Agile Humanities Agency. Some of the fun
 * Ensure that all dependencies are installed and activated in Omeka.
 
 ## Note on Advanced Search
-* The Advanced Search module has been in a fairly rapid release cycle, which can cause some instability as features are added and critical templates are changed. The Agile Suite (Agile Theme Tools + Agile Base Theme) is currently tested for Version 3.4.66.
+* The Advanced Search module has been in a fairly rapid release cycle, which can cause some instability as features are added and critical templates are changed. The Agile Suite (Agile Theme Tools + Agile Base Theme) is currently tested for Version 3.4.67.
 
 # Quickstart: The Standard Agile Install
 
@@ -52,18 +52,18 @@ version", not blocked):
 
 | Module | Version | Role |
 |---|---|---|
-| Common | 3.4.94 | Shared library for the Daniel-KM modules; install first |
-| Easy Admin | 3.4.50 | Installs the other modules, runs tasks and cron jobs |
-| Log | 3.4.42 | Job logs in the admin |
-| Reference | 3.4.64 | Facet counts |
-| Advanced Search | 3.4.66 | Search pages, facets, the main search form |
-| Search Solr *(optional)* | 3.5.75 | Solr engine for Advanced Search (Daniel-KM's: three catalogue entries share the folder name) |
-| IIIF Server | 3.6.34 | Manifests for the viewers |
-| Image Server | 3.6.26 | Tiles for deep zoom |
+| Common | 3.4.95 | Shared library for the Daniel-KM modules; install first |
+| Easy Admin | 3.4.51 | Installs the other modules, runs tasks and cron jobs |
+| Log | 3.4.43 | Job logs in the admin |
+| Reference | 3.4.65 | Facet counts |
+| Advanced Search | 3.4.67 | Search pages, facets, the main search form |
+| Search Solr *(optional)* | 3.5.76 | Solr engine for Advanced Search (Daniel-KM's: three catalogue entries share the folder name) |
+| IIIF Server | 3.6.35 | Manifests for the viewers |
+| Image Server | 3.6.27 | Tiles for deep zoom |
 | Mirador | 3.4.17 | The item viewer (Mirador 4) |
-| Advanced Media | 1.0.0 | Media display blocks, PDF/ePub/audio/transcripts, page links in Mirador, optional media proxy |
+| Advanced Media | 1.1.0 | Media display blocks, PDF/ePub/audio/transcripts, page links in Mirador, optional media proxy |
 | Static Sitemaps | 1.0.0 | Sitemaps as static files |
-| Agile Theme Tools | 2.0.0 | Page blocks, item page blocks, cards, search pages, theme styling and builds, site presets |
+| Agile Theme Tools | 2.1.0 | Page blocks, item page blocks, cards, search pages, theme styling and builds, site presets |
 | Advanced Agile Base Theme / Simplified Agile Base Theme | 2.0.0 | The two themes |
 
 Optional, supported when present: Amazon S3 (file store; activating it makes it the file store), Numeric Data

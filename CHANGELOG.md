@@ -35,6 +35,10 @@ All notable changes to Agile Theme Tools are recorded here. The format follows
   strip, workspace settings) and the download plugin (dl) with image-tools.
 - IIIF Server and Image Server have a minimum version (3.6.32, 3.6.25): the oldest versions the patches were
   verified on. Advanced Media 1.1.0 is the tested version.
+- Item Sets Tree 0.8.0 is the tested version (tag v0.8.0, not on omeka.org yet): the tree is built anew, the
+  edges follow the visibility of their item sets, every item set gets an edge.
+- Search pages preset: every facet joins its selected values with "and" (each value narrows the results), as on
+  Pitts. Advanced Search 3.4.67 made "or" the default (the other values of a facet stay listed and widen the results).
 
 ## [2.0.1] — 2026-11-10
 

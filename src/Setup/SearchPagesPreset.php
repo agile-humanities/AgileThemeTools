@@ -15,9 +15,10 @@ use Omeka\Api\Representation\SiteRepresentation;
  * the Agile page; the form adapter and results template only matter on other themes.
  *
  * The settings start from Advanced Search's stock configuration (data/configs/search_config.default.php), whose
- * facets are the ones above. On Solr, the aliases that name property terms (title, author, description, date) and
- * the advanced filter rows point at Solr fields instead, since Solr cannot resolve property terms there; the date
- * facet uses a year field this preset maps.
+ * facets are the ones above, each set to join its selected values with "and" (each value narrows the results). On
+ * Solr, the aliases that name property terms (title, author, description, date) and the advanced filter rows point
+ * at Solr fields instead, since Solr cannot resolve property terms there; the date facet uses a year field this
+ * preset maps.
  *
  * Solr: the preset reuses the Solr engine SearchSolr created at install (keeping its 47 default maps and suggester),
  * pointing it at the core URL given, and indexes it. The Solr page is skipped when no URL is given or Solr does not
@@ -93,6 +94,13 @@ class SearchPagesPreset
         $stock = (require OMEKA_PATH . '/modules/AdvancedSearch/data/configs/search_config.default.php')['o:settings'];
         $agile = $stock;
         $agile['results']['template'] = 'search/agile/search';
+        // Each selected facet value narrows the results, on both engines (Advanced Search's default, "or", widens
+        // them and keeps the other values listed).
+        foreach ($agile['facet']['facets'] ?? [] as $key => $facet) {
+            if (is_array($facet) && ($facet['join'] ?? '') === '') {
+                $agile['facet']['facets'][$key]['join'] = 'and';
+            }
+        }
 
         $configs = [];
         if ($solr) {

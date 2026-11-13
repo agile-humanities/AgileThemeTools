@@ -49,7 +49,7 @@ return [
     'Common' => [
         'label' => 'Common',
         'level' => 'required',
-        'pinned' => '3.4.94',
+        'pinned' => '3.4.95',
         'minimum' => '3.4.91',
         'volatile' => true,
         'for' => 'Shared code required by Advanced Search and the other modules by the same author.',
@@ -58,7 +58,7 @@ return [
     'AdvancedSearch' => [
         'label' => 'Advanced Search',
         'level' => 'required',
-        'pinned' => '3.4.66',
+        'pinned' => '3.4.67',
         'minimum' => '3.4.64',
         'volatile' => true,
         'for' => 'Search pages, filters and facets. Versions before 3.4.64 fail on the internal search engine and store search settings differently.',
@@ -68,7 +68,7 @@ return [
         'label' => 'Reference',
         'level' => 'required',
         'when' => 'internal-search',
-        'pinned' => '3.4.64',
+        'pinned' => '3.4.65',
         'minimum' => '3.4.58',
         'volatile' => true,
         'for' => 'Facets on Advanced Search’s internal engine. Not needed when every search page uses Solr.',
@@ -77,7 +77,7 @@ return [
     'IiifServer' => [
         'label' => 'IIIF Server',
         'level' => 'required',
-        'pinned' => '3.6.34',
+        'pinned' => '3.6.35',
         'minimum' => '3.6.32',
         'volatile' => true,
         'for' => 'IIIF manifests for the image and document viewers. The oldest version the Agile patches were verified on is 3.6.32.',
@@ -86,7 +86,7 @@ return [
     'ImageServer' => [
         'label' => 'Image Server',
         'level' => 'required',
-        'pinned' => '3.6.26',
+        'pinned' => '3.6.27',
         'minimum' => '3.6.25',
         'volatile' => true,
         'for' => 'IIIF image delivery (deep zoom). The oldest version the Agile patches were verified on is 3.6.25.',
@@ -106,14 +106,14 @@ return [
     'Log' => [
         'label' => 'Log',
         'level' => 'required',
-        'pinned' => '3.4.42',
+        'pinned' => '3.4.43',
         'for' => 'Job and build logs readable in the admin.',
     ] + $danielKm('Log'),
 
     'EasyAdmin' => [
         'label' => 'Easy Admin',
         'level' => 'required',
-        'pinned' => '3.4.50',
+        'pinned' => '3.4.51',
         'for' => 'Installing the stack, and the Check and fix page where builds, checks and setup tasks are run.',
     ] + $danielKm('EasyAdmin'),
 
@@ -141,7 +141,7 @@ return [
         'label' => 'Search Solr',
         'level' => 'required',
         'when' => 'solr-search',
-        'pinned' => '3.5.75',
+        'pinned' => '3.5.76',
         'minimum' => '3.5.70',
         'volatile' => true,
         'for' => 'Solr as the search engine, for larger collections. Required once a search engine uses Solr: item pages read its field maps. Advanced Search 3.4.64 needs 3.5.70 or later.',
@@ -152,7 +152,7 @@ return [
     'NumericDataTypes' => [
         'label' => 'Numeric Data Types',
         'level' => 'optional',
-        'pinned' => '1.14.3',
+        'pinned' => '1.15.0',
         'for' => 'Dates stored as timestamps or intervals are formatted for display.',
         'source' => 'https://github.com/omeka-s-modules/NumericDataTypes',
         'download' => 'https://github.com/omeka-s-modules/NumericDataTypes/releases/download/v{version}/NumericDataTypes-{version}.zip',
@@ -161,7 +161,7 @@ return [
     'ItemSetsTree' => [
         'label' => 'Item Sets Tree',
         'level' => 'optional',
-        'pinned' => '0.7.5',
+        'pinned' => '0.8.0',
         'for' => 'Collections shown as a tree in facets.',
         'source' => 'https://github.com/biblibre/omeka-s-module-ItemSetsTree',
         'download' => null,
@@ -179,15 +179,15 @@ return [
     'UniversalViewer' => [
         'label' => 'Universal Viewer',
         'level' => 'optional',
-        'pinned' => '3.6.15-4.2.1',
+        'pinned' => '3.6.16-p4.4.4',
         'for' => 'Paged documents and ePub in Advanced Media.',
     ] + $danielKm('UniversalViewer'),
 
     'AmazonS3' => [
         'label' => 'Amazon S3',
         'level' => 'optional',
-        'pinned' => '3.4.4',
-        'for' => 'Files stored in S3; Advanced Media can then serve them from the site’s own address.',
+        'pinned' => '3.4.5',
+        'for' => 'Files stored in S3; Advanced Media can then serve them from the site’s own address. With Archive Repertory: 3.4.5 needs Archive Repertory 3.15.18; 3.4.4 works with 3.15.17 only with the Agile patch.',
         'source' => 'https://github.com/Daniel-KM/Omeka-S-module-AmazonS3',
         'download' => null,
     ],
