@@ -70,7 +70,14 @@ AGILEPATCH,
      * manifest's own id and swap it for the current one. This keeps the file on disk
      * a valid manifest in its own right, so losing this patch degrades rather than
      * breaks. Note the json is always encoded with JSON_UNESCAPED_SLASHES above, so
-     * urls appear verbatim and a plain str_replace is sufficient.
+     * urls appear verbatim and a plain string replacement is sufficient.
+     *
+     * A manifest can hold a second host of this installation. The setting "Force
+     * base of url" (iiifserver_url_force_from / _to) rewrites the IIIF urls only,
+     * so a manifest built through a back-door host carries the forced host in its
+     * IIIF ids and the back-door host in "homepage", "seeAlso" and "provider"
+     * (v2: "related", "seeAlso"). When the "from" setting is a full base url, it is
+     * rebased too, so the back-door host never reaches a visitor of another host.
      */
     protected function rebaseIiifCache(string $json): string
     {
@@ -84,17 +91,24 @@ AGILEPATCH,
             return str_replace(self::CACHE_BASE_PLACEHOLDER, $currentBase, $json);
         }
 
+        // Every key ends with the slash that follows the host, so a host is
+        // never matched as the beginning of a longer one.
+        $replace = [];
+
         $cachedBase = $this->iiifCachedBaseUrl($json);
-        if ($cachedBase === null || $cachedBase === $currentBase) {
-            return $json;
+        if ($cachedBase !== null && $cachedBase !== $currentBase) {
+            // The host may be empty ("http://"): "http:///" is unique to the
+            // missing host, where "http://" would match every http url.
+            $replace[$cachedBase . '/'] = $currentBase . '/';
         }
 
-        // An empty host ("http://") would match every http url: replace it with
-        // the following slash only ("http:///" is unique to the missing host).
-        if (preg_match('~^https?://$~', $cachedBase)) {
-            return str_replace($cachedBase . '/', $currentBase . '/', $json);
+        $forcedFrom = rtrim((string) $this->settings()->get('iiifserver_url_force_from', ''), '/');
+        if ($forcedFrom !== $currentBase && preg_match('~^https?://[^/]+$~', $forcedFrom)) {
+            $replace[$forcedFrom . '/'] = $currentBase . '/';
         }
-        return str_replace($cachedBase, $currentBase, $json);
+
+        // One pass: a url is never rewritten twice.
+        return $replace ? strtr($json, $replace) : $json;
     }
 
     /**
@@ -178,7 +192,14 @@ AGILEPATCH,
      * manifest's own id and swap it for the current one. This keeps the file on disk
      * a valid manifest in its own right, so losing this patch degrades rather than
      * breaks. Note the json is always encoded with JSON_UNESCAPED_SLASHES above, so
-     * urls appear verbatim and a plain str_replace is sufficient.
+     * urls appear verbatim and a plain string replacement is sufficient.
+     *
+     * A manifest can hold a second host of this installation. The setting "Force
+     * base of url" (iiifserver_url_force_from / _to) rewrites the IIIF urls only,
+     * so a manifest built through a back-door host carries the forced host in its
+     * IIIF ids and the back-door host in "homepage", "seeAlso" and "provider"
+     * (v2: "related", "seeAlso"). When the "from" setting is a full base url, it is
+     * rebased too, so the back-door host never reaches a visitor of another host.
      */
     protected function rebaseIiifCache(string $json): string
     {
@@ -192,17 +213,24 @@ AGILEPATCH,
             return str_replace(self::CACHE_BASE_PLACEHOLDER, $currentBase, $json);
         }
 
+        // Every key ends with the slash that follows the host, so a host is
+        // never matched as the beginning of a longer one.
+        $replace = [];
+
         $cachedBase = $this->iiifCachedBaseUrl($json);
-        if ($cachedBase === null || $cachedBase === $currentBase) {
-            return $json;
+        if ($cachedBase !== null && $cachedBase !== $currentBase) {
+            // The host may be empty ("http://"): "http:///" is unique to the
+            // missing host, where "http://" would match every http url.
+            $replace[$cachedBase . '/'] = $currentBase . '/';
         }
 
-        // An empty host ("http://") would match every http url: replace it with
-        // the following slash only ("http:///" is unique to the missing host).
-        if (preg_match('~^https?://$~', $cachedBase)) {
-            return str_replace($cachedBase . '/', $currentBase . '/', $json);
+        $forcedFrom = rtrim((string) $this->settings()->get('iiifserver_url_force_from', ''), '/');
+        if ($forcedFrom !== $currentBase && preg_match('~^https?://[^/]+$~', $forcedFrom)) {
+            $replace[$forcedFrom . '/'] = $currentBase . '/';
         }
-        return str_replace($cachedBase, $currentBase, $json);
+
+        // One pass: a url is never rewritten twice.
+        return $replace ? strtr($json, $replace) : $json;
     }
 
     /**
