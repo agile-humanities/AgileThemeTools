@@ -52,14 +52,14 @@ version", not blocked):
 
 | Module | Version | Role |
 |---|---|---|
-| Common | 3.4.95 | Shared library for the Daniel-KM modules; install first |
-| Easy Admin | 3.4.51 | Installs the other modules, runs tasks and cron jobs |
-| Log | 3.4.43 | Job logs in the admin |
+| Common | 3.4.96 | Shared library for the Daniel-KM modules; install first |
+| Easy Admin | 3.4.52 | Installs the other modules, runs tasks and cron jobs |
+| Log | 3.4.44 | Job logs in the admin |
 | Reference | 3.4.65 | Facet counts |
 | Advanced Search | 3.4.67 | Search pages, facets, the main search form |
 | Search Solr *(optional)* | 3.5.76 | Solr engine for Advanced Search (Daniel-KM's: three catalogue entries share the folder name) |
-| IIIF Server | 3.6.35 | Manifests for the viewers |
-| Image Server | 3.6.27 | Tiles for deep zoom |
+| IIIF Server | 3.6.36 | Manifests for the viewers |
+| Image Server | 3.6.28 | Tiles for deep zoom |
 | Mirador | 3.4.17 | The item viewer (Mirador 4) |
 | Advanced Media | 1.1.0 | Media display blocks, PDF/ePub/audio/transcripts, page links in Mirador, optional media proxy |
 | Static Sitemaps | 1.0.0 | Sitemaps as static files |

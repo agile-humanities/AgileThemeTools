@@ -70,7 +70,7 @@ AGILEPATCH,
             ],
         ],
         [
-            'versions' => ['3.6.33', '3.6.34', '3.6.35'],
+            'versions' => ['3.6.33', '3.6.34', '3.6.35', '3.6.36'],
             'edits' => [
                 [
                     'file' => 'src/View/Helper/IiifInfo2.php',

@@ -22,7 +22,7 @@ return [
     'legacy' => ['$has_headers', 'PITTS PATCH (non-local files)'],
     'variants' => [
         [
-            'versions' => ['3.6.25', '3.6.26', '3.6.27'],
+            'versions' => ['3.6.25', '3.6.26', '3.6.27', '3.6.28'],
             'edits' => [
                 [
                     'file' => 'src/ImageServer/AbstractImager.php',

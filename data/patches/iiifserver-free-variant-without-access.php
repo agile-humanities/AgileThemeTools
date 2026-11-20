@@ -22,7 +22,7 @@ return [
     'legacy' => ['PITTS PATCH: without the module Access'],
     'variants' => [
         [
-            'versions' => ['3.6.34', '3.6.35'],
+            'versions' => ['3.6.34', '3.6.35', '3.6.36'],
             'edits' => [
                 [
                     'file' => 'src/Controller/PresentationController.php',

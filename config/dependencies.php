@@ -49,7 +49,7 @@ return [
     'Common' => [
         'label' => 'Common',
         'level' => 'required',
-        'pinned' => '3.4.95',
+        'pinned' => '3.4.96',
         'minimum' => '3.4.91',
         'volatile' => true,
         'for' => 'Shared code required by Advanced Search and the other modules by the same author.',
@@ -77,7 +77,7 @@ return [
     'IiifServer' => [
         'label' => 'IIIF Server',
         'level' => 'required',
-        'pinned' => '3.6.35',
+        'pinned' => '3.6.36',
         'minimum' => '3.6.32',
         'volatile' => true,
         'for' => 'IIIF manifests for the image and document viewers. The oldest version the Agile patches were verified on is 3.6.32.',
@@ -86,7 +86,7 @@ return [
     'ImageServer' => [
         'label' => 'Image Server',
         'level' => 'required',
-        'pinned' => '3.6.27',
+        'pinned' => '3.6.28',
         'minimum' => '3.6.25',
         'volatile' => true,
         'for' => 'IIIF image delivery (deep zoom). The oldest version the Agile patches were verified on is 3.6.25.',
@@ -106,14 +106,14 @@ return [
     'Log' => [
         'label' => 'Log',
         'level' => 'required',
-        'pinned' => '3.4.43',
+        'pinned' => '3.4.44',
         'for' => 'Job and build logs readable in the admin.',
     ] + $danielKm('Log'),
 
     'EasyAdmin' => [
         'label' => 'Easy Admin',
         'level' => 'required',
-        'pinned' => '3.4.51',
+        'pinned' => '3.4.52',
         'for' => 'Installing the stack, and the Check and fix page where builds, checks and setup tasks are run.',
     ] + $danielKm('EasyAdmin'),
 
@@ -179,7 +179,7 @@ return [
     'UniversalViewer' => [
         'label' => 'Universal Viewer',
         'level' => 'optional',
-        'pinned' => '3.6.16-p4.4.4',
+        'pinned' => '3.6.17-p4.4.4',
         'for' => 'Paged documents and ePub in Advanced Media.',
     ] + $danielKm('UniversalViewer'),
 

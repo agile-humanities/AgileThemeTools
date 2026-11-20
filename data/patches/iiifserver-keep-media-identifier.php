@@ -22,7 +22,7 @@ return [
     'legacy' => ['PITTS PATCH: report, never reconfigure'],
     'variants' => [
         [
-            'versions' => ['3.6.32', '3.6.33', '3.6.34', '3.6.35'],
+            'versions' => ['3.6.32', '3.6.33', '3.6.34', '3.6.35', '3.6.36'],
             'edits' => [
                 [
                     'file' => 'Module.php',

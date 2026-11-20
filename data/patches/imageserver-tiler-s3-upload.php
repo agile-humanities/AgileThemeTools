@@ -22,7 +22,7 @@ return [
     'legacy' => ['[\'.dzi\', \'_files\', \'_zdata\']'],
     'variants' => [
         [
-            'versions' => ['3.6.25', '3.6.26', '3.6.27'],
+            'versions' => ['3.6.25', '3.6.26', '3.6.27', '3.6.28'],
             'edits' => [
                 [
                     'file' => 'src/Job/Tiler.php',
